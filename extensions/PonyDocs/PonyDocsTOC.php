@@ -12,8 +12,6 @@ if( !defined( 'MEDIAWIKI' ))
 class PonyDocsTOC
 {
 
-	const CACHE_LOCATION = "/var/www/useruploads/base/toccache/";
-
 	/**
 	 * Our instance of PonyDocsManual to which this Table of Contents applies.
 	 *
@@ -241,26 +239,11 @@ class PonyDocsTOC
 			$latest = true;
 		}
 
-		// Okay, let's check to see if our cached version of our TOC data 
-		// exists. Currently using on-disk cache, but might be better to 
-		// eventually do memcache version.
-		// @tdondich
-		$cacheFileLocation = PonyDocsTOC::CACHE_LOCATION . $this->pManual->getShortName() . '-' . $selectedVersion . '.cache';
-		$toc = false;
-		if(file_exists($cacheFileLocation)) {
-			$toc = @file_get_contents($cacheFileLocation);
-			if($toc !== false) {
-				// We're combining the eval.  If the eval call returns false, 
-				// there was a parsing issue when parsing the PHP cache entry.
-				// Otherwise, $toc will properly equal the cache contents.
-				if(eval('$toc = ' . $toc . ';') === false) {
-					error_log("ERROR [PonyDocsTOC::loadContent] Was unable to parse cache contents of TOC for manual " . $this->pManual->getShortName . ' and version ' . $selectedVersion);
-					@unlink($cacheFileLocation);
-					$toc = false;
-				}
-			}
-		}
-		if($toc === false) {
+
+		$cache = PonyDocsCache::getInstance();
+		$key = "TOCCACHE-" . $manual->getShortName() . "-" . $version->getName();
+		$toc = $cache->get($key);
+		if($toc === null) {
 			// Cache did not exist, let's load our content is build up our cache 
 			// entry.
 			$toc = array( ); 		// Toc is an array.
@@ -461,11 +444,9 @@ class PonyDocsTOC
 
 	static public function clearTOCCache($manual, $version) {
 		error_log("INFO [PonyDocsTOC::clearTOCCache] Deleting cache entry of TOC for manual " . $manual->getShortName() . ' and version ' . $version->getName());
-		$cacheFileLocation = PonyDocsTOC::CACHE_LOCATION . $manual->getShortName() . '-' . $version->getName() . '.cache';
-		if(@unlink($cacheFileLocation) === false) {
-			error_log("ERROR [PonyDocsTOC::clearTOCCache] Was unable to delete cache entry of TOC for manual " . $manual->getShortName() . ' and version ' . $version->getName() . ". Either it doesn't exist yet or there was a permissions error.");
-		}
-
+		$key = "TOCCACHE-" . $manual->getShortName() . "-" . $version->getName();
+		$cache = PonyDocsCache::getInstance();
+		$cache->remove($key);
 	}
 };
 
