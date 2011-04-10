@@ -725,7 +725,7 @@ class PonyDocsExtension
 
 			$tocKey = PonyDocsTOC . '_' . $pManual->getShortName( ) . '_' . $pVersion->getName( );
 			
-			$cache->removeKey( $tocKey );
+			$cache->remove( $tocKey );
 
 			// Clear any PDF for this manual
 			PonyDocsPdfBook::removeCachedFile($pManual, $pVersion);
@@ -1820,7 +1820,7 @@ HEREDOC;
 		// Okay, article is in doc namespace, pass it over to our utility 
 		// function.
 		PonyDocsExtension::deleteDocLinks($article);
-		PonyDocsExtension::clearPonyDocsCache($article);
+		PonyDocsExtension::clearArticleCategoryCache($article);
 		return true;
 	}
 
@@ -1864,7 +1864,7 @@ HEREDOC;
 				PonyDocsTOC::clearTOCCache($manual, $version);
 			}
 		}
-		PonyDocsExtension::clearPonyDocsCache($article);
+		PonyDocsExtension::clearArticleCategoryCache($article);
 
 		return true;
 	}
@@ -1873,18 +1873,14 @@ HEREDOC;
 	 * Deletes PonyDocs category cache associated with the article
 	 * @param Article $article
 	 */
-	static public function clearPonyDocsCache($article) {
-		//global $wgOut, $wgRequest;
-		//$from = $wgRequest->getVal('from');
-		//$until = $wgRequest->getVal('until');
+	static public function clearArticleCategoryCache($article) {
 		$topic = new PonyDocsTopic($article);
+		$cache = PonyDocsCache::getInstance();
 		$ponydocsVersions = $topic->getVersions();
 		if (count($ponydocsVersions) > 0) {
-			$categories = array();
 			foreach ($ponydocsVersions as $ver) {
-				$categories[] = "category-Category:V:" . $ver->getName();
+				$cache->remove("category-Category:V:" . $ver->getName());
 			}
-			PonyDocsCategoryPageHandler::cacheExpireCategories($categories);
 		}
 	}
 

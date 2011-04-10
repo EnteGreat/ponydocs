@@ -26,20 +26,15 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 		$until = $wgRequest->getVal('until');
 		$cacheKey = "category-" . $categoryArticle->getTitle() . "-$from-$until";
 		$res = null;
-		if(CATEGORY_CACHE_ENABLED) {
-			// Do a quick expire from our cache
-			PonyDocsCategoryPageHandler::cacheExpire();
-			// See if this exists in our cache
-			$res = PonyDocsCategoryPageHandler::cacheFetch($cacheKey);
-		}
-		if(!$res) {
+		$cache = PonyDocsCache::getInstance();
+		// See if this exists in our cache
+		$res = $cache->get($cacheKey);
+		if($res == null) {
 			// Either cache is disabled, or cached entry does not exist
 			$categoryViewer = new PonyDocsCategoryPageHandler($categoryArticle->getTitle(), $from, $until);
 			$res = $categoryViewer->getHTML();
-			if(CATEGORY_CACHE_ENABLED) {
-				// Store in our cache
-				PonyDocsCategoryPageHandler::cacheStore($cacheKey, $res, time() + CATEGORY_CACHE_TTL);		
-			}
+			// Store in our cache
+			$cache->put($cacheKey, $res, time() + CATEGORY_CACHE_TTL);		
 		}
 		$wgOut->addHTML($res);
 		return false; // We don't want to continue processing the "normal" mediawiki path, so return false here.
@@ -203,98 +198,4 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 		}
 		return $r;
 	}
-
-
-
-	
-	/**
-	 * Expires/deletes old records from our  cache
-	 */
-	public static function cacheExpire() {
-		$dbr = wfGetDB(DB_MASTER);
-
-		// convert epoch to timestamp
-		$now = date("Y-m-d H:i:s",time());
-
-		$query = "DELETE FROM splunk_cache WHERE expires < '$now'" ;
-		try {
-			$dbr->query($query);
-		} catch (Exception $ex){
-			error_log("FATAL [PonyDocsCategoryPageHandler::cacheExpire] DB call failed pn  Line ".$ex->getLine()." on file ".$ex->getFile().", error Message is: \n".$ex->getMessage()."Stack Trace is:".$ex->getTraceAsString());
-		}
-		return true;
-	}
-
-	/**
-	 * Expires cache for specified tag/category
-	 * @param array $tags array of unique keys to delete
-	 */
-	public static function cacheExpireCategories(array $categories) {
-		$dbr = wfGetDB(DB_MASTER);
-		$sql_conditions = array();
-		foreach ($categories as $cat) {
-			$sql_conditions[] = "tag LIKE '" . $dbr->strencode($cat) . "%'";
-		}
-		$query = 'DELETE FROM splunk_cache WHERE ' . implode(' OR ', $sql_conditions);
-		try {
-			$dbr->query($query);
-		} catch (Exception $ex) {
-			error_log("FATAL [PonyDocsCategoryPageHandler::cacheExpireCategory] DB call failed pn  Line " . $ex->getLine() . " on file " . $ex->getFile() . ", error Message is: \n" . $ex->getMessage() . "Stack Trace is:" . $ex->getTraceAsString());
-		}
-		return true;
-	}
-
-	/**
-	 * Stores an entry into our cache.  The tag is the unique identifier 
-	 * for the entry.
-	 *
-	 * @param $tag string The unique key
-	 * @param $data string The data to store
-	 * @param $expires The timestamp in which this record is old
-	 */
-	public static function cacheStore($tag, $data, $expires) {
-		if(HELP_CACHE_ENABLED) {
-			// We don't see if there's a key collision, if there is, it just means 
-			// a different webhead created the cache entry, no biggie.
-			$dbr = wfGetDB(DB_MASTER);
-			
-			// convert epoch to timestamp
-			$expires = date("Y-m-d H:i:s",$expires);
-
-			$data = mysql_real_escape_string($data);
-			
-			$query = "INSERT INTO splunk_cache VALUES('$tag', '$expires',  '$data')";
-			try {
-				$dbr->query($query);
-			} catch (Exception $ex){
-				error_log("FATAL [PonyDocsCategoryPageHandler::cacheStore] DB call failed on Line ".$ex->getLine()." on file ".$ex->getFile().", error Message is: \n".$ex->getMessage()."Stack Trace is:".$ex->getTraceAsString());
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Fetch a element from our cache. 
-	 *
-	 * @param $tag the identifier to look for
-	 * @returns boolean or string string if succeeded, false if no element found
-	 */
-	public static function cacheFetch($tag) {
-		if(!HELP_CACHE_ENABLED) {
-			return false;
-		}
-		$dbr = wfGetDB(DB_SLAVE);
-		$query = "SELECT *  FROM splunk_cache WHERE tag = '$tag'";
-		try {
-			$res = $dbr->query($query);
-			$obj = $dbr->fetchObject($res);
-			if($obj) {
-				return $obj->data;
-			}
-		} catch(Exception $ex) {
-			error_log("FATAL [PonyDocsCategoryPageHandler::cacheFetch] DB call failed on Line " . $ex->getLine()." on file " . $ex->getFile(). ", error Message is: \n" . $ex->getMessage(). " Stack Trace Is: " . $ex->getTraceAsString());
-		}
-		return false; 		
-	}
-
 }
