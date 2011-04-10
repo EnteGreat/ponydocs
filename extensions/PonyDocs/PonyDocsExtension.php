@@ -1,0 +1,484 @@
+<?php
+/**
+ * Include this file in your LocalSettings.php to activate.  You can find the actual body/code in the file:
+ * 		PonyDocsExtension.body.php
+ * There are also a set of classes used in our extension to manage things like manuals, versions, TOC pages, and
+ * so forth, all of which are included here.  
+ */
+
+/**
+ * Disallow direct loading of this page (which should not be possible anyway).
+ */
+if( !defined( 'MEDIAWIKI' ))
+	die( "PonyDocs MediaWiki Extension" );
+
+define( 'PONYDOCS_TITLE_REMOVE_REGEX', '/([%&?\' ]+)/' );
+
+define( 'PONYDOCS_DOCTALK_BOILERPLATE', 'Documentation:TalkBoilerplate' );
+	
+require_once( "$IP/extensions/PonyDocs/PonyDocsExtension.body.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsWiki.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsTopic.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsVersion.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsManual.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsTOC.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsAjax.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsAliasArticle.php" );
+require_once( "$IP/extensions/PonyDocs/SpecialTOCList.php" );
+require_once( "$IP/extensions/PonyDocs/SpecialTopicList.php" );
+require_once( "$IP/extensions/PonyDocs/SpecialDocTopics.php" );
+require_once( "$IP/extensions/PonyDocs/SpecialLatestDoc.php");
+require_once( "$IP/extensions/PonyDocs/PonyDocsCategoryPageHandler.php");
+require_once( "$IP/extensions/PonyDocs/SpecialDocumentLinks.php");
+require_once( "$IP/extensions/PonyDocs/PonyDocsPdfBook.php");
+
+require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
+require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
+require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
+	
+/**
+ * Setup credits for this extension to appear in the credits page of wiki.
+ */
+$wgExtensionCredits['other'][] = array(
+	'name' => 'PonyDocs Customized MediaWiki', 
+	'author' => 'Splunk',
+	'svn-date' => '$LastChangedDate$',
+	'svn-revision' => '$LastChangedRevision: 207 $',
+	'url' => 'http://www.splunk.com',
+	'description' => 'Provides custom support for product documentation' );
+
+/**
+ * SVN revision #.  This requires we enable this property in svn for this file:
+ * svn propset ?:? "Revision" <file>
+ */
+$wgRevision = '$Revision: 207 $';
+
+/**
+ * Register the setup function for the extension.  This should setup all hooks to be used, any pre-setup, and
+ * so forth done upon initialization of a request.  I am sticking to the naming convention of 'ef' prefixing
+ * for 'extension function'.  Also setup parser setup functions here.
+ * 
+ * I'd like to move all of this into PonyDocsExtension;  i.e. have a registerHooks method which does all of this
+ * and passes array( $this, 'methodName' ) for each instead of using static methods?
+ */
+$wgExtensionFunctions[] = 'efPonyDocsSetup';
+$wgExtensionFunctions[] = 'efManualParserFunction_Setup';
+$wgExtensionFunctions[] = 'efVersionParserFunction_Setup';
+$wgExtensionFunctions[] = 'efTopicParserFunction_Setup';
+$wgExtensionFunctions[] = 'efSearchParserFunction_Setup';
+
+/**
+ * Our magic words for our custom parser functions.
+ */
+$wgHooks['LanguageGetMagic'][] = 'efManualParserFunction_Magic';
+$wgHooks['LanguageGetMagic'][] = 'efVersionParserFunction_Magic';
+$wgHooks['LanguageGetMagic'][] = 'efTopicParserFunction_Magic';
+
+/**
+ * Create a single global instance of our extension.
+ */
+$wgPonyDocs = new PonyDocsExtension( );
+
+/**
+ * Our primary setup function simply handles URL rewrites for aliasing (per spec) and calls our PonyDocsWiki singleton instance
+ * to ensure it runs the data retrieval functions for versions and manuals and the like.  
+ */
+function efPonyDocsSetup()
+{
+	global $wgPonyDocs;
+	PonyDocsWiki::getInstance( );	
+}
+
+/**
+ * This section handles the parser function {{#manual:<shortName>|<longName>}} which defines a manual.
+ */
+function efManualParserFunction_Setup() 
+{
+	global $wgParser;
+	$wgParser->setFunctionHook( 'manual', 'efManualParserFunction_Render' );
+}
+function efManualParserFunction_Magic( &$magicWords, $langCode )
+{
+	$magicWords['manual'] = array( 0, 'manual' );
+	return true;
+}
+
+/**
+ * This is called when {{#manual:short|long}} is found in an article content.  It should produce an output
+ * set of HTML which provides the name (long) as a link to the most recent (based on version tags) TOC
+ * management page for that manual.
+ *
+ * @param Parser $parser
+ * @param string $param1 Short name of the manual used in links.
+ * @param string $param2 Long/display name of manual.
+ * @return array
+ */
+function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
+{
+	global $wgArticlePath, $wgUser, $wgScriptPath;
+
+	$dbr = wfGetDB( DB_SLAVE );
+	
+	$valid = true;
+	if( !preg_match( PONYDOCS_MANUAL_REGEX, $param1 ) || !strlen( $param1 ) || !strlen( $param2 ))
+	{
+		return $parser->insertStripItem('', $parser->mStripState);
+	}
+	
+	$manualName = preg_replace( '/([^' . PONYDOCS_MANUAL_LEGALCHARS . ']+)/', '', $param1 );
+	$version = PonyDocsVersion::GetSelectedVersion( );
+	
+	$res = $dbr->select( 'categorylinks', array( 'cl_sortkey', 'cl_to' ), array(
+						"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualName )) . "toc%'",
+						"cl_to = 'V:" . $version . "'" ), __METHOD__ );
+	if( !$res->numRows( ))
+	{
+		/**
+		 * Link to create new TOC page -- should link to current version TOC and then add message to explain.
+		 */
+		$output = 	'<p><a href="' . str_replace( '$1', 'Documentation:' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
+					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version.</span>\n";
+	}
+	else
+	{
+		$row = $dbr->fetchObject( $res );		
+		$output = '<p><a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>\n";
+	}
+
+	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+/**
+ * This section handles the parser function {{#version:<name>|<status>}} which defines a version.
+ */
+
+function efVersionParserFunction_Setup()
+{
+	global $wgParser;
+	$wgParser->setFunctionHook( 'version', 'efVersionParserFunction_Render' );
+}
+
+function efVersionParserFunction_Magic( &$magicWords, $langCode )
+{
+	$magicWords['version'] = array( 0, 'version' );
+	return true;
+}
+
+/**
+ * The version parser function is of the form:
+ * 	{{#version:name|status}}
+ * Which defines a version and its state.  When output it currently does nothing but should perhaps be a list to Category:<version>.
+ *
+ * @param Parser $parser
+ * @param string $param1 The version name itself.
+ * @param string $param2 The status of the version (released, unreleased, or preview).
+ * @return array
+ */
+function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
+{
+	global $wgUser, $wgScriptPath;
+	
+	$valid = true;
+	
+	if( !preg_match( PONYDOCS_VERSION_REGEX, $param1 ))
+		$valid = false;
+	if(( strcasecmp( $param2, 'released' ) != 0 ) && ( strcasecmp( $param2, 'unreleased' ) != 0 ) && ( strcasecmp( $param2, 'preview' ) != 0 ))
+		$valid = false;
+		
+	$output = 'Version ' . $param1 . ' (' . $param2 . ') ' ;
+	
+	if( !$valid )
+		$output .= ' - Invalid Version Name or Status, Please Fix';
+	$output .= "\n";
+
+
+	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+/**
+ * Our topic parser functions used in TOC management to define a topic to be listed within a section.  This is simply the form:
+ *   {#topic:Name of Topic}
+ */
+
+function efTopicParserFunction_Setup()
+{
+	global $wgParser;
+	$wgParser->setFunctionHook( 'topic', 'efTopicParserFunction_Render' );
+}
+
+function efTopicParserFunction_Magic( &$magicWords, $langCode )
+{
+	$magicWords['topic'] = array( 0, 'topic' );
+	return true;
+}
+
+function efGetTitleFromMarkup($markup = '' )
+{
+	global $wgArticlePath, $wgTitle, $action;
+	
+	PonyDocsWiki::getInstance();
+
+	/**
+	 * We ignore this parser function if not in a TOC management page.
+	 */
+	if( !preg_match( '/Documentation:(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches ))
+		return false;
+
+	$manualShortName = $matches[1];
+
+	/**
+	 * Get the earliest tagged version of this TOC page and append it to the wiki page?  Ensure the manual
+	 * is valid then use PonyDocsManual::getManualByShortName().  Next attempt to get the version tags for
+	 * this page -- which may be NONE -- and from this determine the "earliest" version to which this page
+	 * applies.
+	 */	
+	if( !PonyDocsManual::IsManual( $manualShortName ))	
+		return false;
+
+	$pManual = PonyDocsManual::GetManualByShortName( $manualShortName );	
+	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));	
+	
+	/**
+	 * @FIXME:  If TOC page is NOT tagged with any versions we cannot create the pages/links to the 
+	 * topics, right?
+	 */
+	$manVersionList = $pTopic->getVersions( );
+	if( !sizeof( $manVersionList ))
+	{						
+		return $parser->insertStripItem($param1, $parser->mStripState);
+	}
+	$earliestVersion = PonyDocsVersion::findEarliest( $manVersionList );
+	
+	/**
+	 * Clean up the full text name into a wiki-form.  This means remove spaces, #, ?, and a few other
+	 * characters which are not valid or wanted.  It's not important HOW this is done as long as it is
+	 * consistent.
+	 */
+	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
+	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
+	$wikiPath = 'Documentation:' . $manualShortName . ':' . $wikiTopic;	
+	
+	$dbr = wfGetDB( DB_SLAVE );	
+	
+	/**
+	 * Now look in the database for any instance of this topic name PLUS :<version>.  We need to look in 
+	 * categorylinks for it to find a record with a cl_to (version tag) which is equal to the set of the
+	 * versions for this TOC page.  For instance, if the TOC page was for versions 1.0 and 1.1 and our
+	 * topic was 'How To Foo' we need to find any cl_sortkey which is 'HowToFoo:%' and has a cl_to equal
+	 * to 1.0 or 1.1.  There should only be 0 or 1, so we ignore anything beyond 1.  If found, we use THAT
+	 * cl_sortkey as the link;  if NOT found we create a new topic, the name being the compressed topic name
+	 * plus the earliest TOC version ($earliestVersion->getName( )).  We then need to ACTUALLY create it
+	 * in the database, tag it with all the versions the TOC mgmt page is tagged with, and set the H1 to
+	 * the text inside the parser function.
+	 * 
+	 * @fixme:  Can we test if $action=save here so we don't do this on every page view?  
+	 */
+	
+	$versionIn = array( );
+	foreach( $manVersionList as $pV )
+		$versionIn[] = $pV->getName( );
+		
+	$res = $dbr->select( 'categorylinks', 'cl_sortkey',
+		array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualShortName . ':' . $wikiTopic )) . ":%'",
+				"cl_to IN ('V:" . implode( "','V:", $versionIn ) . "')" ), __METHOD__ );
+	
+	$topicName = '';
+	if( !$res->numRows( ))
+	{	
+		/**
+		 * No match -- so this is a "new" topic.  Set name.
+		 */
+		$topicName = 'Documentation:' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getName( );
+	}
+	else
+	{
+		$row = $dbr->fetchObject( $res );
+		$topicName = $row->cl_sortkey;
+	}
+
+	return $topicName;
+}
+
+/**
+ * This expects to find:
+ * 	{{#topic:Text Name}}
+ *
+ * @param Parser $parser
+ * @param string $param1 Full text name of topic, must be converted to wiki topic name.
+ * @return array
+ */
+function efTopicParserFunction_Render( &$parser, $param1 = '' )
+{
+	global $wgArticlePath, $wgTitle, $action;
+
+	if(PonyDocsExtension::isSpeedProcessingEnabled()) {
+		return true;
+	}
+	
+	PonyDocsWiki::getInstance();
+
+	/**
+	 * We ignore this parser function if not in a TOC management page.
+	 */
+	if( !preg_match( '/Documentation:(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches )) {
+		return false;
+	}
+
+
+	$manualShortName = $matches[1];
+
+	/**
+	 * Get the earliest tagged version of this TOC page and append it to the wiki page?  Ensure the manual
+	 * is valid then use PonyDocsManual::getManualByShortName().  Next attempt to get the version tags for
+	 * this page -- which may be NONE -- and from this determine the "earliest" version to which this page
+	 * applies.
+	 */	
+	if( !PonyDocsManual::IsManual( $manualShortName )) {
+		return false;
+	}
+
+
+	$pManual = PonyDocsManual::GetManualByShortName( $manualShortName );	
+	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));	
+	
+	/**
+	 * @FIXME:  If TOC page is NOT tagged with any versions we cannot create the pages/links to the 
+	 * topics, right?
+	 */
+	$manVersionList = $pTopic->getVersions( );
+
+	if( !sizeof( $manVersionList ))
+	{						
+		return $parser->insertStripItem($param1, $parser->mStripState);
+	}
+	$earliestVersion = PonyDocsVersion::findEarliest( $manVersionList );
+	
+	/**
+	 * Clean up the full text name into a wiki-form.  This means remove spaces, #, ?, and a few other
+	 * characters which are not valid or wanted.  It's not important HOW this is done as long as it is
+	 * consistent.
+	 */
+	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
+	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
+	$wikiPath = 'Documentation:' . $manualShortName . ':' . $wikiTopic;	
+	
+	$dbr = wfGetDB( DB_SLAVE );	
+	
+	/**
+	 * Now look in the database for any instance of this topic name PLUS :<version>.  We need to look in 
+	 * categorylinks for it to find a record with a cl_to (version tag) which is equal to the set of the
+	 * versions for this TOC page.  For instance, if the TOC page was for versions 1.0 and 1.1 and our
+	 * topic was 'How To Foo' we need to find any cl_sortkey which is 'HowToFoo:%' and has a cl_to equal
+	 * to 1.0 or 1.1.  There should only be 0 or 1, so we ignore anything beyond 1.  If found, we use THAT
+	 * cl_sortkey as the link;  if NOT found we create a new topic, the name being the compressed topic name
+	 * plus the earliest TOC version ($earliestVersion->getName( )).  We then need to ACTUALLY create it
+	 * in the database, tag it with all the versions the TOC mgmt page is tagged with, and set the H1 to
+	 * the text inside the parser function.
+	 * 
+	 * @fixme:  Can we test if $action=save here so we don't do this on every page view?  
+	 */
+	
+	$versionIn = array( );
+	foreach( $manVersionList as $pV )
+		$versionIn[] = $pV->getName( );
+		
+	$res = $dbr->select( 'categorylinks', 'cl_sortkey',
+		array( 	"LOWER(cl_sortkey) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualShortName . ':' . $wikiTopic )) . ":%'",
+				"cl_to IN ('V:" . implode( "','V:", $versionIn ) . "')" ), __METHOD__ );
+	
+	$topicName = '';
+	if( !$res->numRows( ))
+	{	
+		/**
+		 * No match -- so this is a "new" topic.  Set name.
+		 */
+		$topicName = 'Documentation:' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getName( );
+	}
+	else
+	{
+		$row = $dbr->fetchObject( $res );
+		$topicName = $row->cl_sortkey;
+	}
+
+	
+	$output = '<a href="' . str_replace( '$1', $topicName, $wgArticlePath ) . '">' . $param1  . '</a>'; 
+	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+function efSearchParserFunction_Setup( )
+{
+	global $wgParser;
+	$wgParser->setHook( 'search', 'efSearchParserFunction_Render' );
+	return true;
+}
+
+/**
+ * This parser hook handles rendering data found in <search></search> blocks using special DIV and CSS/images.  The
+ * input (data between the two tags) is simply placed inside the DIV (inlineQuery) and inside a code tag.
+ *
+ * @param unknown_type $input
+ * @param unknown_type $args
+ * @param unknown_type $parser
+ * @return unknown
+ */
+function efSearchParserFunction_Render( $input, $args, $parser )
+{
+	global $ponydocsMediaWiki;
+	
+	//$text = $parser->recursiveTagParse( $input );
+	$text = $input;
+	
+	$output =	'<div class="inlineQuery">' .
+				'<code>' . htmlentities($text) . '</code>' .
+				'<a title="Run this search on your PonyDocs server" href="javascript:alert(\'Use the “share this event” link in your PonyDocs Server to activate this button\');">' .
+				'<img width="31" height="24" border="0" align="absmiddle" alt="Search" src="' .
+				$ponydocsMediaWiki['DotComHost'] . '/images/base/query_button.png"/>' .
+				'</a><br/></div>';
+	
+	return $output;
+}
+
+/**
+ * Setup our 'hooks' here.  We do this by assigning function names to the $wgHooks array.  THe key of this array
+ * is the NAME of the hook, of which there are a predefined set of hooks within MediaWiki's core.  At a given
+ * point in the execution it will activate all hook functions and execute them IN THE ORDER DEFINED.  For instance:
+ * 
+ * 	$wgHooks['someeventname'][] = 'functionName';
+ * 
+ * The value assigned to it can vary depending on the circumstances, such as whether the hook is an object method,
+ * a function, and whether or not it is to be passed any arguments (this is determined by wfRunHooks though and
+ * the event TYPE/NAME, not by the function being called).  You can also supply it with some optional data to
+ * be passed to the function when it is called.
+ * 
+ * A quick summary of the options:
+ * 	$wgHooks['event'][] = 'function';						Function with only default params.
+ * 	$wgHooks['event'][] = array( 'function', $someArg )		Function with additional data to be passed to function($someArg, $param1, $param2, etc.)
+ *  $wgHooks['event'][] = array( $object, 'method' )		Call 'method' within an object.
+ *  $wgHooks['event'][] = array( $Object, 'method', $arg)
+ * 
+ * Returns true if successful, string on error (with msg), false means success but halts processing of the hook (no further hooks for event are run).
+ * 
+ * More details and list of hooks @ http://www.mediawiki.org/wiki/Manual:Hooks
+ */
+
+$wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave';
+$wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_CheckTOC';
+$wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_AutoLinks';
+$wgHooks['AlternateEdit'][] = 'PonyDocsExtension::onEdit_TOCPage';
+$wgHooks['UnknownAction'][] = 'PonyDocsExtension::onUnknownAction';
+$wgHooks['ParserBeforeStrip'][] = 'PonyDocsExtension::onParserBeforeStrip';
+$wgHooks['AlternateEdit'][] = 'PonyDocsExtension::onEdit';
+$wgHooks['userCan'][] = 'PonyDocsExtension::onUserCan';
+$wgHooks['GetFullURL'][] = 'PonyDocsExtension::onGetFullURL';
+$wgHooks['ArticleFromTitle'][] = 'PonyDocsExtension::onArticleFromTitleQuickLookup';
+$wgHooks['CategoryPageView'][] = 'PonyDocsCategoryPageHandler::onCategoryPageView';
+
+$wgHooks['ArticleDelete'][] = 'PonyDocsExtension::onArticleDelete';
+$wgHooks['ArticleSaveComplete'][] = 'PonyDocsExtension::onArticleSaveComplete';
+
+// Add version field to edit form
+$wgHooks['EditPage::showEditForm:fields'][] = 'PonyDocsExtension::onShowEditFormFields';
+
+/**
+ * End of file.
+ */
