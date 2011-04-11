@@ -3,3 +3,10 @@ CREATE TABLE `ponydocs_doclinks` (
 	  `to_link` varchar(80) collate utf8_unicode_ci NOT NULL default '',
 	  KEY `from` (`from_link`,`to_link`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `ponydocs_cache` (
+	  `cachekey` varchar(255) collate utf8_unicode_ci NOT NULL default '',
+	  `expires` timestamp NOT NULL default CURRENT_TIMESTAMP,
+	  `data` longtext collate utf8_unicode_ci,
+	  PRIMARY KEY  (`cachekey`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

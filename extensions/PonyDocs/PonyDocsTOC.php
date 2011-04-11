@@ -241,7 +241,7 @@ class PonyDocsTOC
 
 
 		$cache = PonyDocsCache::getInstance();
-		$key = "TOCCACHE-" . $manual->getShortName() . "-" . $version->getName();
+		$key = "TOCCACHE-" . $this->pManual->getShortName() . "-" . $selectedVersion;
 		$toc = $cache->get($key);
 		if($toc === null) {
 			// Cache did not exist, let's load our content is build up our cache 
@@ -344,9 +344,7 @@ class PonyDocsTOC
 			if( !$toc[$section]['subs'] ) 
 				unset( $toc[$section] );
 			// Okay, let's store in our cache.
-			if(@file_put_contents($cacheFileLocation, var_export($toc, true)) === false) {
-				error_log("ERROR [PonyDocsTOC::loadContent] Unable to place cache version of TOC for manual " . $this->pManual->getShortName . ' and version ' . $selectedVersion);
-			}
+			$cache->put($key, $toc);
 		}
 
 

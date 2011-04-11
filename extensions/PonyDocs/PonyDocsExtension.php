@@ -11,11 +11,9 @@
  */
 if( !defined( 'MEDIAWIKI' ))
 	die( "PonyDocs MediaWiki Extension" );
-
-define( 'PONYDOCS_TITLE_REMOVE_REGEX', '/([%&?\' ]+)/' );
-
-define( 'PONYDOCS_DOCTALK_BOILERPLATE', 'Documentation:TalkBoilerplate' );
 	
+require_once( "$IP/extensions/PonyDocs/PonyDocs.config.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsCache.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsExtension.body.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsWiki.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsTopic.php" );

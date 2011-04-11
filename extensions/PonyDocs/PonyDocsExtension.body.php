@@ -1682,15 +1682,11 @@ HEREDOC;
 	 */
 	static public function fetchNavDataForVersion($version) {
 		global $ponydocsMediaWiki;
-		$navCacheFile = $ponydocsMediaWiki['navcachedir'] . "/" . md5($version . $ponydocsMediaWiki['navcachesalt']) . "-2"; // Added -2 to avoid using old cache files.
-		$rightNow = time();
-		$filemtime = @filemtime($navCacheFile); // Suppress warning, if the file does not exist.  Returns false if doesn't exist.
-		if(!$filemtime || ($filemtime + $ponydocsMediaWiki['navcachettl']) < $rightNow) {
+		$key = "NAVDATA-" . $version;
+		$cache = PonyDocsCache::getInstance();
+		$cacheEntry = $cache->get($key);
+		if($cacheEntry === null) {
 			error_log("INFO [PonyDocsExtension::fetchNavDataForVersion] Creating new navigation cache file for version $version");
-			// The cache file does not exist, or is stale.  Let's create a new 
-			// one.
-			// Store the old version, so we can set it after we're done loading 
-			// the requested version.
 			$oldVersion = PonyDocsVersion::GetSelectedVersion();
 			PonyDocsVersion::SetSelectedVersion($version);
 			$ver = PonyDocsVersion::GetVersionByName(PonyDocsVersion::GetSelectedVersion());
@@ -1709,14 +1705,13 @@ HEREDOC;
 					}
 				}
 			}
-			file_put_contents($navCacheFile, serialize($cacheEntry));
+			$cache->put($key, $cacheEntry);
 			// Restore old version
 			PonyDocsVersion::SetSelectedVersion($oldVersion);
 			PonyDocsManual::LoadManuals(true);
 		}
 		else {
-			error_log("INFO [PonyDocsExtension::fetchNavDataForVersion] Fetching navigation cache from $navCacheFile");
-			$cacheEntry = unserialize(file_get_contents($navCacheFile));
+			error_log("INFO [PonyDocsExtension::fetchNavDataForVersion] Fetched navigation cache from PonyDocsCache");
 		}
 		return $cacheEntry;
 	}

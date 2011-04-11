@@ -3,42 +3,6 @@ if( !defined( 'MEDIAWIKI' ))
 	die( "PonyDocs MediaWiki Extension" );
 
 /**
- * This is the special page/path used to define our versions.  Do not change it.
- */
-define( 'PONYDOCS_DOCUMENTATION_VERSION_TITLE', 'Documentation:Versions' );
-
-/**
- * The user group in MediaWiki which is considered to have 'author' access.  It must exist.
- */
-define( 'PONYDOCS_AUTHOR_GROUP', 'docteam' );
-
-/**
- * The user group in MediaWiki which is considered to have 'employee' access, which is slightly more
- * limiting than author.
- */
-define( 'PONYDOCS_EMPLOYEE_GROUP', 'employee' );
-
-/**
- * User group for authenticated customer accounts.
- */
-define( 'PONYDOCS_CUSTOMER_GROUP', 'preview' );
-
-/**
- * User-agent string used to identify the crawler which can view unreleased 
- * versions.
- */
-if(!defined('PONYDOCS_CRAWLER_AGENT_REGEX')) {
-	define( 'PONYDOCS_CRAWLER_AGENT_REGEX', '');
-}
-
-/**
- * Define regex which must match to be valid version name.  Generally:
- *	A-Z, a-z, 0-9, comma, period, underscore, dash.
- * Not recommended this be changed!
- */
-define( 'PONYDOCS_VERSION_REGEX', '/([A-Za-z0-9.,_-]+)/' );
-
-/**
  * Class to manage versions in PonyDocs MediaWiki.  Each instance represents a defined version based upon the
  * PONYDOCS_DOCUMENTATION_VERSION_TITLE special page.  It also statically contains the complete list of defined versions and
  * their mappings.
