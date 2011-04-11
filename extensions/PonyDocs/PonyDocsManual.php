@@ -2,18 +2,6 @@
 if( !defined( 'MEDIAWIKI' ))
 	die( "PonyDocs MediaWiki Extension" );
 
-/**
- * This is the name of the special page which defines the list of available manuals on the documentation
- * namespace.  It is case sensitive and it is also a bad idea to change it at any point.
- */
-define( 'PONYDOCS_DOCUMENTATION_MANUALS_TITLE', 'Documentation:Manuals' );
-
-/**
- * Regex used to validate a manual SHORT name.  Do not change.
- */
-
-define( 'PONYDOCS_MANUAL_LEGALCHARS', 'A-Za-z0-9_,.-' );
-define( 'PONYDOCS_MANUAL_REGEX', '/([' . PONYDOCS_MANUAL_LEGALCHARS . ']+)/' );
 
 /**
  * An instance represents a single PonyDocs manual based upon the short/long name.  It also contains static

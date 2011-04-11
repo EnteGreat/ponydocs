@@ -48,7 +48,7 @@ class PonyDocsPdfBook {
 
 		// Get the title and make sure we're in Documentation namespace
 		$title = $article->getTitle();
-		if($title->getNamespace() != 100) {
+		if($title->getNamespace() != PONYDOCS_DOCUMENTATION_NAMESPACE_ID) {
 			return true;
 		}
 

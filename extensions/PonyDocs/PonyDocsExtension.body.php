@@ -1570,10 +1570,7 @@ HEREDOC;
 			 * Disallow edit/submit for documentation, FAQ, and Splexicon namespaces (and pages) unless
 			 * the user is in the employee or authors/docteam group.
 			 */
-			if(	( $title->getNamespace( ) == 100 ) ||
-				( $title->getNamespace( ) == 140 ) ||
-				( $title->getNamespace( ) == 150 ) ||
-				( !strcmp( $title->__toString( ), $wgExtraNamespaces[100] ))) 
+			if(	( $title->getNamespace( ) == PONYDOCS_DOCUMENTATION_NAMESPACE_ID ) || ( !strcmp( $title->__toString( ), PONYDOCS_DOCUMENTATION_NAMESPACE_NAME ))) 
 			{
 				$groups = $user->getGroups();
 				if( !in_array( PONYDOCS_AUTHOR_GROUP, $groups ) && !in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ))
