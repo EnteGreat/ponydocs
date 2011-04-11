@@ -1,6 +1,6 @@
 <?php
 if( !defined( 'MEDIAWIKI' ))
-	die( "Splunk MediaWiki Extension" );
+	die( "PonyDocs MediaWiki Extension" );
 
 /**
  * Needed since we subclass it;  it doesn't seem to be loaded elsewhere.

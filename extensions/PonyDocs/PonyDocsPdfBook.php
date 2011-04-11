@@ -180,7 +180,7 @@ class PonyDocsPdfBook {
 		$titlepagefile = "$wgUploadDirectory/" .uniqid('ponydocs-pdf-book-title');
 		$fh = fopen($titlepagefile, 'w+');
 
-		$titleText = "<br><br><br><br><center><img src=\"$wgScriptPath/skins/splunkbase/images/logo_splunkServer_white_rgb.gif\"><br /><h2>Splunk " . $book . "</h2><h3>Version: " . $versionText . "</h3><h4>Generated: " . date('n/d/Y h:i a', time()) . "<br /> Copyright Splunk, Inc. All Rights Reserved</h4>";
+		$titleText = "<br><br><br><br><center><img src=\"" . PONYDOCS_PRODUCT_LOGO_URL .  "\"><br /><h2>" . PONYDOCS_PRODUCT_NAME . " " . $book . "</h2><h3>Version: " . $versionText . "</h3><h4>Generated: " . date('n/d/Y h:i a', time()) . "<br /> " . PONYDOCS_PDF_COPYRIGHT_MESSAGE . "</h4>";
 
 		fwrite($fh, $titleText);
 		fclose($fh);

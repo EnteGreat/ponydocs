@@ -83,7 +83,7 @@ class SpecialTOCList extends SpecialPage
 		} 
 		
 		$html = '<h2>Other Useful Management Pages</h2>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_VERSION_TITLE, $wgArticlePath ) . '">Version Management</a> - Define and update available Splunk versions.<br/>' .
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_VERSION_TITLE, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . PONYDOCS_PRODUCT_NAME . ' versions.<br/>' .
 				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_MANUALS_TITLE, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
 		
 		$wgOut->addHTML( $html );

@@ -6,6 +6,8 @@ define('PONYDOCS_AUTHOR_GROUP', 'docteam');
 define('PONYDOCS_CUSTOMER_GROUP', 'customers');
 define('PONYDOCS_CRAWLER_AGENT_REGEX', '/gsa/');
 
+define('PONYDOCS_PRODUCT_NAME', 'Example Product');
+define('PONYDOCS_PRODUCT_LOGO_URL', $wgScriptPath . 'extensions/PonyDocs/images/pwny.jpg');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_NAME', 'Documentation');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_ID', 100);
 
@@ -20,4 +22,6 @@ define( 'PONYDOCS_VERSION_REGEX', '/([A-Za-z0-9.,_-]+)/' );
 define( 'PONYDOCS_DOCUMENTATION_MANUALS_TITLE', 'Documentation:Manuals' );
 define( 'PONYDOCS_MANUAL_LEGALCHARS', 'A-Za-z0-9_,.-' );
 define( 'PONYDOCS_MANUAL_REGEX', '/([' . PONYDOCS_MANUAL_LEGALCHARS . ']+)/' );
+
+define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Example Copyright Message');
 

@@ -49,7 +49,7 @@ class SpecialDocumentLinks extends SpecialPage {
 		$title = Title::newFromText($title);
 		$article = new Article($title);
 		$content = $article->getContent();
-		$topic = new SplunkTopic($article);
+		$topic = new PonyDocsTopic($article);
 		$splunkVersions = $topic->getVersions();
 		$versions = array();
 		$mediaWikiTitle = $article->getTitle()->getFullText();
