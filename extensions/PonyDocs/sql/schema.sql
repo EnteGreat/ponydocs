@@ -6,7 +6,7 @@ CREATE TABLE `ponydocs_doclinks` (
 
 CREATE TABLE `ponydocs_cache` (
 	  `cachekey` varchar(255) collate utf8_unicode_ci NOT NULL default '',
-	  `expires` timestamp NOT NULL default CURRENT_TIMESTAMP,
+	  `expires` INT NOT NULL default 0,
 	  `data` longtext collate utf8_unicode_ci,
 	  PRIMARY KEY  (`cachekey`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

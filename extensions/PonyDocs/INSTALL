@@ -1,5 +1,25 @@
 Quick Install Instructions
 
+Modify your apache configuration for the use of friendly urls.  Modify your host to enable rewrite rules.  The following is an example of the apache configuration, if mediawiki was installed at the base of your html directory.  If your mediawiki instance resides in a sub-directory, modify the configuration accordingly.
+
+==== START SAMPLE APACHE CONFIGURATION ====
+RewriteEngine On
+# Main passthrus
+RewriteRule ^/api.php$ 			/api.php 		[L,QSA]
+RewriteRule ^/config/(.*)$ 			/config/$1 		[L,QSA]
+RewriteRule ^/skins/(.*)$		/skins/$1 	[L,QSA]
+RewriteRule ^/extensions/(.*)$ 	/extensions/$1 [L,QSA]
+
+# Rewrite rule to handle passing ugly doc urls to pretty urls
+RewriteRule ^/base/Documentation:(.*):(.*):(.*) /base/Documentation/$3/$1/$2 [L,QSA,R=301]
+RewriteRule ^/base/Documentation:(.*):(.*) /base/Documentation/latest/$1/$2 [L,QSA,R=301]
+
+# get home page requests to Main_Page
+RewriteRule ^/(\/*)$ /index.php?title=Main_Page [PT]
+# all other requests go to specific page
+RewriteRule ^/(\/*)(.*)$ /index.php?title=$3 [PT,QSA]
+==== END SAMPLE APACHE CONFIGURATION ====
+
 Modify your LocalSettings.php file to have an additional namespace of Documentation.  
 
 Example:

@@ -185,6 +185,7 @@ class PonyDocsPdfBook {
 		fwrite($fh, $titleText);
 		fclose($fh);
 
+		$format = 'manual'; 	/* @todo Modify so single topics can be printed in pdf */
 		$footer = $format == 'single' ? '...' : '.1.';
 		$toc    = $format == 'single' ? '' : " --toclevels $levels";
 

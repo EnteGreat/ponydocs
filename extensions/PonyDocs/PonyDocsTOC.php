@@ -344,7 +344,7 @@ class PonyDocsTOC
 			if( !$toc[$section]['subs'] ) 
 				unset( $toc[$section] );
 			// Okay, let's store in our cache.
-			$cache->put($key, $toc);
+			$cache->put($key, $toc, time() + 3600);
 		}
 
 
@@ -384,7 +384,7 @@ class PonyDocsTOC
 			while( $idx >= 0 )
 			{
 				--$idx;
-				if( $toc[$idx]['level'] == 1 )
+				if(isset($toc[$idx]) &&  $toc[$idx]['level'] == 1 )
 				{
 					$prev = $idx;
 					break;
@@ -395,7 +395,7 @@ class PonyDocsTOC
 			while( $idx <= sizeof( $toc ))
 			{
 				++$idx;
-				if( $toc[$idx]['level'] == 1 )
+				if(isset($toc[$idx]) &&  $toc[$idx]['level'] == 1 )
 				{
 					$next = $idx;
 					break;

@@ -21,9 +21,12 @@ class PonyDocsCache
 		return self::$instance;
 	}
 	
-	public function put( $key, $data, $expires )
+	public function put( $key, $data, $expires = null )
 	{
 		if(PONYDOCS_CACHE_ENABLED) {
+			if(!$expires) {
+				$expires = time() + 3600;
+			}
 			$data = mysql_real_escape_string(serialize($data));
 			$query = "INSERT INTO ponydocs_cache VALUES('$key', '$expires',  '$data')";
 			try {

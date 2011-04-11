@@ -7,7 +7,7 @@ define('PONYDOCS_CUSTOMER_GROUP', 'customers');
 define('PONYDOCS_CRAWLER_AGENT_REGEX', '/gsa/');
 
 define('PONYDOCS_PRODUCT_NAME', 'Example Product');
-define('PONYDOCS_PRODUCT_LOGO_URL', $wgScriptPath . 'extensions/PonyDocs/images/pwny.jpg');
+define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . str_replace("$1", "", $wgArticlePath) . 'extensions/PonyDocs/images/pwny.jpg');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_NAME', 'Documentation');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_ID', 100);
 

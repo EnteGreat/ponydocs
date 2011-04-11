@@ -1702,7 +1702,7 @@ HEREDOC;
 					}
 				}
 			}
-			$cache->put($key, $cacheEntry);
+			$cache->put($key, $cacheEntry, time() + 3600);
 			// Restore old version
 			PonyDocsVersion::SetSelectedVersion($oldVersion);
 			PonyDocsManual::LoadManuals(true);
