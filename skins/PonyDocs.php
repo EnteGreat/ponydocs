@@ -143,7 +143,15 @@ class PonyDocsTemplate extends QuickTemplate {
 	<a id="top"></a>
 	<?php if($this->data['sitenotice']) { ?><div id="siteNotice"><?php $this->html('sitenotice') ?></div><?php } ?>
 
-	<h1 id="firstHeading" class="firstHeading"><?php $this->html('title') ?></h1>
+	<?php
+	if(!$inDocumentation) {
+		?>
+		<h1 id="firstHeading" class="firstHeading"><?php 
+		$this->html('title'); 
+		?></h1>
+		<?php
+	}
+	?>
 	<div id="bodyContent">
 		<h3 id="siteSub"><?php $this->msg('tagline') ?></h3>
 		<div id="contentSub"<?php $this->html('userlangattributes') ?>><?php $this->html('subtitle') ?></div>
@@ -288,6 +296,11 @@ class PonyDocsTemplate extends QuickTemplate {
 					<p>
 					<?php
 					if(sizeof($this->data['manualtoc'])) {
+						?>
+						<p>
+						<a href="<?php echo str_replace('$1', '', $wgArticlePath);?>index.php?title=<?php echo $wgTitle->__toString();?>&action=pdfbook">Pdf Version</a>
+						</p>
+						<?php
 						$inUL = false;
 						$listid = "";
 						foreach( $this->data['manualtoc'] as $idx => $data )
