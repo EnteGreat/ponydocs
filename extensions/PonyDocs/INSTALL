@@ -1,0 +1,32 @@
+Quick Install Instructions
+
+Modify your LocalSettings.php file to have an additional namespace of Documentation.  
+
+Example:
+$wgExtraNamespaces[100] = "Documentation";
+
+There are additional user permission flags that are defined.  These are branchtopic, branchmanual, inherit, viewall.  Modify your $wgGroupPermissions to add these permissions to your existing groups.  You can also create new groups for your permissions.  Review http://www.mediawiki.org/wiki/Manual:User_rights for more information.  
+
+An example would be:
+
+$wgGroupPermissions['docteam']['branchtopic']	 = true; // Custom permission to branch a single topic.
+$wgGroupPermissions['docteam']['branchmanual']	 = true; // Custom permission to branch an entire manual.
+$wgGroupPermissions['docteam']['inherit']		 = true; // Custom permission to inherit a topic.
+$wgGroupPermissions['docteam']['viewall']		 = true; // Custom permission to handle View All link for topics.
+
+Some mediawiki instances do not have $wgArticlePath property defined.  Please make sure this is defined in your LocalSettings.php.  Refer to: http://www.mediawiki.org/wiki/Manual:$wgArticlePath for more information.
+
+Example, if mediawiki was installed at the root of your html directory:
+
+$wgArticlePath = '/$1';
+
+
+Modify the PonyDocs.config.php file in the PonyDocs extension directory to fit your environment.
+
+Update your mediawiki database schema by running the schema.sql file in the sql directory of the PonyDocs extension directory.
+
+There is a PonyDocs skin that is provided in this archive.  In order to see additional Documentation features, you should use this skin.  Customize this skin to fit your environment.
+
+For any assistance, please contact tdondich@splunk.com
+
+Splunk > Open Source FTW!
