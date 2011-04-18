@@ -105,37 +105,31 @@ class PonyDocsTemplate extends QuickTemplate {
 
 
 		$this->html( 'headelement' );
-?>
-		<script type="<?php $this->text('jsmimetype') ?>">
-		function ponyDocsOnLoad() {}
+		?>
+		<script type="text/javascript">
+			function ponyDocsOnLoad() {}
 
-		function AjaxChangeVersion_callback( o ) {
-			document.getElementById('docsVersionSelect').disabled = true;
-			var s = new String( o.responseText );
-			document.getElementById('docsVersionSelect').disabled = false;
-			window.location.href = s;
-		}
-		
-		function AjaxChangeVersion( ) {	
-			var versionIndex = document.getElementById('docsVersionSelect').selectedIndex;
-			var version = document.getElementById('docsVersionSelect')[versionIndex].value;
-			var title = '<?php $this->text('pathinfo'); ?>';		
-			sajax_do_call( 'efPonyDocsAjaxChangeVersion', [version,title], AjaxChangeVersion_callback );
-		}
-
-		function changeManual(){
-			var url = $("#docsManualSelect").attr("value");
-			if (url != ""){
-				window.location.href = url;
+			function AjaxChangeVersion_callback( o ) {
+				document.getElementById('docsVersionSelect').disabled = true;
+				var s = new String( o.responseText );
+				document.getElementById('docsVersionSelect').disabled = false;
+				window.location.href = s;
 			}
-		}
 
+			function AjaxChangeVersion( ) {	
+				var versionIndex = document.getElementById('docsVersionSelect').selectedIndex;
+				var version = document.getElementById('docsVersionSelect')[versionIndex].value;
+				var title = '<?php $this->text('pathinfo'); ?>';		
+				sajax_do_call( 'efPonyDocsAjaxChangeVersion', [version,title], AjaxChangeVersion_callback );
+			}
 
-		</script>
-		<script src="<?php $this->text('stylepath') ?>/<?php $this->text('stylename') ?>/js/jquery-1.4.2.min.js" language="Javascript1.3" type="text/javascript"></script>
-		<script src="<?php $this->text('stylepath') ?>/<?php $this->text('stylename') ?>/js/jquery.json-2.2.min.js" language="Javascript1.3" type="text/javascript"></script>
-		<script src="<?php $this->text('stylepath') ?>/<?php $this->text('stylename') ?>/js/docs.js" language="Javascript1.3" type="text/javascript"></script>
-
+			function changeManual(){
+				var url = $("#docsManualSelect").attr("value");
+				if (url != ""){
+					window.location.href = url;
+				}
+			}
+			</script>
 	
 	<div id="globalWrapper">
 
@@ -586,15 +580,15 @@ if($this->data['copyrightico']) { ?>
 		 */
 		if( sizeof( $pieces ) < 3 )
 		{				
-			if( !strcmp( SPLUNK_DOCUMENTATION_VERSION_TITLE, $wgTitle->__toString( )))
+			if( !strcmp( PONYDOCS_DOCUMENTATION_VERSION_TITLE, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Versions Management';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name:status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, underscore, and dash.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name|status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, underscore, and dash.</i></span>');
 			}
-			else if( !strcmp( SPLUNK_DOCUMENTATION_MANUALS_TITLE, $wgTitle->__toString( )))
+			else if( !strcmp( PONYDOCS_DOCUMENTATION_MANUALS_TITLE, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Manuals Management';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#manual:shortName:displayName}} to define a new manual.  If you omit display name, the short name will be used in links.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#manual:shortName|displayName}} to define a new manual.  If you omit display name, the short name will be used in links.</i></span>');
 			}
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[1], $matches ))
 			{										
