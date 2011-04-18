@@ -235,8 +235,10 @@ class PonyDocsTOC
 
 		// Okay, let's determine if the VERSION that the user is in is latest, 
 		// if so, we should set latest to true.
-		if($selectedVersion == PonyDocsVersion::GetLatestReleasedVersion()->getName()) {
-			$latest = true;
+		if(PonyDocsVersion::GetLatestReleasedVersion() != null) {
+		  	if($selectedVersion == PonyDocsVersion::GetLatestReleasedVersion()->getName()) {
+				$latest = true;
+			}
 		}
 
 

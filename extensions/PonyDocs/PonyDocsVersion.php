@@ -163,11 +163,19 @@ class PonyDocsVersion
 	{
 		global $wgUser, $_SESSION;
 
+		$groups = $wgUser->getGroups();
+
 		/**
 	 	 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
 		if( isset( $_SESSION['wsVersion'] ) && strlen( $_SESSION['wsVersion'] )) {
-			return $_SESSION['wsVersion'];
+			// Make sure version exists.
+			if(!array_key_exists($_SESSION['wsVersion'], self::$sVersionMap)) {
+				unset($_SESSION['wsVersion']);
+			}
+			else {
+				return $_SESSION['wsVersion'];
+			}
 		}
 		
 	
@@ -178,8 +186,15 @@ class PonyDocsVersion
 		if( sizeof( self::$sVersionListReleased )) {
 			self::SetSelectedVersion( self::$sVersionListReleased[count(self::$sVersionListReleased)-1]->getName( ));
 		}
-
-		return $_SESSION['wsVersion'];	
+		else if(in_array(PONYDOCS_AUTHOR_GROUP, $groups)) {
+			if(count(self::$sVersionListUnreleased)) {
+				self::SetSelectedVersion(self::$sVersionListUnreleased[count(self::$sVersionListUnreleased)-1]->getName());
+			}
+		}
+		if(isset($_SESSION['wsVersion'])) {
+			return $_SESSION['wsVersion'];	
+		}
+		return null;
 	}
 
 	/**

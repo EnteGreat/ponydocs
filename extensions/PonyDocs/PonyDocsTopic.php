@@ -299,7 +299,7 @@ class PonyDocsTopic
 		foreach( $this->versions as $v )
 		{
 			$ver = strtolower($v->getName());
-			if( !strcasecmp( $ver, PonyDocsVersion::GetLatestReleasedVersion( )->getName( )))
+			if(PonyDocsVersion::GetLatestReleasedVersion() != null &&  !strcasecmp( $ver, PonyDocsVersion::GetLatestReleasedVersion( )->getName( )))
 			{
 				// Return right away, as current is our #1 class
 				return "current";

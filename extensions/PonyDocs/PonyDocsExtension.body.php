@@ -1167,8 +1167,8 @@ HEREDOC;
 		if( !$wgTitle->exists( ))
 		{
 			$script = 	"function ponydocsOnLoad() {
-							document.getElementById('wpTextbox1').value = '[[Category:V:" . PonyDocsVersion::GetSelectedVersion( ) . "]]';
-						}";			
+							$('#wpTextbox1').val(\"\\n\\n[[Category:V:" . PonyDocsVersion::GetSelectedVersion( ) . "]]\");
+						};";			
 			$wgOut->addInLineScript( $script );			
 		}
 			
@@ -1979,6 +1979,15 @@ HEREDOC;
 		// Add our form element to the top of the form.
 		$version = PonyDocsVersion::GetSelectedVersion();
 		$output->mBodytext .= "<input type=\"hidden\" name=\"ponydocsversion\" value=\"" . $version . "\" />";
+		return true;
+	}
+
+	static public function onBeforePageDisplay($out, $sk) {
+		global $wgScriptPath;
+		// Add our js files
+		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/jquery-1.4.2.min.js");
+		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/jquery.json-2.2.min.js");
+		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/docs.js");
 		return true;
 	}
 

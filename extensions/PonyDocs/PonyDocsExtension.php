@@ -135,7 +135,7 @@ function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 		 * Link to create new TOC page -- should link to current version TOC and then add message to explain.
 		 */
 		$output = 	'<p><a href="' . str_replace( '$1', 'Documentation:' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
-					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version.</span>\n";
+					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version (" . PonyDocsVersion::GetSelectedVersion() . ").</span>\n";
 	}
 	else
 	{
@@ -459,6 +459,7 @@ function efSearchParserFunction_Render( $input, $args, $parser )
  * More details and list of hooks @ http://www.mediawiki.org/wiki/Manual:Hooks
  */
 
+$wgHooks['BeforePageDisplay'][] = 'PonyDocsExtension::onBeforePageDisplay';
 $wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave';
 $wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_CheckTOC';
 $wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_AutoLinks';
