@@ -105,12 +105,11 @@ The Documentation:Versions page contains a listing of all versions of your produ
 
 	{{#version:VERSION|STATUS}} 
 
-VERSION can be any alphanumeric string.  It should match your software's version.  STATUS is either "released" or "unreleased".  For example, to initialize version 1.0  and 2.0 of your product, have the following line in your Documentation:Versions page.
+VERSION can be any alphanumeric string.  It should match your software's version.  STATUS is either "released" or "unreleased".  For example, to initialize version 1.0 of your product, have the following line in your Documentation:Versions page:
 
 	{{#version:1.0|unreleased}}
-	{{#version:2.0|unreleased}}
 
-Once saved, you'll be able to move to the next step, defining your first manual.
+Once saved, you'll be able to move to the next step, defining your first manual. As you add more versions of your product, add more lines to the Documentation:Versions page.
 
 -------  6) Creating your first manual. ------- 
 
@@ -140,7 +139,19 @@ Note the use of the Category tag inside the TOC.  This will ensure the TOC is li
 
 This will create a section called 'Getting Started', with your first topic being 'Before You Begin'
 
-When you save the edit to your first TOC page, links to your new topics will automaticall be created. (ALPHA BUG: You may have to save your edits to the TOC page twice).  Clicking on the topic in the TOC page will take you to the new topic, which you'll be able to edit with your new content.
+When you save the edit to your first TOC page, links to your new topics will automatically be created. (ALPHA BUG: You may have to save your edits to the TOC page twice).  Clicking on the topic in the TOC page will take you to the new topic, which you'll be able to edit with your new content.
 
 Should get you started!  Have fun!
+
+---------------------------------------------
+F.A.Q.
+---------------------------------------------
+
+Q. Why do I get an error "Table 'ponydocs_doclinks' doesn't exist"?
+A. You likely missed running the schema.sql file in step 3.
+
+Q. Why can't I edit or create any docs pages?
+A. Go back to step 4 and make sure your user in the in the docs group
+
+
 
