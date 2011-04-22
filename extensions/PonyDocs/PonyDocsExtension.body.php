@@ -1687,6 +1687,7 @@ HEREDOC;
 			$oldVersion = PonyDocsVersion::GetSelectedVersion();
 			PonyDocsVersion::SetSelectedVersion($version);
 			$ver = PonyDocsVersion::GetVersionByName(PonyDocsVersion::GetSelectedVersion());
+
 			$manuals = PonyDocsManual::LoadManuals(true);
 			$cacheEntry = array();
 			foreach($manuals as $manual) {
@@ -1992,6 +1993,7 @@ HEREDOC;
 	}
 
 };
+
 /**
  * End of file.
  */
