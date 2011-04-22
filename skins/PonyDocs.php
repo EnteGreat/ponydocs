@@ -43,6 +43,13 @@ class SkinPonyDocs extends SkinTemplate {
 		$out->addStyle( 'ponydocs/rtl.css', 'screen', '', 'rtl' );
 
 	}
+
+	// We are going to totally overwrite this functionality to fix a weird issue
+	public function setTitle($t) {
+		global $wgTitle;
+		$this->mTitle = $wgTitle;
+	}
+
 }
 
 /**
@@ -73,8 +80,9 @@ class PonyDocsTemplate extends QuickTemplate {
 		global $wgRevision, $action, $wgRequest;
 		PonyDocsVersion::LoadVersions();
 		PonyDocsManual::LoadManuals();
-		
+
 		$ponydocs = PonyDocsWiki::getInstance( );
+
 		$this->data['versions'] = $ponydocs->getVersionsForTemplate( );		
 		$this->data['namespaces'] = $wgExtraNamespaces;		
 		$this->data['selectedVersion'] = PonyDocsVersion::GetSelectedVersion( );
@@ -776,6 +784,7 @@ if($this->data['copyrightico']) { ?>
 			
 		}		
 	}
+
 
 
 } // end of class
