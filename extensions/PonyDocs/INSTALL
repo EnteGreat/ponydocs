@@ -21,6 +21,8 @@ Requirements
 3. You can update apache's conf files for the media wiki ghost
 4. You can run SQL commands on the MediaWiki DB
 5. You know this is Alpha ;)
+6. You promise to read AND follow all these steps IN ORDER
+7. You've made a backup of your mediawiki DB in case you didn't meet the previous requirement
 
 ---------------------------------------------
 Quick Install Instructions
@@ -120,7 +122,7 @@ The Documentation:Manuals page defines the Manuals available for your versions. 
 	{{#manual:Installation|Installation Manual}}
 	{{#manual:FAQ|FAQ}} 
 
-Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:Versions).  By clicking on the Manual name, you'll proceed to the next step.
+Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:Versions).  By clicking on the Manual name, you'll proceed to the next step. (Alpha Bug: You may have to edit and save the Document:Manuals page in order to make the "Click manual to create TOC..." note go away after you've created the TOC).
 
 ------- 7) Creating your first Table of Contents and auto-generating your first Documentation topic. ------- 
 
@@ -135,7 +137,7 @@ Clicking on the Installation Manual link in Documentation:Manuals will have the 
 
 	[[Category:V:1.0]]
 
-Note the use of the Category tag inside the TOC.  This will ensure the TOC is linked to version 1.0.  You must have this category tag present in order for the TOC to properly render for that version.
+Note the use of the Category tag inside the TOC, which should autopopulated when the page was created. This will ensure the TOC is linked to version 1.0.  You must have this category tag present in order for the TOC to properly render for that version.
 
 This will create a section called 'Getting Started', with your first topic being 'Before You Begin'
 
@@ -153,5 +155,11 @@ A. You likely missed running the schema.sql file in step 3.
 Q. Why can't I edit or create any docs pages?
 A. Go back to step 4 and make sure your user in the in the docs group
 
+Q. I've created all the pages, but the drop down for "product version" or "select manual" is empty.  Why?
+A. Reset to the backup you made before starting and try again.  Though there are some corners you can paint yourself into, this system has been tested and should work if you follow the steps in order.
 
+Q. I created my first TOC, but it is either empty or the there aren't links to click like step 7 says there will be.  What gives?
+A. Edit and re-save the page and your content should be there and the links should be clickable. This is a known Alpha bug.
 
+Q. I've created the TOC pages, so why do I still see the "Click manual to create TOC..." notice on the Document:Manuals page?
+A. Save and edit this page and those should go away.  This is an known Alpha bug.
