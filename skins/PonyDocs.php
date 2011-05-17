@@ -65,7 +65,7 @@ class PonyDocsTemplate extends QuickTemplate {
 	 * a namespace it will ignore any title mappings (i.e., either it calls the NS:namespace or the default).
 	 *
 	 * @var array
-	 */	
+	 */
 	private $_methodMappings = array(
 		0 => array( 'prep' => '', 'tpl' => 'nsDefault' ),
 		'T:Documentation' => array( 'prep' => 'prepareDocumentation', 'tpl' => 'nsDocumentation' ),
@@ -87,9 +87,10 @@ class PonyDocsTemplate extends QuickTemplate {
 		$ponydocs = PonyDocsWiki::getInstance( $this->data['selectedProduct'] );
 
 		$this->data['products'] = $ponydocs->getProductsForTemplate( );
-		$this->data['versions'] = $ponydocs->getVersionsForProduct( PonyDocsProduct::GetSelectedProduct() );
+		$this->data['versions'] = $ponydocs->getVersionsForProduct( $this->data['selectedProduct'] );
 		$this->data['namespaces'] = $wgExtraNamespaces;
-		$this->data['selectedVersion'] = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
+		$this->data['selectedVersion'] = PonyDocsProductVersion::GetSelectedVersion( $this->data['selectedProduct'] );
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . "] selected product/version is set to " . $this->data['selectedProduct'] . "/" . $this->data['selectedVersion']);}
 		$this->data['versionurl'] = $this->data['wgScript'] . '?title=' . $this->data['thispage'] . '&action=changeversion';
 
 		$this->skin = $skin = $this->data['skin'];
@@ -113,10 +114,9 @@ class PonyDocsTemplate extends QuickTemplate {
 			$inDocumentation = true;
 			$this->prepareDocumentation();
 		}
-		$this->data['versions'] = $ponydocs->getVersionsForProduct( PonyDocsProduct::GetSelectedProduct() );
+		$this->data['versions'] = $ponydocs->getVersionsForProduct( $this->data['selectedProduct'] );
 
-
-		$this->html( 'headelement' );//var_dump($this->text('thispage')); die;
+		$this->html( 'headelement' );
 		?>
 		<script type="text/javascript">
 			function ponyDocsOnLoad() {}
@@ -246,6 +246,19 @@ class PonyDocsTemplate extends QuickTemplate {
 	<div id="p-documentation" class="portlet">
 		<h5>documentation</h5>
 		<div id="documentationBody" class="pBody">
+			<div class="product">
+				<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
+				<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
+				<?php
+					foreach( $this->data['products'] as $idx => $data ) {
+						echo '<option value="' . $data['name'] . '" ';
+						if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
+							echo 'selected';
+						echo '>' . $data['label'] . '</option>';
+					}
+				?>
+				</select>
+			</div>
 		<?php
 		$versions = PonyDocsProductVersion::GetVersions($this->data['selectedProduct'], true);
 		if(!count($versions)) {
@@ -267,21 +280,6 @@ class PonyDocsTemplate extends QuickTemplate {
 			else {
 				?>
 					<p>
-					<div class="product">
-						<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
-						<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
-						<?php
-							foreach( $this->data['products'] as $idx => $data ) {
-								echo '<option value="' . $data['name'] . '" ';
-								if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
-									echo 'selected';
-								echo '>' . $data['label'] . '</option>';
-							}
-						?>
-						</select>
-						
-					</div>
-					
 					<div class="productVersion">
 						<?php
 						// do quick manip
@@ -301,8 +299,9 @@ class PonyDocsTemplate extends QuickTemplate {
 							foreach( $this->data['versions'] as $idx => $data ) {
 
 								echo '<option value="' . $data['name'] . '" ';
-								if( !strcmp( $data['name'], $this->data['selectedVersion'] ))
+								if( !strcmp( $data['name'], $this->data['selectedVersion'] )) {
 									echo 'selected';
+								}
 								echo '>' . $data['label'] . '</option>';
 							}
 						?>
@@ -642,9 +641,9 @@ if($this->data['copyrightico']) { ?>
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))
 			{
 				$this->data['titletext'] = $matches[1] . ' Table of Contents Page';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} to assign within a bullet.  Place topic tags below proper section name.</i></span>' );	
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} to assign within a bullet.  Place topic tags below proper section name.</i></span>' );
 			}
-			else if( PonyDocsProductManual::IsManual( $pieces[1], $pieces[2] ))
+			else if( sizeof( $pieces ) >= 2 && PonyDocsProductManual::IsManual( $pieces[1], $pieces[2] ))
 			{
 				$pManual = PonyDocsProductManual::GetManualByShortName( $pieces[1], $pieces[2] );
 				if( $pManual )
@@ -655,7 +654,9 @@ if($this->data['copyrightico']) { ?>
 				$this->data['titletext'] = $pieces[2];
 			}
 			else
+			{
 				$this->data['topicname'] = $pieces[2];
+			}
 		}
 		else
 		{
@@ -680,7 +681,7 @@ if($this->data['copyrightico']) { ?>
 		if( $pManual )
 		{
 			$p = PonyDocsProduct::GetProductByShortName( $this->data['selectedProduct'] );
-			$v = PonyDocsProductVersion::GetVersionByName( $this->data['selectedProduct'], PonyDocsProductVersion::GetSelectedVersion( $this->data['selectedProduct'] ));
+			$v = PonyDocsProductVersion::GetVersionByName( $this->data['selectedProduct'], $this->data['selectedVersion'] );
 			$toc = new PonyDocsTOC( $pManual, $v, $p );
 			list( $this->data['manualtoc'], $this->data['tocprev'], $this->data['tocnext'], $this->data['tocstart'] ) = $toc->loadContent( );
 			$this->data['toctitle'] = $toc->getTOCPageTitle();
