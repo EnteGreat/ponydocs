@@ -206,12 +206,12 @@ class PonyDocsVersion
 	 * @return string Version which was set.
 	 */
 	static public function SetSelectedVersion( $v )
-	{		
+	{
 		global $_SESSION;
 		$_SESSION['wsVersion'] = $v;
-		return $v;		
-	}	
-		
+		return $v;
+	}
+
 	/**
 	 * Loads our version data from the special page.  These are defined in the form:
 	 * 	{{#version:name|status}}

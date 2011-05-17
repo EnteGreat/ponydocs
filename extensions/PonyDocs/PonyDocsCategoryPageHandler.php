@@ -34,7 +34,7 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 			$categoryViewer = new PonyDocsCategoryPageHandler($categoryArticle->getTitle(), $from, $until);
 			$res = $categoryViewer->getHTML();
 			// Store in our cache
-			$cache->put($cacheKey, $res, time() + CATEGORY_CACHE_TTL);		
+			$cache->put($cacheKey, $res, time() + CATEGORY_CACHE_TTL);
 		}
 		$wgOut->addHTML($res);
 		return false; // We don't want to continue processing the "normal" mediawiki path, so return false here.
@@ -92,7 +92,7 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 
 			// In rare chances where the title will conflict with another, make 
 			// all article elements sub-arrays
-			if(!is_array($this->articles[strtoupper($h1[0])])) {
+			if(!(isset($this->articles[strtoupper($h1[0])]) && is_array($this->articles[strtoupper($h1[0])]))) {
 				$this->articles[strtoupper($h1[0])] = array();
 			}
 			$this->articles[strtoupper($h1[0])][] = $this->getSkin()->makeKnownLinkObj($title, htmlentities($h1));
@@ -199,3 +199,5 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 		return $r;
 	}
 }
+
+?>

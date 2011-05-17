@@ -18,7 +18,7 @@ class PonyDocsTOC
 	 * @var PonyDocsManual
 	 */
 	protected $pManual;
-	
+
 	/**
 	 * The initial PonyDocsVersion instance to which the TOC is created from.  So, for instance, userTOC3.0
 	 * would initially be tagged to version 3.0 and then tagged to additional versions through the
@@ -27,7 +27,9 @@ class PonyDocsTOC
 	 * @var PonyDocsVersion
 	 */
 	protected $pInitialVersion;
-	
+
+	protected $pProduct;
+
 	/**
 	 * This is the list of versions for which this TOC is tagged for the given manual.  It will
 	 * include the initial version as well.  They are mapped from version name to actual PonyDocsVersion
@@ -51,7 +53,6 @@ class PonyDocsTOC
 	 * */
 	protected $mTOCPageTitle;
 
-	
 	/**
 	 * This is an array of actual TOC items (i.e. not headers) in order.  Each is a PonyDocsTOCItem instance.
 	 * This allows us to get the prev/next links based on the current topic being viewed, if any.
@@ -67,38 +68,39 @@ class PonyDocsTOC
 	protected $mTableOfContents = array( );
 	protected $mPreviousTopic ;
 	protected $mNextTopic ;
-	
+
 	/**
 	 * This stores the index of the currently viewed section so we can just grab the mini-TOC for the top of
 	 * the page directly out of the full TOC shown in the left sidebar.
 	 */
 	protected $mCurrentTopicIndex = -1;
-	
+
 	/**
 	 * Construct with a PonyDocsManual and initial version.  Stores and performs load (should we load here?)
 	 *
 	 * @param PonyDocsManual $pManual Manual to find TOC for.
 	 * @param PonyDocsVersion $initialVersion Initial version (find manual tagged for this version?).
 	 */
-	public function __construct( PonyDocsManual& $pManual, PonyDocsVersion& $initialVersion )
-	{			
+	public function __construct( PonyDocsProductManual& $pManual, PonyDocsProductVersion& $initialVersion, PonyDocsProduct& $product )
+	{
 		$this->pManual = $pManual;
 		$this->pInitialVersion = $initialVersion;
+		$this->pProduct = $product;
 		$this->load( );
 	}
-	
+
 	/**
 	 * Add a version to the list of those which the TOC applies to.
 	 *
 	 * @param PonyDocsVersion $pVersion Version object to add to list.
 	 * @return PonyDocsVersion
 	 */
-	public function & addVersion( PonyDocsVersion& $pVersion )
+	public function & addVersion( PonyDocsProductVersion& $pVersion )
 	{
-		$this->pVersionList[$pVersion->getName( )] = $pVersion;
+		$this->pVersionList[$pVersion->getVersionName( )] = $pVersion;
 		return $pVersion;
 	}
-	
+
 	/**
 	 * Returns the list of version objects to which this TOC applies for the current manual.
 	 *
@@ -108,7 +110,7 @@ class PonyDocsTOC
 	{
 		return $this->pVersionList;
 	}
-	
+
 	/**
 	 * Test whether this TOC applies to the supplied version NAME.
 	 *
@@ -119,7 +121,7 @@ class PonyDocsTOC
 	{
 		return isset( $this->pVersionList[$versionName] );
 	}
-	
+
 	/**
 	 * This actually loads the list of versions for which the TOC is tagged and stores the PonyDocsVersion objects.  
 	 *
@@ -132,18 +134,18 @@ class PonyDocsTOC
 		 * table for the initial version supplied as 'cl_to'.  This should only return one row, but we're going to ignore anything but
 		 * the first just in case.  The resulting 'cl_sortkey' is the actual full name of the TOC page.  From this we then scan the
 		 * same table for all 'cl_to' matches for the complete name and add those versions to our list.
-		 */		
+		 */
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 	
-					"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $this->pManual->getShortName( ))) . "toc%'",
-					"cl_to = 'V:" . $dbr->strencode( $this->pInitialVersion->getName( )) . "'" ),
+					"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( $this->pProduct->getShortName( )) . ":" . $dbr->strencode( strtolower( $this->pManual->getShortName( ))) . "toc%'",
+					"cl_to = 'V:" . $dbr->strencode( $this->pProduct->getShortName( )) . ":" . $dbr->strencode( $this->pInitialVersion->getVersionName( )) . "'" ),
 					__METHOD__ );
-					
+
 		if( !$res->numRows( ))
-		{							
+		{
 			return false;
 		}
-			
+
 		$row = $dbr->fetchObject( $res );
 		$mTOCPageTitle = $row->cl_sortkey;
 		$this->mTOCPageTitle = $mTOCPageTitle;
@@ -151,30 +153,30 @@ class PonyDocsTOC
 		$res = $dbr->select( 'categorylinks', 'cl_to', "cl_sortkey = '" . $dbr->strencode( $mTOCPageTitle ) . "'", __METHOD__ );
 		while( $row = $dbr->fetchObject( $res ))
 		{
-			if( preg_match( '/^v:(.*)/i', $row->cl_to, $match ))
+			if( preg_match( '/^v:(.*):(.*)/i', $row->cl_to, $match ))
 			{
-				$addV = PonyDocsVersion::GetVersionByName( $match[1] );
+				$addV = PonyDocsProductVersion::GetVersionByName( $match[1], $match[2] );
 				if( $addV )
 					$this->addVersion( $addV );
-			}			
+			}
 		}
-		
+
 		//print_r( $this->pVersionList ); die();
-		
+
 		/**
 		 * Now load the contents of our TOC article itself and store internally.
 		 *
-		 */		
+		 */
 		$this->pTOCArticle = new Article( Title::newFromText( $mTOCPageTitle ));
-		$this->pTOCArticle->getContent( );		
-		
+		$this->pTOCArticle->getContent( );
+
 		return true;
 	}
 
 	public function getTOCPageTitle() {
 		return $this->mTOCPageTitle;
 	}
-	
+
 	/**
 	 * This function parses the content of the TOC management page.  It should be loaded and stored and this sort of breaks
 	 * the design in the way that it returns the template ready array of data which PonyDocsWiki is really supposed to be
@@ -197,7 +199,7 @@ class PonyDocsTOC
 	 * @return array
 	 */
 	public function loadContent( )
-	{		
+	{
 		global $wgArticlePath;
 		global $wgTitle;
 		global $wgScriptPath;
@@ -215,7 +217,7 @@ class PonyDocsTOC
 		 * We also have to store the index of the current section in our loop.  The reason for this is so that we can remove
 		 * any sections which have no defined/valid topics listed.  This will also assist in our prev/next links which are stored
 		 * in special indices.
-		 */				
+		 */
 
 
 		// Our title is our url.  We should check to see if 
@@ -230,28 +232,29 @@ class PonyDocsTOC
 			$latest = true;
 		}
 
-		$selectedVersion = PonyDocsVersion::GetSelectedVersion();
+		$selectedProduct = PonyDocsProduct::GetSelectedProduct();
+		$selectedVersion = PonyDocsProductVersion::GetSelectedVersion($selectedProduct);
 
 
 		// Okay, let's determine if the VERSION that the user is in is latest, 
 		// if so, we should set latest to true.
-		if(PonyDocsVersion::GetLatestReleasedVersion() != null) {
-		  	if($selectedVersion == PonyDocsVersion::GetLatestReleasedVersion()->getName()) {
+		if(PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct) != null) {
+		  	if($selectedVersion == PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct)->getVersionName()) {
 				$latest = true;
 			}
 		}
 
 
 		$cache = PonyDocsCache::getInstance();
-		$key = "TOCCACHE-" . $this->pManual->getShortName() . "-" . $selectedVersion;
+		$key = "TOCCACHE-" . $selectedProduct . "-" . $this->pManual->getShortName() . "-" . $selectedVersion;
 		$toc = $cache->get($key);
 		if($toc === null) {
 			// Cache did not exist, let's load our content is build up our cache 
 			// entry.
 			$toc = array( ); 		// Toc is an array.
 			$idx = 0; 				// The current index of the element in $toc we will work on
-			$section = -1;		
-			$lines = split( "\n", $this->pTOCArticle->mContent );
+			$section = -1;
+			$lines = explode( "\n", $this->pTOCArticle->mContent );
 			foreach( $lines as $line )
 			{
 				/**
@@ -266,7 +269,6 @@ class PonyDocsTOC
 					*/
 					if(( $section != -1 ) && !$toc[$section]['subs'] )
 							unset( $toc[$section] );
-					
 
 					if(isset($line[0]) && ctype_alnum( $line[0] ))
 					{
@@ -287,16 +289,14 @@ class PonyDocsTOC
 					if( -1 == $section ) {
 						continue;
 					}
-						
 					if( !preg_match( '/{{#topic:(.*)}}/i', $line, $matches )) {
 						continue ;
 					}
-													
-						
+
 					$baseTopic = $matches[1];
-					$title = 'Documentation:' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
-					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title );
-									
+					$title = 'Documentation:' . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
+					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $this->pProduct->getShortName( ) );
+
 					/**
 					* Hide topics which have no content (i.e. have not been created yet) from the user viewing.  Authors must go to the
 					* TOC page in order to view and edit these.  The only way to do this (the cleanest/quickest) is to create a Title
@@ -304,7 +304,7 @@ class PonyDocsTOC
 					* 
 					* @tbd:  Fix so that the section name is hidden if no topics are visible?
 					*/
-					$t = Title::newFromText( $newTitle ) ;	
+					$t = Title::newFromText( $newTitle ) ;
 					if( !$t || !$t->getArticleID( )) {
 						continue;
 					}
@@ -314,21 +314,20 @@ class PonyDocsTOC
 					*/
 					$h1 = PonyDocsTopic::FindH1ForTitle( $newTitle );
 					if( $h1 === false )
-						$h1 = $newTitle;				
-					
+						$h1 = $newTitle;
+
 					/**
 					* If we are in ALIAS mode we need to adjust the HREF for each item properly.
 					*/
 					$href = ''; 
 
-
 					if( $wgPonyDocs->getURLMode( ) == PonyDocsExtension::URLMODE_ALIASED )
 					{
-							$href = str_replace( '$1', 'Documentation/' . $selectedVersion . '/' . $this->pManual->getShortName() . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );						
+						$href = str_replace( '$1', 'Documentation/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName() . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
 					}
 					else
 					{
-						$href = str_replace( '$1', 'Documentation/' . $selectedVersion . '/' . $this->pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath ); 					
+						$href = str_replace( '$1', 'Documentation/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
 						//$href = str_replace( '$1', $newTitle, $wgArticlePath );
 					}
 					$toc[$idx] = array( 	'level' => 1,
@@ -349,11 +348,10 @@ class PonyDocsTOC
 			$cache->put($key, $toc, time() + 3600);
 		}
 
-
 		$currentIndex = -1;
 		$start = array( );
 		// Go through and determine start, prev, next and current elements.
-		
+
 		foreach($toc as $idx => &$entry) {
 			// Not using $entry.  Only interested in $idx.
 			// This allows us to process tocs with removed key indexes.
@@ -413,7 +411,7 @@ class PonyDocsTOC
 		}
 		
 		/**
-		 * You should typically capture this by doing:	
+		 * You should typically capture this by doing:
 		 * list( $toc, $prev, $next, $start ) = $ponydocstoc->loadContent( );
 		 *
 		 * @FIXME:  Previous and next links change based on the page you are on, so we cannot CACHE those!
@@ -442,17 +440,18 @@ class PonyDocsTOC
 		return $secText;
 	}
 
-	static public function clearTOCCache($manual, $version) {
-		error_log("INFO [PonyDocsTOC::clearTOCCache] Deleting cache entry of TOC for manual " . $manual->getShortName() . ' and version ' . $version->getName());
-		$key = "TOCCACHE-" . $manual->getShortName() . "-" . $version->getName();
+	static public function clearTOCCache($manual, $version, $product) {
+		error_log("INFO [PonyDocsTOC::clearTOCCache] Deleting cache entry of TOC for product " . $product->getShortName() . " manual " . $manual->getShortName() . ' and version ' . $version->getVersionName());
+		$key = "TOCCACHE-" . $product->getShortName() . "-" . $manual->getShortName() . "-" . $version->getVersionName();
 		$cache = PonyDocsCache::getInstance();
 		$cache->remove($key);
 		// Also remove NAVDATA cache, since the first Article may have changed.
-		$key = "NAVDATA-" . $version->getName();
+		$key = "NAVDATA-" . $product->getShortName() . "-" . $version->getVersionName();
 		$cache->remove($key);
 	}
-};
+}
 
 /**
  * End of file.
  */
+?>

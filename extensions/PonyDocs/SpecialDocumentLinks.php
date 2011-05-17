@@ -14,7 +14,7 @@ class SpecialDocumentLinks extends SpecialPage {
 	private $categoryName;
 	private $skin;
 	private $titles;
-	
+
 	/**
 	 * Call the parent with our name.
 	 */
@@ -50,26 +50,20 @@ class SpecialDocumentLinks extends SpecialPage {
 		$article = new Article($title);
 		$content = $article->getContent();
 		$topic = new PonyDocsTopic($article);
-		$splunkVersions = $topic->getVersions();
+		$splunkVersions = $topic->getProductVersions();
 		$versions = array();
 		$mediaWikiTitle = $article->getTitle()->getFullText();
 		$mediaWikiTitle = str_replace(" ", "_", $mediaWikiTitle);
 
 		foreach($splunkVersions as $ver) {
-			$versions[] = $ver->getName();
-		}
-
 		?>
-	The following is in-bound links to <?php echo $title;?> from other Documentation namespace topics.
+
+			The following is in-bound links to <?php echo $title; ?> from other Documentation namespace topics.
+			<h2>Version: <?php echo $ver->getVersionName(); ?></h2>
+
 		<?php
-
-
-		foreach($versions as $currentVersion) {
-			?>
-				<h2>Version: <?php echo $currentVersion;?></h2>
-			<?php
 			// Let's grab the mediawiki name of the topic.
-			$humanReadableTitle = preg_replace("/Documentation:([^:]+):([^:]+):([^:]+)$/i", "Documentation/" . $currentVersion . "/$1/$2", $mediaWikiTitle);
+			$humanReadableTitle = preg_replace("/Documentation:([^:]+):([^:]+):([^:]+):([^:]+)$/i", "Documentation/" . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $mediaWikiTitle);
 			// $humanReadableTitle now contains human readable title.
 
 			// Get our records.

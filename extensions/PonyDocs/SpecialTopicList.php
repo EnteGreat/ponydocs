@@ -38,7 +38,7 @@ class SpecialTopicList extends SpecialPage
 	public function execute( )
 	{
 		global $wgOut, $wgArticlePath, $wgRequest;
-		
+
 		$topic = $wgRequest->getVal( 'topic' );
 		if( !$topic || !strlen( $topic )) {
 			ob_start();
@@ -56,21 +56,20 @@ class SpecialTopicList extends SpecialPage
 			ob_end_clean();
 			return;
 		}
-			
-		
-		if( !preg_match( '/Documentation:(.*):(.*)/i', $topic, $match ))
+
+		if( !preg_match( '/Documentation:(.*):(.*):(.*)/i', $topic, $match ))
 			return;
 			
 		$dbr = wfGetDB( DB_SLAVE );
 
 		$this->setHeaders( );	
 		$wgOut->setPagetitle( 'Topic Listing For ' . $topic );
-		$wgOut->addHTML( '<h2>Topic Listing For Topic <b>'. $match[2] . '</b> in ' . $match[1] . ' manual.</h2>' );
-		
+		$wgOut->addHTML( '<h2>Topic Listing For Topic <b>'. $match[3] . '</b> in ' . $match[2] . ' manual for ' . $match[1] . ' product.</h2>' );
+
 		$q =	"SELECT DISTINCT(cl_sortkey) " .
 				"FROM categorylinks " .
 				"WHERE LOWER(cl_sortkey) LIKE '" . strtolower( $topic ) . ":%'";
-		
+
 		$res = $dbr->query( $q, __METHOD__ );
 		if( !$res->numRows( ))
 		{
@@ -78,30 +77,30 @@ class SpecialTopicList extends SpecialPage
 		}
 
 		$wgOut->addHTML( 'The following is a list of articles for the specified topic and the versions to which they apply.<br><br><ul>' );
-		
+
 		while( $row = $dbr->fetchObject( $res ))
 		{
 			$vRes = $dbr->select( 'categorylinks', 'cl_to', "cl_sortkey = '" . $row->cl_sortkey . "'", __METHOD__ );
 			if( !$vRes->numRows( ))
-				continue;				
-			
+				continue;
+
 			$wgOut->addHTML( '<li>' . $row->cl_sortkey . ': ' );
 
 			$hasVersions = false;
 			while( $vRow = $dbr->fetchObject( $vRes ))
 			{
-				if( preg_match( '/^V:(.*)/i', $vRow->cl_to, $vmatch ))
+				if( preg_match( '/^V:(.*):(.*)/i', $vRow->cl_to, $vmatch ))
 				{
-					$wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $vmatch[1] . '</a> ' );
+					$wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $vmatch[2] . '</a> ' );
 					$hasVersions = true;
 				}
 			}	
 			if( !$hasVersions )
 				$wgOut->addHTML( 'None' );
-			
+
 			$wgOut->addHTML( '</li><br>' );
 		}
-			
+
 		$wgOut->addHTML( '</ul><br><br>' );
 		return;
 	}
@@ -110,3 +109,4 @@ class SpecialTopicList extends SpecialPage
 /**
  * End of file.
  */
+?>

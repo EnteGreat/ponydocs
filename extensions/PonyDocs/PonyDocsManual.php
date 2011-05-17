@@ -104,7 +104,7 @@ class PonyDocsManual
 		 * 
 		 * There is a user defined parser hook which converts this into useful output when viewing as well.
 		 * 
-		 * Then query categorylinks to only add the manual if it has a tagged TOC file with the selected version.
+		 * Then query categorylinks to only add the manual if it is for the selected product and has a tagged TOC file with the selected version.
 		 * Otherwise, skip it!
 		 */
 		
@@ -116,9 +116,7 @@ class PonyDocsManual
 			$pManual = new PonyDocsManual( $m[1], $m[2] );			
 			self::$sDefinedManualList[strtolower($pManual->getShortName( ))] = $pManual;
 			
-			$res = $dbr->select( 'categorylinks', 'cl_to', 
-				array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . strtolower( $pManual->getShortName( )). "toc%'",
-						"cl_to = 'V:" . PonyDocsVersion::GetSelectedVersion( ) . "'" ), __METHOD__ );
+			$res = PonyDocsCategoryLinks::getTOCByProductManualVersion(PonyDocsProduct::GetSelectedProduct(), $pManual->getShortName(), PonyDocsVersion::GetSelectedVersion());
 
 			if( !$res->numRows( )) {
 				continue ;			

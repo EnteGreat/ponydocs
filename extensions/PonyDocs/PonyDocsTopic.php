@@ -16,57 +16,57 @@ class PonyDocsTopic
 	 * @var Article
 	 */
 	protected $pArticle = null;
-	
+
 	/**
 	 * The Title instance the Article refers to, retrieved from the $pArticle instance.
 	 *
 	 * @var Title
 	 */
 	protected $pTitle = null;
-	
+
 	/**
 	 * List of PonyDocsVersion objects to which this topic belongs (tagged).
 	 *
 	 * @var array
 	 */
 	protected $versions = array( );
-	
+
 	/**
 	 * Contains a regex match array of all internal wiki links found in the article content.
 	 *
 	 * @var array
 	 */
 	protected $mWikiLinks = array( );
-	
+
 	/**
 	 * Contains a regex match array of all section headers found in the article content.
 	 *
 	 * @var array
 	 */
 	protected $mSectionHeaders = array( );
-	
+
 	/**
 	 * True if this is a TOPIC in Documentation NS?
 	 *
 	 * @var boolean
 	 */
 	protected $mIsDocumentationTopic = false;
-	
+
 	/**
 	 * Instantiate this topic with a supplied Article instance.
 	 *
 	 * @param Article $article
 	 */
 	public function __construct( Article &$article )
-	{				
+	{
 		$this->pArticle = $article;
 		//$this->pArticle->loadContent( );
 		//echo '<pre>' . $article->getContent( ) . '</pre>';
-		$this->pTitle = $article->getTitle( );				
-		if( preg_match( '/Documentation:.*:.*:.*/i', $this->pTitle->__toString( )))
-			$this->mIsDocumentationTopic = true;	
+		$this->pTitle = $article->getTitle( );
+		if( preg_match( '/Documentation:.*:.*:.*:.*/i', $this->pTitle->__toString( )))
+			$this->mIsDocumentationTopic = true;
 	}
-	
+
 	/**
 	 * Return our instance of Article.
 	 *
@@ -76,7 +76,7 @@ class PonyDocsTopic
 	{
 		return $this->pArticle;
 	}
-	
+
 	/**
 	 * Return our Title instance.
 	 *
@@ -86,21 +86,22 @@ class PonyDocsTopic
 	{
 		return $this->pTitle;
 	}
-		
+
 	/**
 	 * Return an array of versions for the supplied article.  These are saved as category tags so we simply need to find the page_id from
 	 * the article and find anything in the categorylinks table.  Return a list with each element being a PonyDocsVersion object.
 	 * 
 	 * @param boolean $reload If true, force reload from database; else used cache copy (if found).
 	 * @return array
+	 * @deprecated use getProductVersions
 	 */
-	public function getVersions( $reload = false )
-	{	
+/*	public function getVersions( $reload = false )
+	{
 		if( sizeof( $this->versions ) && !$reload )
 			return $this->versions;
-		
+
 		$dbr = wfGetDB( DB_SLAVE );
-		$revision = $this->pArticle->mRevision;		
+		$revision = $this->pArticle->mRevision;
 		
 		//$res = $dbr->select( 'categorylinks', 'cl_to', "cl_from = '" . $revision->mPage . "'", __METHOD__ );
 		$res = $dbr->select( 'categorylinks', 'cl_to',
@@ -112,11 +113,11 @@ class PonyDocsTopic
 		while ( $row = $dbr->fetchObject( $res ))
 		{
 			if( preg_match( '/^v:(.*)/i', $row->cl_to, $match ))
-			{				
-				$v = PonyDocsVersion::GetVersionByName( $match[1] );								
+			{
+				$v = PonyDocsVersion::GetVersionByName( $match[1] );
 				if( $v )
 					$tempVersions[] = $v;
-			}			
+			}
 		}
 
 		// Sort by Version, by doing a natural sort
@@ -133,32 +134,80 @@ class PonyDocsTopic
 		}
 		
 		return $this->versions;
-	}	
-	
+	}
+*/
+	/**
+	 * Return an array of versions for the supplied article.  These are saved as category tags so we simply need to find the page_id from
+	 * the article and find anything in the categorylinks table.  Return a list with each element being a PonyDocsVersion object.
+	 * 
+	 * @param boolean $reload If true, force reload from database; else used cache copy (if found).
+	 * @return array
+	 */
+	public function getProductVersions( $reload = false )
+	{
+		if( sizeof( $this->versions ) && !$reload )
+			return $this->versions;
+
+		$dbr = wfGetDB( DB_SLAVE );
+		$revision = $this->pArticle->mRevision;
+
+		//$res = $dbr->select( 'categorylinks', 'cl_to', "cl_from = '" . $revision->mPage . "'", __METHOD__ );
+		$res = $dbr->select( 'categorylinks', 'cl_to',
+							"cl_sortkey = '" . $dbr->strencode(  $this->pTitle->__toString( )) . "'", __METHOD__ );
+
+		$tempVersions = array();
+
+		while ( $row = $dbr->fetchObject( $res ))
+		{
+			if( preg_match( '/^v:(.*):(.*)/i', $row->cl_to, $match ))
+			{
+				$v = PonyDocsProductVersion::GetVersionByName( $match[1], $match[2] );
+				if( $v )
+					$tempVersions[] = $v;
+			}
+		}
+
+		// Sort by Version, by doing a natural sort
+		// Also remove any duplicates.
+		/// FIXME - what is this really doing? tempVersions index is int per above code!
+		$sortArray = array();
+		foreach($tempVersions as $index => $version) {
+			if(!in_array($version->getVersionName(), $sortArray)) {
+				$sortArray[(string)$index] = $version->getVersionName();
+			}
+		}
+		natsort($sortArray);
+		foreach($sortArray as $targetIndex => $verName) {
+			$this->versions[] = $tempVersions[$targetIndex];
+		}
+
+		return $this->versions;
+	}
+
 	/**
 	 * Given a 'base' topic name (Documentation:User:HowToFoo), find the proper topic name based on selected version.  So if 2.1 is selected and we have
 	 * a HowToFoo2.0 tagged for 2.1, return HowToFoo2.0.
 	 *
 	 * @static
 	 * @param string $baseTopic
-	 * @param PonyDocsVersion $pVersion
+	 * @param string $product
 	 */
-	static public function GetTopicNameFromBaseAndVersion( $baseTopic )
-	{		
+	static public function GetTopicNameFromBaseAndVersion( $baseTopic, $product )
+	{
 		$dbr = wfGetDB( DB_SLAVE );
-		
+
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', 
 			array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $baseTopic )) . ":%'",
-					"cl_to = 'V:" . PonyDocsVersion::GetSelectedVersion( ) . "'" ), __METHOD__ );
-			
+					"cl_to = 'V:" . $product . ':' . PonyDocsProductVersion::GetSelectedVersion( $product ) . "'" ), __METHOD__ );
+
 		if(!$res->numRows( ))
 			return false;
-				
+
 		$row = $dbr->fetchObject( $res );
-		
-		return $row->cl_sortkey;			
+
+		return $row->cl_sortkey;
 	}
-	
+
 	/**
 	 * CHANGE THIS TO CACHE THESE IN MEMCACHE OR WHATEVER.
 	 *
@@ -180,7 +229,7 @@ class PonyDocsTopic
 		
 		return $matches[1];		
 	}
-	
+
 	/**
 	 * Given a text string, convert it to a wiki topic name.
 	 * @FIXME:  This is probably not entirely correct, it probably does NOT handle all possible characters and their conversions.
@@ -193,7 +242,7 @@ class PonyDocsTopic
 	{
 		return preg_replace( SPLUNK_TITLE_REMOVE_REGEX, '', $text );
 	}
-	
+
 	/**
 	 * This loads/parses the sub-contents for the in-page header TOC display.  This display shows the H2s and H3s for the current topic.
 	 *
@@ -221,7 +270,7 @@ class PonyDocsTopic
 		}
 		return $sec;
 	}
-	
+
 	/**
 	 * Not currently used, but wanted to save the code in case we need it.  This takes an article content and extracts all [[]] style
 	 * links from it into a match array.  Each array in the list contains 3 indices:
@@ -234,13 +283,13 @@ class PonyDocsTopic
 	 * @returns array
 	 */
 	private function parseWikiLinks( )
-	{		
+	{
 		$re = "/\\[\\[([" . Title::legalChars() . "]+)(?:\\|?(.*?))\]\]/sD";
 		if( preg_match_all( $re, $this->pArticle->mContent, $matches, PREG_SET_ORDER ))
-			return $matches;		
+			return $matches;
 		return array( );
 	}
-	
+
 	/**
 	 * Another non-used function which we may need if we have to parse out the section headers of an article (which is very likely).  This
 	 * parses out all the headers in the form:
@@ -255,14 +304,13 @@ class PonyDocsTopic
 	 */
 	public function parseSections( )
 	{
-		
 		$content = preg_replace( '/\<nowiki\>(.*)\<\/nowiki\>/i', '', $this->pArticle->mContent );
-		
+
 		$re = "/(=+)([\() A-Za-z0-9?._+%$#@!&*~`'\\\"{}|,.<>-]+)(\\1)/";
 		if( preg_match_all( $re, $content, $matches, PREG_SET_ORDER ))
 			return $matches;
 		return array( );
-	}	
+	}
 	
 	/**
 	 * This function determines the version category this applies to.  For instance, we want a slight skinning change or notice
@@ -277,29 +325,29 @@ class PonyDocsTopic
 	 */
 	public function getVersionClass( )
 	{
-		if( !preg_match( '/Documentation:(.*):(.*):(.*)/i', $this->pTitle->__toString( )))
+		if( !preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $matches))
 			// This is not a documentation title.
 			return "unknown";
-		
+		$productName = $matches[1];
 		/**
 		 * Test if topic applies to latest released version (current).
-		 */		 		
-		$releasedVersions = PonyDocsVersion::GetReleasedVersions();
+		 */
+		$releasedVersions = PonyDocsProductVersion::GetReleasedVersions($productName);
 		$releasedNames = array(); // Just the names of our released versions
 		foreach($releasedVersions as $ver) {
-			$releasedNames[] = strtolower($ver->getName());
+			$releasedNames[] = strtolower($ver->getVersionName());
 		}
-		$previewVersions = PonyDocsVersion::GetPreviewVersions();
+		$previewVersions = PonyDocsProductVersion::GetPreviewVersions($productName);
 		$previewNames = array(); // Just the names of our preview versions
 		foreach($previewVersions as $ver) {
-			$previewNames[] = strtolower($ver->getName());
+			$previewNames[] = strtolower($ver->getVersionName());
 		}
 		$isPreview = false;
 		$isOlder = false;
 		foreach( $this->versions as $v )
 		{
-			$ver = strtolower($v->getName());
-			if(PonyDocsVersion::GetLatestReleasedVersion() != null &&  !strcasecmp( $ver, PonyDocsVersion::GetLatestReleasedVersion( )->getName( )))
+			$ver = strtolower($v->getVersionName());
+			if(PonyDocsProductVersion::GetLatestReleasedVersion($productName) != null &&  !strcasecmp( $ver, PonyDocsProductVersion::GetLatestReleasedVersion($productName)->getVersionName( )))
 			{
 				// Return right away, as current is our #1 class
 				return "current";
@@ -328,11 +376,11 @@ class PonyDocsTopic
 	 */
 	public function getBaseTopicName( )
 	{
-		if( preg_match( '/Documentation:(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $match ))
-		{	
-			return sprintf( "Documentation:%s:%s", $match[1], $match[2] );
+		if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $match ))
+		{
+			return sprintf( "Documentation:%s:%s:%s", $match[1], $match[2], $match[3] );
 		}
-		
+
 		return '';
 	}
 };

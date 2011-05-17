@@ -78,37 +78,41 @@ class PonyDocsPdfBook {
 		// Determine articles to gather
 		$articles = array();
 		$ponydocs = PonyDocsWiki::getInstance();
-		$pieces = split(":", $wgTitle->__toString());
+		$pieces = explode(":", $wgTitle->__toString());
 		// Try and get rid of the TOC portion of the title
-		if(strpos($pieces[1], "TOC")) {
-			$pieces[1] = substr($pieces[1], 0, strpos($pieces[1], "TOC"));
-		}
-		if(PonyDocsManual::isManual($pieces[1])) {
-			$pManual = PonyDocsManual::GetManualByShortName($pieces[1]);
+		if(strpos($pieces[2], "TOC")) {
+			$pieces[2] = substr($pieces[2], 0, strpos($pieces[2], "TOC"));
 		}
 
-		$versionText = PonyDocsVersion::GetSelectedVersion();
+		$pProduct = PonyDocsProduct::GetProductByShortName($pieces[1]);
+		$productName = $pProduct->getShortName();
+
+		if(PonyDocsProductManual::isManual($productName, $pieces[2])) {
+			$pManual = PonyDocsProductManual::GetManualByShortName($productName, $pieces[2]);
+		}
+
+		$versionText = PonyDocsProductVersion::GetSelectedVersion($productName);
 
 		if(!empty($pManual)) {
 			// We should always have a pManual, if we're printing 
 			// from a TOC
-			$v = PonyDocsVersion::GetVersionByName($versionText);
+			$v = PonyDocsProductVersion::GetVersionByName($productName, $versionText);
 
 			// We have our version and our manual
 			// Check to see if a file already exists for this combination
-			$pdfFileName = "$wgUploadDirectory/ponydocspdf-" . $versionText . "-" . $pManual->getShortName() . "-book.pdf";
+			$pdfFileName = "$wgUploadDirectory/ponydocspdf-" . $productName . "-" . $versionText . "-" . $pManual->getShortName() . "-book.pdf";
 			// Check first to see if this PDF has already been created and 
 			// is up to date.  If so, serve it to the user and stop 
 			// execution.
 			if(file_exists($pdfFileName)) {
-				error_log("INFO [PonyDocsPdfBook::onUnknownAction] " . php_uname('n') . ": cache serve username=\"" . $wgUser->getName() . "\" version=\"" . $versionText ."\" " . " manual=\"" . $pManual->getShortName() . "\"");
-				PonyDocsPdfBook::servePdf($pdfFileName, $versionText, $pManual->getShortName());
+				error_log("INFO [PonyDocsPdfBook::onUnknownAction] " . php_uname('n') . ": cache serve username=\"" . $wgUser->getName() . "\" product=\"" . $productName . "\" version=\"" . $versionText ."\" " . " manual=\"" . $pManual->getShortName() . "\"");
+				PonyDocsPdfBook::servePdf($pdfFileName, $productName, $versionText, $pManual->getShortName());
 				// No more processing
 				return false;
 			}
 			// Oh well, let's go on our merry way and create our pdf.
 
-			$toc = new PonyDocsTOC($pManual, $v);
+			$toc = new PonyDocsTOC($pManual, $v, $pProduct);
 			list($manualtoc, $tocprev, $tocnext, $tocstart) = $toc->loadContent();
 
 			// We successfully got our table of contents.  It's 
@@ -226,11 +230,11 @@ class PonyDocsPdfBook {
 	 *
 	 * @param $fileName string The full path to the PDF file.
 	 */
-	static public function servePdf($fileName, $version, $manual) {
+	static public function servePdf($fileName, $product, $version, $manual) {
 		if(file_exists($fileName)) {
 			header("Content-Type: application/pdf");
-			header("Content-Disposition: attachment; filename=\"PonyDocs-$version-$manual.pdf\"");
-			readfile($fileName);		
+			header("Content-Disposition: attachment; filename=\"PonyDocs-$product-$version-$manual.pdf\"");
+			readfile($fileName);
 			die();				// End processing right away.
 		}
 		else {
@@ -247,9 +251,9 @@ class PonyDocsPdfBook {
 	 * @param $manual string The short name of the manual remove
 	 * @param $version string The version of the manual to remove
 	 */
-	static public function removeCachedFile($manual, $version) {
+	static public function removeCachedFile($product, $manual, $version) {
 		global $wgUploadDirectory;
-		$pdfFileName = "$wgUploadDirectory/ponydocspdf-" . $version . "-" . $manual . "-book.pdf";
+		$pdfFileName = "$wgUploadDirectory/ponydocspdf-" . $product . "-" . $version . "-" . $manual . "-book.pdf";
 		@unlink($pdfFileName);
 		if(file_exists($pdfFileName)) {
 			error_log("ERROR [PonyDocsPdfBook::removeCachedFile] " . php_uname('n') . ": Failed to delete cached pdf file $pdfFileName");
@@ -260,7 +264,6 @@ class PonyDocsPdfBook {
 		}
 		return true;
 	}
-
 
 	/**
 	 * Needed in some versions to prevent Special:Version from breaking
@@ -276,3 +279,4 @@ function wfSetupPdfBook() {
 	$wgPonyDocsPdfBook = new PonyDocsPdfBook();
 }
 
+?>

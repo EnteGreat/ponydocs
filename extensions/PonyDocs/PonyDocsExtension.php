@@ -11,14 +11,17 @@
  */
 if( !defined( 'MEDIAWIKI' ))
 	die( "PonyDocs MediaWiki Extension" );
-	
+
 require_once( "$IP/extensions/PonyDocs/PonyDocs.config.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsCache.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsExtension.body.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsWiki.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsTopic.php" );
-require_once( "$IP/extensions/PonyDocs/PonyDocsVersion.php" );
-require_once( "$IP/extensions/PonyDocs/PonyDocsManual.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsProduct.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsProductVersion.php" );
+//require_once( "$IP/extensions/PonyDocs/PonyDocsVersion.php" );
+//require_once( "$IP/extensions/PonyDocs/PonyDocsManual.php" );
+require_once( "$IP/extensions/PonyDocs/PonyDocsProductManual.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsTOC.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsAjax.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsAliasArticle.php" );
@@ -26,6 +29,7 @@ require_once( "$IP/extensions/PonyDocs/SpecialTOCList.php" );
 require_once( "$IP/extensions/PonyDocs/SpecialTopicList.php" );
 require_once( "$IP/extensions/PonyDocs/SpecialDocTopics.php" );
 require_once( "$IP/extensions/PonyDocs/SpecialLatestDoc.php");
+require_once( "$IP/extensions/PonyDocs/PonyDocsCategoryLinks.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsCategoryPageHandler.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocumentLinks.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsPdfBook.php");
@@ -33,7 +37,7 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsPdfBook.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
 require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
-	
+
 /**
  * Setup credits for this extension to appear in the credits page of wiki.
  */
@@ -62,6 +66,7 @@ $wgRevision = '$Revision: 207 $';
 $wgExtensionFunctions[] = 'efPonyDocsSetup';
 $wgExtensionFunctions[] = 'efManualParserFunction_Setup';
 $wgExtensionFunctions[] = 'efVersionParserFunction_Setup';
+$wgExtensionFunctions[] = 'efProductParserFunction_Setup';
 $wgExtensionFunctions[] = 'efTopicParserFunction_Setup';
 $wgExtensionFunctions[] = 'efSearchParserFunction_Setup';
 
@@ -70,6 +75,7 @@ $wgExtensionFunctions[] = 'efSearchParserFunction_Setup';
  */
 $wgHooks['LanguageGetMagic'][] = 'efManualParserFunction_Magic';
 $wgHooks['LanguageGetMagic'][] = 'efVersionParserFunction_Magic';
+$wgHooks['LanguageGetMagic'][] = 'efProductParserFunction_Magic';
 $wgHooks['LanguageGetMagic'][] = 'efTopicParserFunction_Magic';
 
 /**
@@ -84,7 +90,7 @@ $wgPonyDocs = new PonyDocsExtension( );
 function efPonyDocsSetup()
 {
 	global $wgPonyDocs;
-	PonyDocsWiki::getInstance( );	
+	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
 }
 
 /**
@@ -116,30 +122,31 @@ function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 	global $wgArticlePath, $wgUser, $wgScriptPath;
 
 	$dbr = wfGetDB( DB_SLAVE );
-	
+
 	$valid = true;
-	if( !preg_match( PONYDOCS_MANUAL_REGEX, $param1 ) || !strlen( $param1 ) || !strlen( $param2 ))
+	if( !preg_match( PONYDOCS_PRODUCTMANUAL_REGEX, $param1 ) || !strlen( $param1 ) || !strlen( $param2 ))
 	{
 		return $parser->insertStripItem('', $parser->mStripState);
 	}
-	
-	$manualName = preg_replace( '/([^' . PONYDOCS_MANUAL_LEGALCHARS . ']+)/', '', $param1 );
-	$version = PonyDocsVersion::GetSelectedVersion( );
-	
+
+	$manualName = preg_replace( '/([^' . PONYDOCS_PRODUCTMANUAL_LEGALCHARS . ']+)/', '', $param1 );
+	$productName = PonyDocsProduct::GetSelectedProduct();
+	$version = PonyDocsProductVersion::GetSelectedVersion( $productName );
+
 	$res = $dbr->select( 'categorylinks', array( 'cl_sortkey', 'cl_to' ), array(
-						"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualName )) . "toc%'",
-						"cl_to = 'V:" . $version . "'" ), __METHOD__ );
+						"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $productName )) . ':' . $dbr->strencode( strtolower( $manualName )) . "toc%'",
+						"cl_to = 'V:" . $productName . ':' . $version . "'" ), __METHOD__ );
 	if( !$res->numRows( ))
 	{
 		/**
 		 * Link to create new TOC page -- should link to current version TOC and then add message to explain.
 		 */
-		$output = 	'<p><a href="' . str_replace( '$1', 'Documentation:' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
-					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version (" . PonyDocsVersion::GetSelectedVersion() . ").</span>\n";
+		$output = 	'<p><a href="' . str_replace( '$1', 'Documentation:' . $productName . ':' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
+					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version (" . $version . ").</span>\n";
 	}
 	else
 	{
-		$row = $dbr->fetchObject( $res );		
+		$row = $dbr->fetchObject( $res );
 		$output = '<p><a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>\n";
 	}
 
@@ -177,8 +184,8 @@ function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 	global $wgUser, $wgScriptPath;
 	
 	$valid = true;
-	
-	if( !preg_match( PONYDOCS_VERSION_REGEX, $param1 ))
+
+	if( !preg_match( PONYDOCS_PRODUCTVERSION_REGEX, $param1 ))
 		$valid = false;
 	if(( strcasecmp( $param2, 'released' ) != 0 ) && ( strcasecmp( $param2, 'unreleased' ) != 0 ) && ( strcasecmp( $param2, 'preview' ) != 0 ))
 		$valid = false;
@@ -189,6 +196,54 @@ function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 		$output .= ' - Invalid Version Name or Status, Please Fix';
 	$output .= "\n";
 
+	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+/**
+ * Our topic parser functions used in TOC management to define a topic to be listed within a section.  This is simply the form:
+ *   {#topic:Name of Topic}
+ */
+
+/**
+ * This section handles the parser function {{#product:<name>|<status>}} which defines a product.
+ */
+
+function efProductParserFunction_Setup()
+{
+	global $wgParser;
+	$wgParser->setFunctionHook( 'product', 'efProductParserFunction_Render' );
+}
+
+function efProductParserFunction_Magic( &$magicWords, $langCode )
+{
+	$magicWords['product'] = array( 0, 'product' );
+	return true;
+}
+
+/**
+ * The product parser function is of the form:
+ * 	{{#product:name|long_name}}
+ * Which defines a product and its state.  When output it currently does nothing but should perhaps be a list to Category:<product>.
+ *
+ * @param Parser $parser
+ * @param string $param1 The product name itself.
+ * @param string $param2 The long product name.
+ * @return array
+ */
+function efProductParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
+{
+	global $wgUser, $wgScriptPath;
+	
+	$valid = true;
+	
+	if( !preg_match( PONYDOCS_PRODUCT_REGEX, $param1 ))
+		$valid = false;
+
+	$output = $param1 . ' (' . $param2 . ') ' ;
+	
+	if( !$valid )
+		$output .= ' - Invalid Product Name or Long Name, Please Fix';
+	$output .= "\n";
 
 	return $parser->insertStripItem($output, $parser->mStripState);
 }
@@ -213,40 +268,41 @@ function efTopicParserFunction_Magic( &$magicWords, $langCode )
 function efGetTitleFromMarkup($markup = '' )
 {
 	global $wgArticlePath, $wgTitle, $action;
-	
-	PonyDocsWiki::getInstance();
 
 	/**
 	 * We ignore this parser function if not in a TOC management page.
 	 */
-	if( !preg_match( '/Documentation:(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches ))
+	if( !preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches ))
 		return false;
 
-	$manualShortName = $matches[1];
+	$manualShortName = $matches[2];
+	$productShortName = $matches[1];
+
+	PonyDocsWiki::getInstance( $productShortName );
 
 	/**
 	 * Get the earliest tagged version of this TOC page and append it to the wiki page?  Ensure the manual
 	 * is valid then use PonyDocsManual::getManualByShortName().  Next attempt to get the version tags for
 	 * this page -- which may be NONE -- and from this determine the "earliest" version to which this page
 	 * applies.
-	 */	
-	if( !PonyDocsManual::IsManual( $manualShortName ))	
+	 */
+	if( !PonyDocsProductManual::IsManual( $productShortName, $manualShortName ))
 		return false;
 
-	$pManual = PonyDocsManual::GetManualByShortName( $manualShortName );	
-	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));	
-	
+	$pManual = PonyProductDocsManual::GetManualByShortName( $productShortName, $manualShortName );
+	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));
+
 	/**
 	 * @FIXME:  If TOC page is NOT tagged with any versions we cannot create the pages/links to the 
 	 * topics, right?
 	 */
-	$manVersionList = $pTopic->getVersions( );
+	$manVersionList = $pTopic->getProductVersions( );
 	if( !sizeof( $manVersionList ))
-	{						
+	{
 		return $parser->insertStripItem($param1, $parser->mStripState);
 	}
-	$earliestVersion = PonyDocsVersion::findEarliest( $manVersionList );
-	
+	$earliestVersion = PonyDocsProductVersion::findEarliest( $productShortName, $manVersionList );
+
 	/**
 	 * Clean up the full text name into a wiki-form.  This means remove spaces, #, ?, and a few other
 	 * characters which are not valid or wanted.  It's not important HOW this is done as long as it is
@@ -254,10 +310,10 @@ function efGetTitleFromMarkup($markup = '' )
 	 */
 	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
 	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
-	$wikiPath = 'Documentation:' . $manualShortName . ':' . $wikiTopic;	
-	
-	$dbr = wfGetDB( DB_SLAVE );	
-	
+	$wikiPath = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
+
+	$dbr = wfGetDB( DB_SLAVE );
+
 	/**
 	 * Now look in the database for any instance of this topic name PLUS :<version>.  We need to look in 
 	 * categorylinks for it to find a record with a cl_to (version tag) which is equal to the set of the
@@ -271,22 +327,22 @@ function efGetTitleFromMarkup($markup = '' )
 	 * 
 	 * @fixme:  Can we test if $action=save here so we don't do this on every page view?  
 	 */
-	
+
 	$versionIn = array( );
 	foreach( $manVersionList as $pV )
-		$versionIn[] = $pV->getName( );
-		
+		$versionIn[] = $pV->getVersionName( );
+
 	$res = $dbr->select( 'categorylinks', 'cl_sortkey',
 		array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualShortName . ':' . $wikiTopic )) . ":%'",
-				"cl_to IN ('V:" . implode( "','V:", $versionIn ) . "')" ), __METHOD__ );
-	
+				"cl_to IN ('V:$productShortName:" . implode( "','V:$productShortName:", $versionIn ) . "')" ), __METHOD__ );
+
 	$topicName = '';
 	if( !$res->numRows( ))
-	{	
+	{
 		/**
 		 * No match -- so this is a "new" topic.  Set name.
 		 */
-		$topicName = 'Documentation:' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getName( );
+		$topicName = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
 	}
 	else
 	{
@@ -312,18 +368,18 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	if(PonyDocsExtension::isSpeedProcessingEnabled()) {
 		return true;
 	}
-	
-	PonyDocsWiki::getInstance();
 
 	/**
 	 * We ignore this parser function if not in a TOC management page.
 	 */
-	if( !preg_match( '/Documentation:(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches )) {
+	if( !preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches )) {
 		return false;
 	}
 
+	$manualShortName = $matches[2];
+	$productShortName = $matches[1];
 
-	$manualShortName = $matches[1];
+	PonyDocsWiki::getInstance($productShortName);
 
 	/**
 	 * Get the earliest tagged version of this TOC page and append it to the wiki page?  Ensure the manual
@@ -331,26 +387,25 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	 * this page -- which may be NONE -- and from this determine the "earliest" version to which this page
 	 * applies.
 	 */	
-	if( !PonyDocsManual::IsManual( $manualShortName )) {
+	if( !PonyDocsProductManual::IsManual( $productShortName, $manualShortName )) {
 		return false;
 	}
 
-
-	$pManual = PonyDocsManual::GetManualByShortName( $manualShortName );	
-	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));	
+	$pManual = PonyDocsProductManual::GetManualByShortName( $productShortName, $manualShortName );
+	$pTopic = new PonyDocsTopic( new Article( $wgTitle ));
 	
 	/**
 	 * @FIXME:  If TOC page is NOT tagged with any versions we cannot create the pages/links to the 
 	 * topics, right?
 	 */
-	$manVersionList = $pTopic->getVersions( );
+	$manVersionList = $pTopic->getProductVersions( );
 
 	if( !sizeof( $manVersionList ))
-	{						
+	{
 		return $parser->insertStripItem($param1, $parser->mStripState);
 	}
-	$earliestVersion = PonyDocsVersion::findEarliest( $manVersionList );
-	
+	$earliestVersion = PonyDocsProductVersion::findEarliest( $productShortName, $manVersionList );
+
 	/**
 	 * Clean up the full text name into a wiki-form.  This means remove spaces, #, ?, and a few other
 	 * characters which are not valid or wanted.  It's not important HOW this is done as long as it is
@@ -358,10 +413,10 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	 */
 	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
 	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
-	$wikiPath = 'Documentation:' . $manualShortName . ':' . $wikiTopic;	
-	
-	$dbr = wfGetDB( DB_SLAVE );	
-	
+	$wikiPath = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
+
+	$dbr = wfGetDB( DB_SLAVE );
+
 	/**
 	 * Now look in the database for any instance of this topic name PLUS :<version>.  We need to look in 
 	 * categorylinks for it to find a record with a cl_to (version tag) which is equal to the set of the
@@ -375,22 +430,22 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	 * 
 	 * @fixme:  Can we test if $action=save here so we don't do this on every page view?  
 	 */
-	
+
 	$versionIn = array( );
 	foreach( $manVersionList as $pV )
-		$versionIn[] = $pV->getName( );
-		
+		$versionIn[] = $productShortName . ':' . $pV->getVersionName( );
+
 	$res = $dbr->select( 'categorylinks', 'cl_sortkey',
-		array( 	"LOWER(cl_sortkey) LIKE 'documentation:" . $dbr->strencode( strtolower( $manualShortName . ':' . $wikiTopic )) . ":%'",
+		array( 	"LOWER(cl_sortkey) LIKE 'documentation:" . $dbr->strencode( strtolower( $productShortName . ':' . $manualShortName . ':' . $wikiTopic )) . ":%'",
 				"cl_to IN ('V:" . implode( "','V:", $versionIn ) . "')" ), __METHOD__ );
-	
+
 	$topicName = '';
 	if( !$res->numRows( ))
-	{	
+	{
 		/**
 		 * No match -- so this is a "new" topic.  Set name.
 		 */
-		$topicName = 'Documentation:' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getName( );
+		$topicName = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
 	}
 	else
 	{
@@ -398,7 +453,6 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 		$topicName = $row->cl_sortkey;
 	}
 
-	
 	$output = '<a href="' . str_replace( '$1', $topicName, $wgArticlePath ) . '">' . $param1  . '</a>'; 
 	return $parser->insertStripItem($output, $parser->mStripState);
 }
@@ -432,7 +486,7 @@ function efSearchParserFunction_Render( $input, $args, $parser )
 				'<img width="31" height="24" border="0" align="absmiddle" alt="Search" src="' .
 				$ponydocsMediaWiki['DotComHost'] . '/images/base/query_button.png"/>' .
 				'</a><br/></div>';
-	
+
 	return $output;
 }
 

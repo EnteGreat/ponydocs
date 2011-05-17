@@ -16,6 +16,7 @@ $wgExtensionFunctions[] = 'efPonyDocsAjaxInit';
 $wgAjaxExportList[] = 'efPonyDocsAjaxRemoveVersions';
 $wgAjaxExportList[] = 'efPonyDocsAjaxTopicClone';
 $wgAjaxExportList[] = 'efPonyDocsAjaxChangeVersion';
+$wgAjaxExportList[] = 'efPonyDocsAjaxChangeProduct';
 
 /**
  * Basic init function to ensure Ajax is enabled.
@@ -28,6 +29,63 @@ function efPonyDocsAjaxInit()
 }
 
 /**
+ * This is called when a product change occurs in the select box.  It should update the product
+ * only;  to update the page the Ajax function in JS should then refresh by using history.go(0)
+ * or something along those lines, otherwise the content may reflect the old product selection.
+ * 
+ * @param string $product New product tag to set as current.  Should be some checking.
+ * @param string $title The current title that the person resides in, if any.
+ * @param boolean $force Force the change, no matter if a doc is in the same product or not
+ * @return AjaxResponse
+ */
+function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
+{
+	global $wgArticlePath;
+
+	$dbr = wfGetDB( DB_SLAVE );
+
+	PonyDocsProduct::SetSelectedProduct( $product );
+	$response = new AjaxResponse( );
+
+	if($force) {
+		// This is coming from the search page.  let's not do any title look up, 
+		// and instead just pass back the same url.
+		$response->addText("/" . $title); // Need to make the url non-relative
+		return $response;
+	}
+
+	$defaultTitle = "Documentation:" . $product;
+	if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
+	{
+		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 
+			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
+			"cl_to LIKE 'V:" . $product . "%'" ), __METHOD__ );
+
+		if( $res->numRows( ))
+		{
+			$row = $dbr->fetchObject( $res );
+			$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
+		}
+		else
+			$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+	}
+	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
+	{
+		/**
+		 * Just swap out the source product tag ($match[1]) with the selected product in the output URL.
+		 */
+		//$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
+		// just redirect to that product's main page, we can't carry over version and manual across products
+		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
+	}
+	else {
+		$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+	}
+
+	return $response;
+}
+
+/**
  * This is called when a version change occurs in the select box.  It should update the version
  * only;  to update the page the Ajax function in JS should then refresh by using history.go(0)
  * or something along those lines, otherwise the content may reflect the old version selection.
@@ -37,13 +95,14 @@ function efPonyDocsAjaxInit()
  * @param boolean $force Force the change, no matter if a doc is in the same version or not
  * @return AjaxResponse
  */
-function efPonyDocsAjaxChangeVersion( $version, $title, $force = false )
-{	
+function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false )
+{
 	global $wgArticlePath;
-	
+
 	$dbr = wfGetDB( DB_SLAVE );
 
-	PonyDocsVersion::SetSelectedVersion( $version );
+	PonyDocsProduct::SetSelectedProduct( $product );
+	PonyDocsProductVersion::SetSelectedVersion( $product, $version );
 	$response = new AjaxResponse( );
 
 	if($force) {
@@ -52,33 +111,51 @@ function efPonyDocsAjaxChangeVersion( $version, $title, $force = false )
 		$response->addText("/" . $title); // Need to make the url non-relative
 		return $response;
 	}
-	
-	$defaultTitle = "Documentation";	
-	if( preg_match( '/^base\/Documentation:(.*):(.*):(.*)/i', $title, $match ))
-	{				
+
+	$defaultTitle = "Documentation";
+
+	//if( preg_match( '/^base\/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
+	if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
+	{
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 
-			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $match[1] . ':' . $match[2] )) . ":%'",
-			"cl_to = 'V:" . $version . "'" ), __METHOD__ );
-		
+			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
+			"cl_to = 'V:" . $dbr->strencode($product . ":" . $version) . "'" ), __METHOD__ );
+
 		if( $res->numRows( ))
-		{		
+		{
 			$row = $dbr->fetchObject( $res );
-			$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));			
+			$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
+			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 1 [" . __FILE__ . ":" . __LINE__ . "]");}
 		}
 		else
-			$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+		{
+			$response->addText( str_replace( '$1', $defaultTitle . ":" . $product . ":" . $version, $wgArticlePath ));
+			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 2 [" . __FILE__ . ":" . __LINE__ . "]");}
+		}
 	}
-	else if( preg_match( '/^base\/Documentation\/(.*)\/(.*)\/(.*)/i', $title, $match ))
-	{	
+	else if( preg_match( '/Documentation:(.*):(.*)/i', $title, $match ))
+	{
+		// this is a manuals or versions page
+		$add_text = str_replace( '$1', $defaultTitle . '/' . $product . '/' . $match[2], $wgArticlePath);
+		/// FIXME we probably need to clear objectcache for this [product]:Manuals page, or even better, do not cache it(?)
+		$response->addText( $add_text );
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 3 [" . __FILE__ . ":" . __LINE__ . "]");}
+	}
+	//else if( preg_match( '/^base\/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
+	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
+	{
 		/**
-		 * Just swap out the source version tag ($match[1]) with the selected version in the output URL.
+		 * Just swap out the source version tag ($match[2]) with the selected version in the output URL.
 		 */
-		$response->addText( str_replace( '$1', 'Documentation/' . $version . '/' . $match[2] . '/' . $match[3], $wgArticlePath ));		
+		$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 4 [" . __FILE__ . ":" . __LINE__ . "]");}
 	}
 	else {
-		$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+		$add_text = str_replace( '$1', $defaultTitle . '/' . $product . '/' . $version, $wgArticlePath );
+		$response->addText( $add_text );
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 5 [" . __FILE__ . ":" . __LINE__ . "]");}
 	}
-			
+	if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect result " . print_r($response, true) . " [" . __FILE__ . ":" . __LINE__ . "]");}
 	return $response;
 }
 
@@ -98,15 +175,15 @@ function efPonyDocsAjaxChangeVersion( $version, $title, $force = false )
 function efPonyDocsAjaxRemoveVersions( $title, $versionList )
 {
 	global $wgRequest;
-	
+
 	/**
- 	 * First open the title and strip the [[Category]] tags from the content and save.
+	 * First open the title and strip the [[Category]] tags from the content and save.
 	 */
-	$versions = split( ':', $versionList );
-	
+	$versions = explode( ':', $versionList );
+
 	$article = new Article( Title::newFromText( $title ));
 	$content = $article->getContent( );
-	
+
 	$findArray = $repArray = array( );
 	foreach( $versions as $v )
 	{
@@ -114,7 +191,7 @@ function efPonyDocsAjaxRemoveVersions( $title, $versionList )
 		$repArray[] = '';
 	}
 	$content = preg_replace( $findArray, $repArray, $content );
-	$article->doEdit( $content, 'Automatic removal of duplicate version tags.', EDIT_UPDATE );				
+	$article->doEdit( $content, 'Automatic removal of duplicate version tags.', EDIT_UPDATE );
 
 	/**
 	 * Now update the categorylinks table as well -- might not be needed, doEdit() might take care
@@ -123,12 +200,12 @@ function efPonyDocsAjaxRemoveVersions( $title, $versionList )
 	$q =	"DELETE FROM categorylinks " .
 			"WHERE LOWER(cast(cl_sortkey AS CHAR)) = '" . $dbr->strencode( strtolower( $title )) . "' " .
 			"AND cl_to IN ('V:" . implode( "','V:", $versions ) . "')";
-	
+
 	$res = $dbr->query( $q, __METHOD__ );
 
 	/**
 	 * Do not output anything, but perhaps a status would be nice to return?
-	 */			
+	 */
 	$response = new AjaxResponse( );
 	return $response;
 }
@@ -147,29 +224,29 @@ function efPonyDocsAjaxRemoveVersions( $title, $versionList )
  * @param string $version Name of version.
  * @return AjaxResponse
  */
-function efPonyDocsAjaxTopicClone( $topic, $version )
+function efPonyDocsAjaxTopicClone( $topic, $product, $version )
 {
 	global $wgParser;
 	$dbr = wfGetDB( DB_SLAVE );
-	
+
 	$res = $dbr->select( 'categorylinks', 'cl_sortkey', array(
 			"cl_sortkey LIKE '" . $topic . ":%'",
-			"cl_to = 'V:" . $version . "'" ), __METHOD__ );
+			"cl_to = 'V:" . $product . ':' . $version . "'" ), __METHOD__ );
 
 	if( !$res->numRows( ))
 		return '';
-	
+
 	$row = $dbr->fetchObject( $res );
-	
+
 	$article = new Article( Title::newFromText( $row->cl_sortkey ));
 	$content = $article->getContent( );
-	
-	$content = preg_replace( "/\[\[Category:V:([A-Za-z0-9_., -]+)\]\]/i", '', $content );
-	
+
+	$content = preg_replace( "/\[\[Category:V:([" . PONYDOCS_PRODUCT_LEGALCHARS . "]+):([" . PONYDOCS_PRODUCTVERSION_LEGALCHARS . "]+)\]\]/i", '', $content );
+
 	$response = new AjaxResponse( );
 	$response->addText( $content );
 	$response->setCacheDuration( false );
-	
+
 	return $response;
 }
 
@@ -194,7 +271,7 @@ function efPonyDocsAjaxCloneExternalTopic( $topic, $destTitle )
 {
 	$response = new AjaxResponse( );
 	$response->setCacheDuration( false );
-	
+
 	$pieces = split( ':', $destTitle );
 	if(( sizeof( $pieces ) < 4 || ( strcasecmp( $pieces[0], 'Documentation' ) != 0 )))
 	{  
@@ -207,30 +284,29 @@ function efPonyDocsAjaxCloneExternalTopic( $topic, $destTitle )
 		$response->addText( 'Destination title references an invalid manual.' );
 		return $response;
 	}
-	
+
 	if( !PonyDocsVersion::IsVersion( $pieces[3] ))
 	{
 		$response->addText( 'Destination title references an undefined version.' );
 		return $response;
 	}
-	
+
 	$destArticle = new Article( Title::newFromText( $destTitle ));
 	if( $destArticle->exists( ))
 	{
 		$response->addText( 'Destination title already exists.' );
 		return $response;
 	}
-	
+
 	$article = new Article( Title::newFromText( $topic ));
 	if( !$article->exists( ))
 	{
 		$response->addText( 'Source article could not be found.' );
 		return $response;
 	}
-	
+
 	$content = $article->getContent( );
 	//$content = preg_replace( '/\[\[
-	
 
 	return $response;
 }

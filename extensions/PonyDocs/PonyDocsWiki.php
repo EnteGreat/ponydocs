@@ -16,34 +16,70 @@ class PonyDocsWiki
 	 *
 	 * @var PonyDocsWiki
 	 */
-	static protected $instance = null;
-		
+	static protected $instance = array();
+
 	/**
 	 * Made private to enforce singleton pattern.  On instantiation (through the first call to 'getInstance') we cache our
 	 * versions and manuals [we don't save them we just cause them to load -- is this necessary?].
 	 */
-	private function __construct( )
+	private function __construct( $product )
 	{
 		/**
 		 * @FIXME:  Only necessary in Documentation namespace!
-		 */		
-		PonyDocsVersion::LoadVersions( true );
-		PonyDocsManual::LoadManuals( true );						
+		 */
+		PonyDocsProductVersion::LoadVersionsForProduct( $product, true );
+		PonyDocsProductManual::LoadManualsForProduct( $product, true );
 	}
-	
+
 	/**
 	 * Return our static singleton instance of the class or initialize if not existing.
 	 *
 	 * @static
 	 * @return PonyDocsWiki
 	 */
-	static public function &getInstance( )
+	static public function &getInstance( $product )
 	{
-		if( !self::$instance )		
-			self::$instance = new PonyDocsWiki( );					
-		return self::$instance;
+		if( !isset(self::$instance[$product]) )
+			self::$instance[$product] = new PonyDocsWiki( $product );
+		return self::$instance[$product];
 	}
-	
+
+	/**
+	 * This returns the list of available products for template output in a more useful way for templates.  It is a simple list
+	 * with each element being an associative array containing two keys:  name and status.
+	 * 
+	 * @FIXME:  If a product has NO defined versions it should be REMOVED from this list.
+	 *
+	 * @return array
+	 */
+	public function getProductsForTemplate( )
+	{
+		$dbr = wfGetDB( DB_SLAVE );
+		$product = PonyDocsProduct::GetProducts( );
+		$validProducts = $out = array( );
+
+		/**
+		 * This should give us one row per version which has 1 or more TOCs tagged to it.  So basically, if its not in this list
+		 * it should not be displayed.
+		 */
+		$res = PonyDocsCategoryLinks::getTOCCountsByProduct();
+
+		while( $row = $dbr->fetchObject( $res ))
+			$validProducts[] = $row->cl_to;
+
+		foreach( $product as $p )
+		{
+			/**
+			 *	Only add it to our available list if its in our list of valid products.
+			 *	NOTE skip for now.
+			 */
+			//if( in_array( 'V:' . $p->getShortName( ), $validProducts ))
+				$out[] = array( 'name' => $p->getShortName( ), 'label' => $p->getLongName( ));
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Return a simple associative array format for template output of all versions which apply to the supplied topic.
 	 *
@@ -53,17 +89,17 @@ class PonyDocsWiki
 	public function getVersionsForTopic( PonyDocsTopic &$pTopic )
 	{
 		global $wgArticlePath;
-		$versions = $pTopic->getVersions( );
-		
+		$versions = $pTopic->getProductVersions( );
+
 		$out = array( );
 		foreach( $versions as $v )
 		{
-			$out[] = array( 'name' => $v->getName( ), 'href' => str_replace( '$1', 'Category:V:' . $v->getName( ), $wgArticlePath ));
+			$out[] = array( 'name' => $v->getVersionName( ), 'href' => str_replace( '$1', 'Category:V:' . $v->getProductName() . ':' . $v->getVersionName( ), $wgArticlePath ));
 		}
-		
+
 		return $out;
 	}
-	
+
 	/**
 	 * This returns the list of available versions for template output in a more useful way for templates.  It is a simple list
 	 * with each element being an associative array containing two keys:  name and status.
@@ -73,34 +109,31 @@ class PonyDocsWiki
 	 *
 	 * @return array
 	 */
-	public function getVersionsForTemplate( )
+	public function getVersionsForProduct( $productName )
 	{
-		$dbr = wfGetDB( DB_SLAVE );		
-		$version = PonyDocsVersion::GetVersions( );
+		$dbr = wfGetDB( DB_SLAVE );
+		$version = PonyDocsProductVersion::GetVersions( $productName );
 		$validVersions = $out = array( );
-		
+
 		/**
 		 * This should give us one row per version which has 1 or more TOCs tagged to it.  So basically, if its not in this list
 		 * it should not be displayed.
 		 */
-		$res = $dbr->query( "SELECT cl_to, COUNT(*) AS cl_to_ct 
-							 FROM categorylinks 
-							 WHERE LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:%toc%'
-							 AND cl_to LIKE 'V:%' 
-							 GROUP BY cl_to" );
+		$res = PonyDocsCategoryLinks::getTOCCountsByProductVersion( $productName );
 
 		while( $row = $dbr->fetchObject( $res ))
 			$validVersions[] = $row->cl_to;			
-		
+
 		foreach( $version as $v )
 		{
 			/**
 			 * 	Only add it to our available list if its in our list of valid versions.
+			 *	NOTE disabled for now
 			 */
-			if( in_array( 'V:' . $v->getName( ), $validVersions ))
-				$out[] = array( 'name' => $v->getName( ), 'status' => $v->getStatus( ));
+			//if( in_array( 'V:' . $v->getVersionName( ), $validVersions ))
+				$out[] = array( 'name' => $v->getVersionName( ), 'status' => $v->getVersionStatus( ));
 		}
-		
+
 		return $out;
 	}
 	
@@ -110,18 +143,18 @@ class PonyDocsWiki
 	 *
 	 * @return array
 	 */
-	public function getManualsForTemplate( )
+	public function getManualsForProduct( $product )
 	{
-		PonyDocsVersion::LoadVersions(); 	// Dependency
-		PonyDocsVersion::getSelectedVersion();
-		PonyDocsManual::LoadManuals();	// Dependency
-		$manuals = PonyDocsManual::GetManuals( );
-		
+		PonyDocsProductVersion::LoadVersionsForProduct($product); 	// Dependency
+		PonyDocsProductVersion::getSelectedVersion($product);
+		PonyDocsProductManual::LoadManualsForProduct($product);	// Dependency
+		$manuals = PonyDocsProductManual::GetManuals( $product );
+
 		$out = array( );
 		foreach( $manuals as $m )
-			$out[$m->getShortName( )] = $m->getLongName( );					
-			
-		return $out;		
+			$out[$m->getShortName( )] = $m->getLongName( );
+
+		return $out;
 	}
 	
 	/**

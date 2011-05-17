@@ -25,12 +25,12 @@ class SpecialDocListing extends SpecialPage
 	{
 		SpecialPage::__construct( "DocListing" );
 	}
-	
+
 	public function getDescription( )
 	{
 		return 'Documentation Listing';
 	}
-	
+
 	/**
 	 * This is called upon loading the special page.  It should write output to the page with $wgOut.
 	 */
@@ -41,31 +41,31 @@ class SpecialDocListing extends SpecialPage
 		
 		$dbr = wfGetDB( DB_SLAVE );
 
-		$this->setHeaders( );	
+		$this->setHeaders( );
 		$wgOut->setPagetitle( 'Documentation Listing' );
 
 		$wgOut->addHTML( 	"<p>This page lists all release versions as well as links to the manuals in each version.</p><br><br>" );
 
 		ob_start();
 
-		
 		// Get all versions and iterate
 
-		$versions = PonyDocsVersion::GetReleasedVersions(true);
+		$product = PonyDocsProduct::GetSelectedProduct();
+		$versions = PonyDocsProductVersion::GetReleasedVersions($product, true);
 
 		?>
 		<ul>
 		<?php
 		foreach($versions as $version) {
 			?>
-			<li><?php echo $version->getName();?>
+			<li><?php echo $version->getVersionName();?>
 				<ul>
 					<?php
 					// Load Manuals for version
-					PonyDocsVersion::SetSelectedVersion($version->getName());
-					$navData = PonyDocsExtension::fetchNavdataForVersion($version->getName());
+					PonyDocsProductVersion::SetSelectedVersion($version->getProductName(), $version->getVersionName());
+					$navData = PonyDocsExtension::fetchNavdataForVersion($version->getProductName(), $version->getVersionName());
 					foreach($navData as $nav) {
-						$url = str_replace("Documentation/latest/", "Documentation/" . $version->getName() . "/", $nav['firstUrl']);
+						$url = str_replace("Documentation/" . $version->getProductName() . "/latest/", "Documentation/" . $version->getProductName() . "/" . $version->getVersionName() . "/", $nav['firstUrl']);
 						?>
 						<li><a href="<?php echo $url;?>"><?php echo $nav['longName'];?></a></li>
 						<?php
@@ -84,3 +84,4 @@ class SpecialDocListing extends SpecialPage
 		$wgOut->addHTML( $output );
 	}
 };
+?>

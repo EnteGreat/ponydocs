@@ -43,14 +43,15 @@ class SpecialLatestDoc extends SpecialPage {
 		$wgOut->setPagetitle("Latest Documentation For " .$title );
 
 		$dbr = wfGetDB( DB_SLAVE );
-		
+
 		/**
 		 * We only care about Documentation namespace for rewrites and they must contain a slash, so scan for it.
-		 * $matches[1] = latest|version
-		 * $matches[2] = manual
-		 * $matches[3] = topic
+		 * $matches[1] = product
+		 * $matches[2] = latest|version
+		 * $matches[3] = manual
+		 * $matches[4] = topic
 		 */
-		if( !preg_match( '/^Documentation\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
+		if( !preg_match( '/^Documentation\/(.*)\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
 			?>
 			<p>
 			Sorry, but <?php echo $title;?> is not a valid Documentation url.
@@ -61,12 +62,14 @@ class SpecialLatestDoc extends SpecialPage {
 			/**
 			 * At this point $matches contains:
 			 * 	0= Full title.
-			 *  1= Manual name (short name).
-			 *  2= Version OR 'latest' as a string.
-			 *  3= Wiki topic name.
-			 */	
-			PonyDocsVersion::LoadVersions();		// Load versions from DB
-			$versionName = $matches[1];
+			 *  1= Product name (short name).
+			 *  2= Manual name (short name).
+			 *  3= Version OR 'latest' as a string.
+			 *  4= Wiki topic name.
+			 */
+			PonyDocsProductVersion::LoadVersions();		// Load versions from DB
+			$productName = $matches[1];
+			$versionName = $matches[2];
 			$version = '';
 			if(strcasecmp('latest', $versionName)) {
 				?>
@@ -76,25 +79,25 @@ class SpecialLatestDoc extends SpecialPage {
 				<?php
 			}
 			if( !strcasecmp( 'latest', $versionName ))
-			{	
+			{
 				/**
 				 * This will be a DESCENDING mapping of version name to PonyDocsVersion object and will ONLY contain the
 				 * versions available to the current user (i.e. LoadVersions() only loads the ones permitted).
 				 */
-				$versionList = array_reverse( PonyDocsVersion::GetReleasedVersions( true ));
+				$versionList = array_reverse( PonyDocsProductVersion::GetReleasedVersions( $productName, true ));
 				$versionNameList = array( );
 				foreach( $versionList as $pV )
-					$versionNameList[] = $pV->getName( );						
+					$versionNameList[] = $pV->getVersionName( );
 
 				/**
 				 * Now get a list of version names to which the current topic is mapped in DESCENDING order as well
 				 * from the 'categorylinks' table.
 				 *
 				 * DB can't do descending order here, it depends on the order defined in versions page!  So we have to
-				 * do some magic sorting below.	
+				 * do some magic sorting below.
 				 */
 				$res = $dbr->select( 'categorylinks', 'cl_to', 
-									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $matches[2] . ':' . $matches[3] )) . ":%'",
+									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $matches[1] . ':' . $matches[2] . ':' . $matches[3] )) . ":%'",
 									 __METHOD__ );
 
 				if( !$res->numRows( ))
@@ -103,7 +106,8 @@ class SpecialLatestDoc extends SpecialPage {
 					 * What happened here is we requested a topic that does not exist or is not linked to any version.
 					 * Perhaps setup a default redirect, Main_Page or something?
 					 */
-					Header( "Location: " . $wgScriptPath . "/Documentation" );
+					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/Documentation [" . __FILE__ . ":" . __LINE__ . "]");}
+					header( "Location: " . $wgScriptPath . "/Documentation" );
 					exit( 0 );
 				}
 
@@ -115,10 +119,10 @@ class SpecialLatestDoc extends SpecialPage {
 				 */
 				$existingVersions = array( );
 				while( $row = $dbr->fetchObject( $res ))
-				{						
-					if( preg_match( '/^V:(.*)/i', $row->cl_to, $vmatch ))
+				{
+					if( preg_match( '/^V:(.*):(.*)/i', $row->cl_to, $vmatch ))
 					{
-						$pVersion = PonyDocsVersion::GetVersionByName( $vmatch[1] );					
+						$pVersion = PonyDocsProductVersion::GetVersionByName( $vmatch[1], $vmatch[2] );
 						if( $pVersion && !in_array( $pVersion, $existingVersions )) {
 							$existingVersions[] = $pVersion;
 						}
@@ -129,35 +133,37 @@ class SpecialLatestDoc extends SpecialPage {
 					// doesn't have access to any of the versions this topic is 
 					// linked to.  In this situation, our default behavior is to 
 					// redirect to our base homepage.
+					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/Documentation [" . __FILE__ . ":" . __LINE__ . "]");}
 					header("Location: " . $wgScriptPath . "/Documentation");
 					exit(0);
 				}
-				usort( $existingVersions, "PonyDocs_versionCmp" );
-				$existingVersions = array_reverse( $existingVersions );			
+				usort( $existingVersions, "PonyDocs_ProductVersionCmp" );
+				$existingVersions = array_reverse( $existingVersions );
 
 				// $existingVersions[0] points to the latest version this document 
 				// is in
 				// If this document is in the latest version, then let's go 
 				// ahead and redirect over to it.
-				if(count($existingVersions) && $existingVersions[0]->getName() == $versionNameList[0]) {
+				if(count($existingVersions) && $existingVersions[0]->getVersionName() == $versionNameList[0]) {
+					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/$title [" . __FILE__ . ":" . __LINE__ . "]");}
 					header("Location: " . $wgScriptPath . "/" . $title);
 					exit(0);
 				}
 				// If we are here, we should FORCE the user to be viewing the 
 				// latest documentation, and report the issue with the topic not 
 				// being in the latest.
-				$_SESSION['wsVersion'] = $versionNameList[0];
+				$_SESSION['wsVersion'][$productName] = $versionNameList[0];
 				?>
 				<p>
-				Hi! Just wanted to let you know:	
+				Hi! Just wanted to let you know:
 				</p>
 				<p>
 				The topic you've asked to see does not apply to the most recent version.
 				</p>
 				<p>
 				<ul>
-					<li>To search the latest version of the documentation, click <a href="<?php echo $wgScriptPath;;?>/Special:Search?search=<?php echo $matches[3];?>">Search</a></li>
-					<li>To look at this topic anyway, click <a href="/base/Documentation/<?php echo $existingVersions[0]->getName();?>/<?php echo $matches[2];?>/<?php echo $matches[3];?>">here</a>.</li>
+					<li>To search the latest version of the documentation, click <a href="<?php echo $wgScriptPath;;?>/Special:Search?search=<?php echo $matches[4];?>">Search</a></li>
+					<li>To look at this topic anyway, click <a href="/base/Documentation/<?php echo $existingVersions[0]->getProductName();?>/<?php echo $existingVersions[0]->getVersionName();?>/<?php echo $matches[3];?>/<?php echo $matches[4];?>">here</a>.</li>
 				</ul>
 				</p>
 				<?php
@@ -172,3 +178,4 @@ class SpecialLatestDoc extends SpecialPage {
 
 }
 
+?>

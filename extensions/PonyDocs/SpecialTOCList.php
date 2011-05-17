@@ -31,20 +31,20 @@ class SpecialTOCList extends SpecialPage
 	{
 		return 'Table of Contents Management';
 	}
-	
+
 	/**
 	 * This is called upon loading the special page.  It should write output to the page with $wgOut.
 	 */
 	public function execute( )
 	{
 		global $wgOut, $wgArticlePath;
-		
+
 		$dbr = wfGetDB( DB_SLAVE );
 
-		$this->setHeaders( );	
+		$this->setHeaders( );
 		$wgOut->setPagetitle( 'Table of Contents Management' );
 		$wgOut->addHTML( '<h2>Table of Contents Management Pages</h2>' );
-		
+
 		/**
 		 * We need to select ALL pages of the form:
 		 * 	Documentation:<manualShortName>TOC*
@@ -53,16 +53,17 @@ class SpecialTOCList extends SpecialPage
 		 * must run this query for each manual type, which involes getting the list of manuals defined.
 		 */
 		$out = array( );
-		$manuals = PonyDocsManual::GetDefinedManuals( );
-		
+		$product = PonyDocsProduct::GetSelectedProduct( );
+		$manuals = PonyDocsProductManual::GetDefinedManuals( $product );
+
 		foreach( $manuals as $pMan )
-		{			
+		{
 			$qry = "SELECT DISTINCT(cl_sortkey) 
 					FROM categorylinks 
-					WHERE LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $pMan->getShortName( ))) . "toc%'";
-			
+					WHERE LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $product ) ) . ':' . $dbr->strencode( strtolower( $pMan->getShortName( ))) . "toc%'";
+
 			$res = $dbr->query( $qry );
-			
+
 			while( $row = $dbr->fetchObject( $res ))
 			{
 				$subres = $dbr->select( 'categorylinks', 'cl_to', "cl_sortkey = '" . $dbr->strencode( $row->cl_sortkey ) . "'", __METHOD__ );
@@ -70,10 +71,10 @@ class SpecialTOCList extends SpecialPage
 
 				while( $subrow = $dbr->fetchObject( $subres ))
 				{
-					if( preg_match( '/^V:(.*)/i', $subrow->cl_to, $vmatch ))
+					if( preg_match( '/^V:' . $product . ':(.*)/i', $subrow->cl_to, $vmatch ))
 						$versions[] = $vmatch[1];
 				}
-				
+
 				$wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $row->cl_sortkey . '</a> - Versions: ' );
 				if( sizeof( $versions ))
 					$wgOut->addHTML( implode( ' | ', $versions ) . '<br>' );
@@ -81,11 +82,11 @@ class SpecialTOCList extends SpecialPage
 					$wgOut->addHTML( 'None<br>' );
 			}
 		} 
-		
+
 		$html = '<h2>Other Useful Management Pages</h2>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_VERSION_TITLE, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . PONYDOCS_PRODUCT_NAME . ' versions.<br/>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_MANUALS_TITLE, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
-		
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $productName . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br/>' .
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $productName . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
+
 		$wgOut->addHTML( $html );
 	}
 };
@@ -93,3 +94,4 @@ class SpecialTOCList extends SpecialPage
 /**
  * End of file.
  */
+?>
