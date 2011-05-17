@@ -179,7 +179,7 @@ class PonyDocsProductVersion
 		global $wgUser, $_SESSION;
 
 		$groups = $wgUser->getGroups();
-//var_dump($_SESSION['wsVersion']); die;
+
 		/**
 		 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
@@ -187,12 +187,16 @@ class PonyDocsProductVersion
 			isset(self::$sVersionMap[$productName]) && count(self::$sVersionMap[$productName]) ) {
 			// Make sure version exists.
 			if(!array_key_exists($_SESSION['wsVersion'][$productName], self::$sVersionMap[$productName])) {
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] unsetting version key $productName/" . $_SESSION['wsVersion'][$productName]);}
 				unset($_SESSION['wsVersion'][$productName]);
 			}
 			else {
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected version $productName/" . $_SESSION['wsVersion'][$productName]);}
 				return $_SESSION['wsVersion'][$productName];
 			}
 		}
+
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
 
 		/**
 			* If we're here, we don't have a version set previously.
@@ -207,8 +211,10 @@ class PonyDocsProductVersion
 			}
 		}
 		if(isset($_SESSION['wsVersion'][$productName])) {
+			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected version $productName/" . $_SESSION['wsVersion'][$productName]);}
 			return $_SESSION['wsVersion'][$productName];
 		}
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected version NULL");}
 		return null;
 	}
 
@@ -224,6 +230,7 @@ class PonyDocsProductVersion
 	{
 		global $_SESSION;
 		$_SESSION['wsVersion'][$productName] = $v;
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/$v");}
 		return $v;
 	}
 

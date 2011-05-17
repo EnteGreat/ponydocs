@@ -19,8 +19,6 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsWiki.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsTopic.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsProduct.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsProductVersion.php" );
-//require_once( "$IP/extensions/PonyDocs/PonyDocsVersion.php" );
-//require_once( "$IP/extensions/PonyDocs/PonyDocsManual.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsProductManual.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsTOC.php" );
 require_once( "$IP/extensions/PonyDocs/PonyDocsAjax.php" );
@@ -37,6 +35,9 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsPdfBook.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
 require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
+
+/// FIXME Is there a way to enable sessions for anonymous traffic in mediawiki?
+session_start();
 
 /**
  * Setup credits for this extension to appear in the credits page of wiki.

@@ -16,7 +16,7 @@ class PonyDocsProduct
 	 * @var string
 	 */
 	protected $mShortName;
-	
+
 	/**
 	 * Long name for the product which functions as the 'display' name in the list of products and so
 	 * forth.
@@ -24,7 +24,7 @@ class PonyDocsProduct
 	 * @var string
 	 */
 	protected $mLongName;
-	
+
 	/**
 	 * Our list of products loaded from the special page, stored statically.  This only contains the products
 	 * which have a TOC defined and tagged to the currently selected version.
@@ -38,7 +38,7 @@ class PonyDocsProduct
 	 *
 	 * @var array
 	 */
-	static protected $sDefinedProductList = array( );	
+	static protected $sDefinedProductList = array( );
 	
 	/**
 	 * Constructor is simply passed the short and long (display) name.  We convert the short name to lowercase
@@ -115,22 +115,13 @@ class PonyDocsProduct
 		foreach( $matches as $m )
 		{
 			$pProduct = new PonyDocsProduct( $m[1], $m[2] );
-			self::$sDefinedProductList[strtolower($pProduct->getShortName( ))] = $pProduct;
-
-			//$res = $dbr->select( 'categorylinks', 'cl_to',
-			//	array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . strtolower( $pProduct->getShortName( )). "%toc%'",
-			//			"cl_to = 'P:" . PonyDocsVersion::GetSelectedVersion( ) . "'" ), __METHOD__ );
-
-			//if( !$res->numRows( )) {
-			//	continue;
-			//}
-
-			self::$sProductList[strtolower($m[1])] = $pProduct;
+			self::$sDefinedProductList[$pProduct->getShortName( )] = $pProduct;
+			self::$sProductList[$m[1]] = $pProduct;
 		}
 
 		return self::$sProductList;
 	}
-	
+
 	/**
 	 * Just an alias.
 	 *
@@ -141,7 +132,7 @@ class PonyDocsProduct
 	{
 		return self::LoadProducts( );
 	}
-	
+
 	/**
 	 * Return list of ALL defined products regardless of selected version.
 	 *
@@ -153,7 +144,7 @@ class PonyDocsProduct
 		self::LoadProducts( );
 		return self::$sDefinedProductList;
 	}
-	
+
 	/**
 	 * Our product list is a map of 'short' name to the PonyDocsProduct object.  Returns it, or null if not found.
 	 *
@@ -165,10 +156,10 @@ class PonyDocsProduct
 	{
 		$convertedName = preg_replace( '/([^' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)/', '', $shortName );
 		if( self::IsProduct( $convertedName ))
-			return self::$sDefinedProductList[strtolower($convertedName)];		
+			return self::$sDefinedProductList[$convertedName];
 		return null;
 	}
-	
+
 	/**
 	 * Test whether a given product exists (is in our list).  
 	 *
@@ -183,7 +174,7 @@ class PonyDocsProduct
 		PonyDocsProduct::LoadProducts(false);
 		// Should just force our products to load, just in case.
 		$convertedName = preg_replace( '/([^' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)/', '', $shortName );
-		return isset( self::$sDefinedProductList[strtolower($convertedName)] );
+		return isset( self::$sDefinedProductList[$convertedName] );
 	}
 
 	/**
@@ -208,7 +199,7 @@ class PonyDocsProduct
 	 * to auto-select the proper product.  Typically if it is not set it means the user just loaded the site for the
 	 * first time this session and is thus not logged in, so its a safe bet to auto-select the most recent RELEASED
 	 * product. We're only going to use sessions to track this. 
-	 *	 
+	 *
 	 *
 	 * @static
 	 * @return string Currently selected product string.
@@ -218,21 +209,27 @@ class PonyDocsProduct
 		global $wgUser, $_SESSION;
 
 		$groups = $wgUser->getGroups();
+		self::LoadProducts();
 
 		/**
-	 	 * Do we have the session var and is it non-zero length?  Could also check if valid here.
+		 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
 		if( isset( $_SESSION['wsProduct'] ) && strlen( $_SESSION['wsProduct'] )) {
 			// Make sure product exists.
 			if(!array_key_exists($_SESSION['wsProduct'], self::$sProductList)) {
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] product not found in " . print_r(self::$sProductList, true));}
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] unsetting product key " . $_SESSION['wsProduct']);}
 				unset($_SESSION['wsProduct']);
 			}
 			else {
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected product " . $_SESSION['wsProduct']);}
 				return $_SESSION['wsProduct'];
 			}
 		}
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected product; will attempt to set default.");}
 		/// If we are here there is no product set, use default product from configuration
 		self::SetSelectedProduct(PONYDOCS_DEFAULT_PRODUCT);
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected product " . $_SESSION['wsProduct']);}
 		return $_SESSION['wsProduct'];
 	}
 
@@ -240,6 +237,7 @@ class PonyDocsProduct
 	{
 		global $_SESSION;
 		$_SESSION['wsProduct'] = $p;
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected product to $p");}
 		return $p;
 	}
 

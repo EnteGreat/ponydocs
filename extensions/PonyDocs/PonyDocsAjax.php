@@ -54,9 +54,10 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		return $response;
 	}
 
-	$defaultTitle = "Documentation:" . $product;
+	$defaultTitle = "Documentation";
 	if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
 	{
+		/*
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 
 			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
 			"cl_to LIKE 'V:" . $product . "%'" ), __METHOD__ );
@@ -67,7 +68,10 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 			$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
 		}
 		else
-			$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+		{*/
+			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 1");}
+			$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
+		//}
 	}
 	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
 	{
@@ -76,12 +80,15 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		 */
 		//$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
 		// just redirect to that product's main page, we can't carry over version and manual across products
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
 	}
 	else {
-		$response->addText( str_replace( '$1', $defaultTitle, $wgArticlePath ));
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
+		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
 	}
 
+	if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect result " . print_r($response, true));}
 	return $response;
 }
 
@@ -103,6 +110,7 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 
 	PonyDocsProduct::SetSelectedProduct( $product );
 	PonyDocsProductVersion::SetSelectedVersion( $product, $version );
+
 	$response = new AjaxResponse( );
 
 	if($force) {
@@ -124,38 +132,39 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 		if( $res->numRows( ))
 		{
 			$row = $dbr->fetchObject( $res );
-			$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
-			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 1 [" . __FILE__ . ":" . __LINE__ . "]");}
+			//$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
+			$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version . '/' . $match[2] . '/' . $match[3], $wgArticlePath ));
+			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 1");}
 		}
 		else
 		{
-			$response->addText( str_replace( '$1', $defaultTitle . ":" . $product . ":" . $version, $wgArticlePath ));
-			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 2 [" . __FILE__ . ":" . __LINE__ . "]");}
+			// same manual/topic doesn't exist for newly selected version, redirect to default
+			$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version, $wgArticlePath ));
+			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		}
 	}
 	else if( preg_match( '/Documentation:(.*):(.*)/i', $title, $match ))
 	{
 		// this is a manuals or versions page
-		$add_text = str_replace( '$1', $defaultTitle . '/' . $product . '/' . $match[2], $wgArticlePath);
+		$add_text = str_replace( '$1', 'Documentation:' . $product . ':' . $match[2], $wgArticlePath);
 		/// FIXME we probably need to clear objectcache for this [product]:Manuals page, or even better, do not cache it(?)
 		$response->addText( $add_text );
-		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 3 [" . __FILE__ . ":" . __LINE__ . "]");}
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
 	}
-	//else if( preg_match( '/^base\/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
 	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
 	{
 		/**
 		 * Just swap out the source version tag ($match[2]) with the selected version in the output URL.
 		 */
 		$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
-		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 4 [" . __FILE__ . ":" . __LINE__ . "]");}
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 4");}
 	}
 	else {
 		$add_text = str_replace( '$1', $defaultTitle . '/' . $product . '/' . $version, $wgArticlePath );
 		$response->addText( $add_text );
-		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect rule 5 [" . __FILE__ . ":" . __LINE__ . "]");}
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 5");}
 	}
-	if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] ajax redirect result " . print_r($response, true) . " [" . __FILE__ . ":" . __LINE__ . "]");}
+	if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect result " . print_r($response, true));}
 	return $response;
 }
 
