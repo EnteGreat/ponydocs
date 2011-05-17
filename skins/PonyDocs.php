@@ -78,14 +78,18 @@ class PonyDocsTemplate extends QuickTemplate {
 
 		global $wgUser, $wgExtraNamespaces, $wgTitle, $wgArticlePath, $IP;
 		global $wgRevision, $action, $wgRequest;
-		PonyDocsVersion::LoadVersions();
-		PonyDocsManual::LoadManuals();
 
-		$ponydocs = PonyDocsWiki::getInstance( );
+		PonyDocsProduct::LoadProducts();
+		$this->data['selectedProduct'] = PonyDocsProduct::GetSelectedProduct( );
+		PonyDocsProductVersion::LoadVersionsForProduct($this->data['selectedProduct']);
+		PonyDocsProductManual::LoadManualsForProduct($this->data['selectedProduct']);
 
-		$this->data['versions'] = $ponydocs->getVersionsForTemplate( );		
-		$this->data['namespaces'] = $wgExtraNamespaces;		
-		$this->data['selectedVersion'] = PonyDocsVersion::GetSelectedVersion( );
+		$ponydocs = PonyDocsWiki::getInstance( $this->data['selectedProduct'] );
+
+		$this->data['products'] = $ponydocs->getProductsForTemplate( );
+		$this->data['versions'] = $ponydocs->getVersionsForProduct( PonyDocsProduct::GetSelectedProduct() );
+		$this->data['namespaces'] = $wgExtraNamespaces;
+		$this->data['selectedVersion'] = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
 		$this->data['versionurl'] = $this->data['wgScript'] . '?title=' . $this->data['thispage'] . '&action=changeversion';
 
 		$this->skin = $skin = $this->data['skin'];
@@ -109,13 +113,27 @@ class PonyDocsTemplate extends QuickTemplate {
 			$inDocumentation = true;
 			$this->prepareDocumentation();
 		}
-		$this->data['versions'] = $ponydocs->getVersionsForTemplate( );		
+		$this->data['versions'] = $ponydocs->getVersionsForProduct( PonyDocsProduct::GetSelectedProduct() );
 
 
-		$this->html( 'headelement' );
+		$this->html( 'headelement' );//var_dump($this->text('thispage')); die;
 		?>
 		<script type="text/javascript">
 			function ponyDocsOnLoad() {}
+
+			function AjaxChangeProduct_callback( o ) {
+				document.getElementById('docsProductSelect').disabled = true;
+				var s = new String( o.responseText );
+				document.getElementById('docsProductSelect').disabled = false;
+				window.location.href = s;
+			}
+
+			function AjaxChangeProduct( ) {
+				var productIndex = document.getElementById('docsProductSelect').selectedIndex;
+				var product = document.getElementById('docsProductSelect')[productIndex].value;
+				var title = '<?php $this->jstext('thispage'); ?>';
+				sajax_do_call( 'efPonyDocsAjaxChangeProduct', [product,title], AjaxChangeProduct_callback );
+			}
 
 			function AjaxChangeVersion_callback( o ) {
 				document.getElementById('docsVersionSelect').disabled = true;
@@ -124,11 +142,13 @@ class PonyDocsTemplate extends QuickTemplate {
 				window.location.href = s;
 			}
 
-			function AjaxChangeVersion( ) {	
+			function AjaxChangeVersion( ) {
+				var productIndex = document.getElementById('docsProductSelect').selectedIndex;
+				var product = document.getElementById('docsProductSelect')[productIndex].value;
 				var versionIndex = document.getElementById('docsVersionSelect').selectedIndex;
 				var version = document.getElementById('docsVersionSelect')[versionIndex].value;
-				var title = '<?php $this->text('pathinfo'); ?>';		
-				sajax_do_call( 'efPonyDocsAjaxChangeVersion', [version,title], AjaxChangeVersion_callback );
+				var title = '<?php $this->jstext('thispage'); ?>';
+				sajax_do_call( 'efPonyDocsAjaxChangeVersion', [product,version,title], AjaxChangeVersion_callback );
 			}
 
 			function changeManual(){
@@ -137,8 +157,8 @@ class PonyDocsTemplate extends QuickTemplate {
 					window.location.href = url;
 				}
 			}
-			</script>
-	
+		</script>
+
 	<div id="globalWrapper">
 
 <div id="column-content"><div id="content" <?php $this->html("specialpageattributes") ?>>
@@ -227,7 +247,7 @@ class PonyDocsTemplate extends QuickTemplate {
 		<h5>documentation</h5>
 		<div id="documentationBody" class="pBody">
 		<?php
-		$versions = PonyDocsVersion::GetVersions(true);
+		$versions = PonyDocsProductVersion::GetVersions($this->data['selectedProduct'], true);
 		if(!count($versions)) {
 			?>
 				<p>
@@ -236,7 +256,7 @@ class PonyDocsTemplate extends QuickTemplate {
 			<?php
 		}
 		else {
-			$manuals = PonyDocsManual::GetDefinedManuals(true);
+			$manuals = PonyDocsProductManual::GetDefinedManuals($this->data['selectedProduct'], true);
 			if(!count($manuals)) {
 				?>
 					<p>
@@ -247,6 +267,21 @@ class PonyDocsTemplate extends QuickTemplate {
 			else {
 				?>
 					<p>
+					<div class="product">
+						<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
+						<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
+						<?php
+							foreach( $this->data['products'] as $idx => $data ) {
+								echo '<option value="' . $data['name'] . '" ';
+								if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
+									echo 'selected';
+								echo '>' . $data['label'] . '</option>';
+							}
+						?>
+						</select>
+						
+					</div>
+					
 					<div class="productVersion">
 						<?php
 						// do quick manip
@@ -268,8 +303,8 @@ class PonyDocsTemplate extends QuickTemplate {
 								echo '<option value="' . $data['name'] . '" ';
 								if( !strcmp( $data['name'], $this->data['selectedVersion'] ))
 									echo 'selected';
-								echo '>' . $data['label'] . '</option>';		
-							}	
+								echo '>' . $data['label'] . '</option>';
+							}
 						?>
 						</select>
 						
@@ -279,7 +314,7 @@ class PonyDocsTemplate extends QuickTemplate {
 						<label for="docsManualSelect" class="navlabels">Select manual:&nbsp;</label><br />
 						<select id="docsManualSelect" name="selectedManual" onChange="changeManual();">
 						<?php
-						$navData = PonyDocsExtension::fetchNavDataForVersion($this->data['selectedVersion']);
+						$navData = PonyDocsExtension::fetchNavDataForVersion($this->data['selectedProduct'], $this->data['selectedVersion']);
 						print "<option value=''>Pick One...</option>";
 						//loop through nav array and look for current URL
 						foreach ($navData as $manual){
@@ -293,7 +328,7 @@ class PonyDocsTemplate extends QuickTemplate {
 						}
 						?>
 						</select>
-					</div>	
+					</div>
 					</p>
 					<p>
 					<?php
@@ -551,96 +586,103 @@ if($this->data['copyrightico']) { ?>
 		global $wgArticle, $wgParser, $wgTitle, $wgOut, $wgScriptPath, $wgUser;
 		/**
 		 * We need a lot of stuff from our PonyDocs extension!
-		 */		
-		$ponydocs = PonyDocsWiki::getInstance( );		
-		$this->data['manuals'] = $ponydocs->getManualsForTemplate( );	
+		 */
+		$ponydocs = PonyDocsWiki::getInstance( $this->data['selectedProduct'] );
+		$this->data['manuals'] = $ponydocs->getManualsForProduct( $this->data['selectedProduct'] );
 
 		/**
 		 * Adjust content actions as needed, such as add 'view all' link.
 		 */
-		$this->contentActions( );		
+		$this->contentActions( );
 		$this->navURLS( );
 
 		/**
 		 * Possible topic syntax we must handle:
 		 * 
 		 * Documentation:<topic> *Which may include a version tag at the end, we don't care about this.
-		 * Documentation:<manualShortName>:<topic>:<version>
-		 * Documentation:<manualShortName>
+		 * Documentation:<productShortName>:<manualShortName>:<topic>:<version>
+		 * Documentation:<productShortName>:<manualShortName>
 		 */
 
 		/**
-		 * Based on the name; i.e. 'Documentation:Manual:Topic' we need to parse it out and store the manual name and
+		 * Based on the name; i.e. 'Documentation:Product:Manual:Topic' we need to parse it out and store the manual name and
 		 * the topic name as parameters.  We store manual in 'manualname' and topic in 'topicname'.  Special handling
 		 * needs to be done for versions and TOC?
 		 *
 		 * 	0=NS (Documentation)
-		 *  1=Manual (Short name)
-		 *  2=Topic
-		 *  3=Version
+		 *  1=Product (Short name)
+		 *  2=Manual (Short name)
+		 *  3=Topic
+		 *  4=Version
 		 */
 		$pManual = null;
-		$pieces = split( ':', $wgTitle->__toString( ));
+		$pieces = explode( ':', $wgTitle->__toString( ));
 		$helpClass = '';
-		
+
 		/**
 		 * This isn't a specific topic+version -- handle appropriately.
 		 */
-		if( sizeof( $pieces ) < 3 )
-		{				
-			if( !strcmp( PONYDOCS_DOCUMENTATION_VERSION_TITLE, $wgTitle->__toString( )))
+		if( sizeof( $pieces ) < 4 )
+		{
+			if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Versions Management';
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name|status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, underscore, and dash.</i></span>');
 			}
-			else if( !strcmp( PONYDOCS_DOCUMENTATION_MANUALS_TITLE, $wgTitle->__toString( )))
+			else if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Manuals Management';
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#manual:shortName|displayName}} to define a new manual.  If you omit display name, the short name will be used in links.</i></span>');
 			}
-			else if( preg_match( '/(.*)TOC(.*)/', $pieces[1], $matches ))
-			{										
-				$this->data['titletext'] = $matches[1] . ' Table of Contents Page';			
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} to assign within a bullet.  Place topic tags below proper section name.</i></span>' );	
-			}			
-			else if( PonyDocsManual::IsManual( $pieces[1] ))
+			else if ( !strcmp( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $wgTitle->__toString( )))
 			{
-				$pManual = PonyDocsManual::GetManualByShortName( $pieces[1] );				
+				$this->data['titletext'] = 'Products Management';
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:shortName|displayName}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
+			}
+			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))
+			{
+				$this->data['titletext'] = $matches[1] . ' Table of Contents Page';
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} to assign within a bullet.  Place topic tags below proper section name.</i></span>' );	
+			}
+			else if( PonyDocsProductManual::IsManual( $pieces[1], $pieces[2] ))
+			{
+				$pManual = PonyDocsProductManual::GetManualByShortName( $pieces[1], $pieces[2] );
 				if( $pManual )
 					$this->data['manualname'] = $pManual->getLongName( );
-				else					
-					$this->data['manualname'] = $pieces[1]; 
-				$this->data['topicname'] = $pieces[2];
-				$this->data['titletext'] = $pieces[1] ;
+				else
+					$this->data['manualname'] = $pieces[2]; 
+				$this->data['topicname'] = $pieces[3];
+				$this->data['titletext'] = $pieces[2];
 			}
 			else
-				$this->data['topicname'] = $pieces[1];				
+				$this->data['topicname'] = $pieces[2];
 		}
 		else
-		{			
-			$pManual = PonyDocsManual::GetManualByShortName( $pieces[1] );
+		{
+			$pManual = PonyDocsProductManual::GetManualByShortName( $pieces[1], $pieces[2] );
 			if( $pManual )
 				$this->data['manualname'] = $pManual->getLongName( );
 			else
-				$this->data['manualname'] = $pieces[1];			 			
-			$this->data['topicname'] = $pieces[2];
-			
-			$h1 = PonyDocsTopic::FindH1ForTitle( $wgTitle->__toString( ));			
+				$this->data['manualname'] = $pieces[2];
+			$this->data['topicname'] = $pieces[3];
+
+			$h1 = PonyDocsTopic::FindH1ForTitle( $wgTitle->__toString( ));
 			if( $h1 !== false )
-				$this->data['titletext'] = $h1;				
+				$this->data['titletext'] = $h1;
 		}
-		
+
 		/**
 		 * Get current topic, passing it our global Article object.  From this, generate our TOC based on the current
 		 * topic selected.  This generates our left sidebar TOC plus our prev/next/start navigation links.  This should ONLY
 		 * be done if we actually are WITHIN a manual, so special pages like TOC, etc. should not do this!
 		 */
-				
+
 		if( $pManual )
-		{						
-			$v = PonyDocsVersion::GetVersionByName( PonyDocsVersion::GetSelectedVersion( ));
-			$toc = new PonyDocsTOC( $pManual, $v );			
-			list( $this->data['manualtoc'], $this->data['tocprev'], $this->data['tocnext'], $this->data['tocstart'] ) = $toc->loadContent( );							
+		{
+			$p = PonyDocsProduct::GetProductByShortName( $this->data['selectedProduct'] );
+			$v = PonyDocsProductVersion::GetVersionByName( $this->data['selectedProduct'], PonyDocsProductVersion::GetSelectedVersion( $this->data['selectedProduct'] ));
+			$toc = new PonyDocsTOC( $pManual, $v, $p );
+			list( $this->data['manualtoc'], $this->data['tocprev'], $this->data['tocnext'], $this->data['tocstart'] ) = $toc->loadContent( );
 			$this->data['toctitle'] = $toc->getTOCPageTitle();
 		}
 
@@ -653,28 +695,28 @@ if($this->data['copyrightico']) { ?>
 		 * cattext:  Category description.
 		 * basetopicname:  Base topic name (w/o :<version> at end).
 		 * basetopiclink:  Link to special TopicList page to view all same topics.
-		 */		
-		
+		 */
+
 		//echo '<pre>' ;print_r( $wgArticle ); die();
 		$topic = new PonyDocsTopic( $wgArticle );
-		
-		if( preg_match( '/^Documentation:(.*):(.*):(.*)/', $wgTitle->__toString( )) ||
-			preg_match( '/^Documentation:.*TOC.*/', $wgTitle->__toString( )))
+
+		if( preg_match( '/^Documentation:(.*):(.*):(.*):(.*)/', $wgTitle->__toString( )) ||
+			preg_match( '/^Documentation:.*:.*TOC.*/', $wgTitle->__toString( )))
 		{
 			$this->data['topicversions'] = PonyDocsWiki::getVersionsForTopic( $topic );
 			$this->data['inlinetoc'] = $topic->getSubContents( );
 			$this->data['versionclass'] = $topic->getVersionClass( );
-			
+
 			/**
 			 * Sort of a hack -- we only use this right now when loading a TOC page which is new/does not exist.  When this
 			 * happens a hook (AlternateEdit) adds an inline script to define this JS function, which populates the edit
 			 * box with the proper Category tag based on the currently selected version.
 			 */
-			
+
 			$this->data['body_onload'] = 'ponyDocsOnLoad();';
-		
+
 			switch( $this->data['catcode'] )
-			{		
+			{
 				case 0:
 					$this->data['cattext'] = 'Applies to latest version which is currently unreleased.';
 					break;
@@ -692,15 +734,15 @@ if($this->data['copyrightico']) { ?>
 					break;
 				case 5:	
 					$this->data['cattext'] = 'Applies to one or more unreleased version(s) only.';
-					break;	
+					break;
 				case -2: /** Means its not a a title name which should be checked. */
-					break;		
+					break;
 				default:
 					$this->data['cattext'] = 'Does not apply to any version of PonyDocs.';
 					break;
 			}
 		}
-		
+
 		$this->data['basetopicname'] = $topic->getBaseTopicName( );
 		if( strlen( $this->data['basetopicname'] ))
 		{
@@ -717,16 +759,16 @@ if($this->data['copyrightico']) { ?>
 	private function contentActions( )
 	{
 		global $wgUser, $wgTitle, $wgArticle, $wgArticlePath, $wgScriptPath, $wgUser;
-		
+
 		$groups = $wgUser->getGroups( );
-		
-		if( preg_match( '/Documentation:(.*):(.*):(.*)/i', $wgTitle->__toString( ), $match ))
-		{			
+
+		if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $wgTitle->__toString( ), $match ))
+		{
 			if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || in_array( PONYDOCS_AUTHOR_GROUP, $groups ))
-			{			
-				array_pop( $match );  array_shift( $match );
+			{
+				array_pop( $match );  array_shift( $match );  array_shift( $match );
 				$title = 'Documentation:' . implode( ':', $match );
-				
+
 				$this->data['content_actions']['viewall'] = array(
 					'class' => '',
 					'text' => 'View All',
@@ -742,38 +784,38 @@ if($this->data['copyrightico']) { ?>
 				);
 			}
 		}
-		else if( preg_match( '/Documentation:(.*)TOC(.*)/i', $wgTitle->__toString( ), $match ))
+		else if( preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $match ))
 		{
 			if( $wgUser->isAllowed( 'branchmanual' ))
-			{	
+			{
 				$this->data['content_actions']['branch'] = array(
 					'class' => '',
 					'text'  => 'Branch',
 					'href'	=> $wgScriptPath . '/Special:BranchInherit?toc=' . $wgTitle->__toString( )
-				);				
+				);
 			}
 		}
 	}
-	
+
 	/**
 	 * Update the nav URLs (toolbox) to include certain special pages for authors and bureaucrats.
-	 */	
+	 */
 	private function navURLS( )
 	{
 		global $wgUser, $wgArticlePath, $wgArticle, $wgTitle;
-		
+
 		$groups = $wgUser->getGroups( );
-		
+
 		if( in_array( 'bureaucrat', $groups ) || in_array( PONYDOCS_AUTHOR_GROUP, $groups ))
 		{
 			$this->data['nav_urls']['special_doctopics'] = array(
 				'href' => str_replace( '$1', 'Special:DocTopics', $wgArticlePath ),
 				'text' => 'Document Topics' );
-	
+
 			$this->data['nav_urls']['special_tocmgmt'] = array(
 				'href' => str_replace( '$1', 'Special:TOCList', $wgArticlePath ),
 				'text' => 'TOC Management' );
-			
+
 			$this->data['nav_urls']['documentation_manuals'] = array(
 				'href' => str_replace( '$1', 'Documentation:Manuals', $wgArticlePath ),
 				'text' => 'Manuals' );
@@ -781,8 +823,8 @@ if($this->data['copyrightico']) { ?>
 			$this->data['nav_urls']['document_links'] = array(
 				'href' => str_replace( '$1', 'Special:PonyDocsDocumentLinks?t=' . $wgTitle->__toString()  , $wgArticlePath),
 				'text' => 'Document Links');
-			
-		}		
+
+		}
 	}
 
 
@@ -790,3 +832,4 @@ if($this->data['copyrightico']) { ?>
 } // end of class
 
 
+?>
