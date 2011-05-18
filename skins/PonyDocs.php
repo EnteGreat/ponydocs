@@ -360,16 +360,15 @@ class PonyDocsTemplate extends QuickTemplate {
 									echo '<li class="expanded">' . $data['text'] . '</li>';
 								}
 								else
-									echo '<li><a href="' . $data['link'] . '">' . $data['text'] . '</a></li>';
+									echo '<li><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
 							}
 							else
 							{
 								if( $data['current'] )
 									echo '<li class="expanded" style="margin-left: 13px;">' . $data['text'] . '</li>';
 								else
-									echo '<li style="margin-left: 13px;"><a href="' . $data['link'] . '">' . $data['text'] . '</a></li>';
+									echo '<li style="margin-left: 13px;"><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
 							}
-							
 						}
 						if( $inUL )
 							echo '</ul></div>';
