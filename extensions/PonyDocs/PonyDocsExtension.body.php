@@ -1126,7 +1126,7 @@ HEREDOC;
 							} 
 						}
 					}
-					
+
 					/**
 					 * Handle non-Documentation NS references, such as 'Dev:SomeTopic'.  This is much simpler -- if it doesn't exist,
 					 * create it and add the H1.  Nothing else.
@@ -1146,7 +1146,7 @@ HEREDOC;
 							else
 								$content = '= ' . $match[1] . " =\n";
 								
-							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );							
+							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
 						}
 					}
 

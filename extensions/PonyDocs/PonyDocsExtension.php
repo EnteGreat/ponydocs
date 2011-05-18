@@ -454,7 +454,7 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 		$topicName = $row->cl_sortkey;
 	}
 
-	$output = '<a href="' . str_replace( '$1', $topicName, $wgArticlePath ) . '">' . $param1  . '</a>'; 
+	$output = '<a href="' . wfUrlencode(str_replace( '$1', $topicName, $wgArticlePath )) . '">' . $param1  . '</a>'; 
 	return $parser->insertStripItem($output, $parser->mStripState);
 }
 

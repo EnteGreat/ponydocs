@@ -94,7 +94,7 @@ class SpecialTopicList extends SpecialPage
 					$wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $vmatch[2] . '</a> ' );
 					$hasVersions = true;
 				}
-			}	
+			}
 			if( !$hasVersions )
 				$wgOut->addHTML( 'None' );
 
