@@ -43,8 +43,8 @@ Modify your apache configuration for the use of friendly urls.  Modify your host
 	RewriteRule ^/extensions/(.*)$ 	/extensions/$1	[L,QSA]
 
 	# Rewrite rule to handle passing ugly doc urls to pretty urls
-	RewriteRule ^/Documentation:(.*):(.*):(.*) /Documentation/$3/$1/$2 [L,QSA,R=301]
-	RewriteRule ^/Documentation:(.*):(.*) /Documentation/latest/$1/$2 [L,QSA,R=301]
+	RewriteRule ^/Documentation:(.*):(.*):(.*):(.*) /Documentation/$1/$4/$2/$3 [L,QSA,R=301]
+    RewriteRule ^/Documentation:(.*):(.*):(.*) /Documentation/$1/latest/$2/$3 [L,QSA,R=301]
 
 	# get home page requests to Main_Page
 	RewriteRule ^/(\/*)$ /index.php?title=Main_Page [PT]
