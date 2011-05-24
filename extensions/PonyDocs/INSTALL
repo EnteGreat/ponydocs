@@ -128,38 +128,46 @@ Visit your Mediawiki's Special:UserRights page and modify your administrator use
 
 ------- 6) Create your first product  -------
 
-TODO - heather and bob will be here!
+Login as your administrator user and visit the Documentation:Products page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:Products .  You'll need to Create this page.
 
-	Documentation:Products
+The Documentation:Products page contains a listing of all your products.Each line in Documentation:Products must follow the syntax of {{#product:SHORT_NAME|LONG_NAME}} to define a product.  It uses this format:
+
+    {{#products:SHORT_NAME|LONG_NAME}} 
+
+SHORT_NAME can be any alphanumeric string.  It is the test that will be used later in this document.  LONG_NAME is the Human readable name of the product you are documenting. 
+
+    {{#version:1.0|unreleased}}
+
+Once saved, you'll be able to move to the next step, defining your versions. As you add more products, add more lines to the Documentation:Products page.
 
 ------- 7) Create your first product version. -------
 
-Login as your administrator user and visit the Documentation:Versions page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:Versions .  You'll need to Create this page.
+Login as your administrator user and visit the Documentation:(SHORT_NAME):Versions page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:(SHORT_NAME):Versions .  You'll need to Create this page.
 
-The Documentation:Versions page contains a listing of all versions of your product, as well as the status of that version.  The status can be 'released', 'unreleased' and 'preview'.  For regular users, only 'released' can be seen.  For documentation teams, all version can be seen.  For Customer group, the 'preview' versions can also be seen.  Each line in Documentation:Versions must follow the syntax of {{#version:name|status}} to define a version.  It uses this format:
+The Documentation:(SHORT_NAME):Versions page contains a listing of all versions of a product defined by it's SHORT_NAME (see above), as well as the status of that version.  The status can be 'released', 'unreleased' and 'preview'.  For regular users, only 'released' can be seen.  For documentation teams, all version can be seen.  For Customer group, the 'preview' versions can also be seen.  Each line in Documentation:Versions must follow the syntax of {{#version:name|status}} to define a version.  It uses this format:
 
 	{{#version:VERSION|STATUS}} 
 
-VERSION can be any alphanumeric string.  It should match your software's version.  STATUS is either "released" or "unreleased".  For example, to initialize version 1.0 of your product, have the following line in your Documentation:Versions page:
+VERSION can be any alphanumeric string.  It should match your software's version.  STATUS is either "released" or "unreleased".  For example, to initialize version 1.0 of your product, have the following line in your Documentation:(SHORT_NAME):Versions page:
 
 	{{#version:1.0|unreleased}}
 
-Once saved, you'll be able to move to the next step, defining your first manual. As you add more versions of your product, add more lines to the Documentation:Versions page.
+Once saved, you'll be able to move to the next step, defining your first manual. As you add more versions of your product, add more lines to the Documentation:(SHORT_NAME):Versions page.
 
 -------  8) Creating your first manual. -------
 
-Now head to /Documentation:Manuals .  You'll need to create this page.
+Now head to /Documentation:(SHORT_NAME):Manuals .  You'll need to create this page.
 
-The Documentation:Manuals page defines the Manuals available for your versions.  A version can have all the manuals, or a sub-set of the manuals you define here.  You'll create the links of the manuals to your first version in the next step.  For now, you'll need to define the first manual.  Each line in Documentation:Manuals must follow the syntax of {{#manual:shortName|displayName}} where shortName is a nospaces short version name of the manual (For example, 'admin'), and the displayName can have spaces and is the full name of the Manual (For example, 'Administration').  The following lines creates two manuals called Installation and FAQ.
+The Documentation:(SHORT_NAME):Manuals page defines the Manuals available for a product version.  A version can have all the manuals, or a sub-set of the manuals you define here.  You'll create the links of the manuals to your first version in the next step.  For now, you'll need to define the first manual.  Each line in Documentation:(SHORT_NAME):Manuals must follow the syntax of {{#manual:shortName|displayName}} where shortName is a nospaces short version name of the manual (For example, 'admin'), and the displayName can have spaces and is the full name of the Manual (For example, 'Administration').  The following lines creates two manuals called Installation and FAQ.
 
 	{{#manual:Installation|Installation Manual}}
 	{{#manual:FAQ|FAQ}} 
 
-Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:Versions).  By clicking on the Manual name, you'll proceed to the next step. (Alpha Bug: You may have to edit and save the Document:Manuals page in order to make the "Click manual to create TOC..." note go away after you've created the TOC).
+Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:(SHORT_NAME):Versions).  By clicking on the Manual name, you'll proceed to the next step. (Alpha Bug: You may have to edit and save the Document:(SHORT_NAME):Manuals page in order to make the "Click manual to create TOC..." note go away after you've created the TOC).
 
 ------- 9) Creating your first Table of Contents and auto-generating your first Documentation topic. -------
 
-Clicking on the Installation Manual link in Documentation:Manuals will have the system direct you to Documentation:InstallationTOC1.0 (If your manual name was Installation and your first version is 1.0).  TOC pages contain the Table of Contents of the manual for that version.  The TOC page consists of Section Names and the topics which reside under those sections.  Create the page, and put the following in the TOC page.
+Clicking on the Installation Manual link in Documentation:(SHORT_NAME):Manuals will have the system direct you to Documentation:(SHORT_NAME):InstallationTOC1.0 (If your manual name was Installation and your first version is 1.0).  TOC pages contain the Table of Contents of the manual for that version.  The TOC page consists of Section Names and the topics which reside under those sections.  Create the page, and put the following in the TOC page.
 
 	Getting Started
 	* {{#topic:Before You Begin}}
@@ -168,7 +176,7 @@ Clicking on the Installation Manual link in Documentation:Manuals will have the 
 	* {{#topic:Disk Permissions}}
 	* {{#topic:Database Errors}}
 
-	[[Category:V:1.0]]
+	[[Category:V:(SHORT_NAME):1.0]]
 
 Note the use of the Category tag inside the TOC, which should autopopulated when the page was created. This will ensure the TOC is linked to version 1.0.  You must have this category tag present in order for the TOC to properly render for that version.
 
