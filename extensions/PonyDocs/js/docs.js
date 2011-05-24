@@ -110,6 +110,7 @@ $(function(){
 });
 
 SplunkBranchInherit = function() {
+	var sourceProduct = '';
 	var sourceVersion = '';
 	var targetVersion = '';
 	var manuals = [];
@@ -124,6 +125,7 @@ SplunkBranchInherit = function() {
 	return {
 		init: function() {
 				$('#versionselect_submit').click(function() {
+					sourceProduct = $('#force_product').val();
 					if($('#force_sourceVersion').length != 0) {
 						sourceVersion = $('#force_sourceVersion').val();
 						forceTitle = $('#force_titleName').val();
@@ -141,7 +143,7 @@ SplunkBranchInherit = function() {
 						$('#docbranchinherit .targetversion').html(targetVersion);
 						$('#versionselect_submit').attr("disabled", "disabled").attr("value", "Fetching Data...");
 						if(forceTitle == null) {
-							sajax_do_call('SpecialBranchInherit::ajaxFetchManuals', [sourceVersion], function(res) {
+							sajax_do_call('SpecialBranchInherit::ajaxFetchManuals', [sourceProduct, sourceVersion], function(res) {
 								var manuals = eval(res.responseText);
 								var container = $('#manualselect_manuals');
 								container.html('');
@@ -152,13 +154,12 @@ SplunkBranchInherit = function() {
 								$('#docbranchinherit .versionselect').fadeOut(function () {
 									$('#versionselect_submit').attr("value", "Continue to Manuals").removeAttr("disabled");
 									$('#docbranchinherit .manualselect').fadeIn();
-								});	
+								});
 							});
 						}
 						else {
 							// Force handling a title.
-							sajax_do_call('SpecialBranchInherit::ajaxFetchTopics', [sourceVersion, targetVersion, forceManual, forceTitle], SplunkBranchInherit.setupTopicActions);
-
+							sajax_do_call('SpecialBranchInherit::ajaxFetchTopics', [sourceProduct, sourceVersion, targetVersion, forceManual, forceTitle], SplunkBranchInherit.setupTopicActions);
 						}
 					}
 				});
@@ -188,7 +189,7 @@ SplunkBranchInherit = function() {
 					});
 					$("#manualselect_submit").attr("disabled", "disabled").attr("value", "Fetching Data...");
 					// Okay, let's fetch our tocs.
-					sajax_do_call('SpecialBranchInherit::ajaxFetchTopics', [sourceVersion, targetVersion, manuals.join(',')], SplunkBranchInherit.setupTopicActions);
+					sajax_do_call('SpecialBranchInherit::ajaxFetchTopics', [sourceProduct, sourceVersion, targetVersion, manuals.join(',')], SplunkBranchInherit.setupTopicActions);
 				});
 				$('#topicactions_submit').click(function() {
 						if(!confirm("Are you sure you want to process this job?  Be sure to review all topics because there is no stopping it once it begins.  Please note this will take some time, so please be patient.")) {
@@ -227,7 +228,7 @@ SplunkBranchInherit = function() {
 							SplunkBranchInherit.jobID = res.responseText;
 							sajax_request_type = 'POST';
 							SplunkBranchInherit.fetchProgress();
-							sajax_do_call('SpecialBranchInherit::ajaxProcessRequest', [SplunkBranchInherit.jobID, sourceVersion, targetVersion, $.toJSON(topicActions)], function(res) {
+							sajax_do_call('SpecialBranchInherit::ajaxProcessRequest', [SplunkBranchInherit.jobID, sourceProduct, sourceVersion, targetVersion, $.toJSON(topicActions)], function(res) {
 								completed = true;
 								clearTimeout(progressTimer);
 								progressTimer = null;
@@ -336,7 +337,7 @@ SplunkBranchInherit = function() {
 						sajax_do_call('SpecialBranchInherit::ajaxFetchJobProgress', [SplunkBranchInherit.jobID], function(res) {
 						$('#progressconsole').html(res.responseText);
 						if(!completed) {
-								progressTimer = setTimeout("SplunkBranchInherit.fetchProgress();", 3000);						
+								progressTimer = setTimeout("SplunkBranchInherit.fetchProgress();", 3000);
 						}
 				});
 			}

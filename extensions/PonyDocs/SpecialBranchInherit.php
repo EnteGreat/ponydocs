@@ -45,16 +45,16 @@ class SpecialBranchInherit extends SpecialPage
 	}
 
 	/**
-	 * AJAX method to fetch manuals for a specified version
+	 * AJAX method to fetch manuals for a specified product and version
 	 *
 	 * @param $ver string The string representation of the version to retrieve 
 	 * 					  manuals for.
  	 * @returns string JSON representation of the manuals
 	 */
-	public static function ajaxFetchManuals($ver) {
-		PonyDocsVersion::LoadVersions();
-		PonyDocsVersion::SetSelectedVersion($ver);
-		$manuals = PonyDocsManual::GetManuals();
+	public static function ajaxFetchManuals($product, $ver) {
+		PonyDocsProductVersion::LoadVersionsForProduct($product);
+		PonyDocsProductVersion::SetSelectedVersion($product, $ver);
+		$manuals = PonyDocsProductManual::GetManuals($product);
 		$result = array();
 		foreach($manuals as $manual) {
 			$result[] = array("shortname" => $manual->getShortName(),
@@ -74,10 +74,12 @@ class SpecialBranchInherit extends SpecialPage
 	 * 							  (for individual branch/inherit)
 	 * @returns string JSON representation of all titles requested
 	 */
-	public static function ajaxFetchTopics($sourceVersion, $targetVersion, $manuals, $forcedTitle = null) {
-		PonyDocsVersion::LoadVersions(true, true);
-		$sourceVersion = PonyDocsVersion::GetVersionByName($sourceVersion);
-		$targetVersion = PonyDocsVersion::GetVersionByName($targetVersion);
+	public static function ajaxFetchTopics($productName, $sourceVersion, $targetVersion, $manuals, $forcedTitle = null) {
+		PonyDocsProduct::LoadProducts(true);
+		$product = PonyDocsProduct::GetProductByShortName($productName);
+		PonyDocsProductVersion::LoadVersionsForProduct(true, true);
+		$sourceVersion = PonyDocsProductVersion::GetVersionByName($productName, $sourceVersion);
+		$targetVersion = PonyDocsProductVersion::GetVersionByName($productName, $targetVersion);
 		if(!$sourceVersion || !$targetVersion) {
 			$result = array("success", false);
 			$result = json_encode($result);
@@ -87,16 +89,16 @@ class SpecialBranchInherit extends SpecialPage
 		// Okay, get manual by name.
 		$manuals = explode(",", $manuals);
 		foreach($manuals as $manualName) {
-			$manual = PonyDocsManual::GetManualByShortName($manualName);
+			$manual = PonyDocsProductManual::GetManualByShortName($productName, $manualName);
 			$result[$manualName] = array();
 			$result[$manualName]['meta'] = array();
 			// Load up meta.
 			$result[$manualName]['meta']['text'] = $manual->getLongName();
 			// See if TOC exists for target version.
-			$result[$manualName]['meta']['toc_exists'] = PonyDocsBranchInheritEngine::TOCExists($manual, $targetVersion);
+			$result[$manualName]['meta']['toc_exists'] = PonyDocsBranchInheritEngine::TOCExists($product, $manual, $targetVersion);
 			$result[$manualName]['sections'] = array();
 			// Got the version and manual, load the TOC.
-			$ponyTOC = new PonyDocsTOC($manual, $sourceVersion);
+			$ponyTOC = new PonyDocsTOC($manual, $sourceVersion, $product);
 			list($toc, $prev, $next, $start) = $ponyTOC->loadContent();
 			// Time to iterate through all the items.
 			$section = '';
@@ -111,7 +113,7 @@ class SpecialBranchInherit extends SpecialPage
 					if($forcedTitle == null || $tocItem['title'] == $forcedTitle) {
 						$tempEntry = array('title' => $tocItem['title'],
 									'text' => $tocItem['text'],
-									'conflicts' => PonyDocsBranchInheritEngine::getConflicts($tocItem['title'], $targetVersion)							   );
+									'conflicts' => PonyDocsBranchInheritEngine::getConflicts($product, $tocItem['title'], $targetVersion) );
 						/**
 						 * We want to set to empty, so the UI javascript doesn't 
 						 * bork out on this.
@@ -161,7 +163,6 @@ class SpecialBranchInherit extends SpecialPage
 		return $progress;
 	}
 
-
 	/**
 	 * Processes a branch/inherit job request.
 	 *
@@ -172,7 +173,7 @@ class SpecialBranchInherit extends SpecialPage
 	 * 								their requested actions.
 	 * @return string Full job log of the process by printing to stdout.
 	 */
-	public static function ajaxProcessRequest($jobID, $sourceVersion, $targetVersion, $topicActions) {
+	public static function ajaxProcessRequest($jobID, $productName, $sourceVersion, $targetVersion, $topicActions) {
 		global $wgScriptPath;
 		ob_start();
 
@@ -185,15 +186,16 @@ class SpecialBranchInherit extends SpecialPage
 			return true;
 		}
 
-		print("Beginning process job for source version: " . $sourceVersion . "<br />");
+		print("Beginning process job for source version: " . $productName . ':' . $sourceVersion . "<br />");
 		print("Target version is: " . $targetVersion . "<br />");
 
 		// Enable speed processing to avoid any unnecessary processing on 
 		// new topics created by this tool.
 		PonyDocsExtension::setSpeedProcessing(true);
 
-		$sourceVersion = PonyDocsVersion::GetVersionByName($sourceVersion);
-		$targetVersion = PonyDocsVersion::GetVersionByName($targetVersion);
+		$product = PonyDocsProduct::GetProductByShortName($productName);
+		$sourceVersion = PonyDocsProductVersion::GetVersionByName($productName, $sourceVersion);
+		$targetVersion = PonyDocsProductVersion::GetVersionByName($productName, $targetVersion);
 
 		// Determine how many topics there are to process.
 		$numOfTopics = 0;
@@ -216,32 +218,32 @@ class SpecialBranchInherit extends SpecialPage
 		$lastTopicTarget = null;
 
 		foreach($topicActions as $manualName => $manualData) {
-			$manual = PonyDocsManual::GetManualByShortName($manualName);
+			$manual = PonyDocsProductManual::GetManualByShortName($productName, $manualName);
 			// Determine if TOC already exists for target version.
-			if(!PonyDocsBranchInheritEngine::TOCExists($manual, $targetVersion)) {
-				print("<div class=\"normal\">TOC Does not exist for Manual " . $manual->getShortName() . " for version " . $targetVersion->getName() . "</div>");
+			if(!PonyDocsBranchInheritEngine::TOCExists($product, $manual, $targetVersion)) {
+				print("<div class=\"normal\">TOC Does not exist for Manual " . $manual->getShortName() . " for version " . $targetVersion->getVersionName() . "</div>");
 				// Crl eate the toc or inherit.
 				if($manualData['tocAction'] != 'default') {
 					// Then they want to force.
 					if($manualData['tocAction'] == 'forceinherit') {
 						print("<div class=\"normal\">Forcing inheritance of source TOC.</div>");
-						PonyDocsBranchInheritEngine::addVersionToTOC($manual, $sourceVersion, $targetVersion);
+						PonyDocsBranchInheritEngine::addVersionToTOC($product, $manual, $sourceVersion, $targetVersion);
 						print("<div class=\"normal\">Complete</div>");
 
 					}
 					else if($manualData['tocAction'] == 'forcebranch') {
 						print("<div class=\"normal\">Forcing branch of source TOC.</div>");
-						PonyDocsBranchInheritEngine::branchTOC($manual, $sourceVersion, $targetVersion);
+						PonyDocsBranchInheritEngine::branchTOC($product, $manual, $sourceVersion, $targetVersion);
 						print("<div class=\"normal\">Complete</div>");
 					}
-				}	
+				}
 				else {
-				   	if($manualData['tocInherit']) {
+					if($manualData['tocInherit']) {
 						// We need to get the TOC for source version/manual and add 
 						// target version to the category tags.
 						try {
 							print("<div class=\"normal\">Attempting to add target version to existing source version TOC.</div>");
-							PonyDocsBranchInheritEngine::addVersionToTOC($manual, $sourceVersion, $targetVersion);
+							PonyDocsBranchInheritEngine::addVersionToTOC($product, $manual, $sourceVersion, $targetVersion);
 							print("<div class=\"normal\">Complete</div>");
 						} catch(Exception $e) {
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
@@ -257,7 +259,7 @@ class SpecialBranchInherit extends SpecialPage
 									$addData[$sectionName][] = $topic['text'];
 								}
 							}
-							PonyDocsBranchInheritEngine::createTOC($manual, $targetVersion, $addData);
+							PonyDocsBranchInheritEngine::createTOC($product, $manual, $targetVersion, $addData);
 							print("<div class=\"normal\">Complete</div>");
 						} catch(Exception $e) {
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
@@ -277,14 +279,13 @@ class SpecialBranchInherit extends SpecialPage
 								}
 							}
 						}
-						PonyDocsBranchInheritEngine::addCollectionToTOC($manual, $targetVersion, $addData);
+						PonyDocsBranchInheritEngine::addCollectionToTOC($product, $manual, $targetVersion, $addData);
 						print("<div class=\"normal\">Complete</div>");
 					} catch(Exception $e) {
 						print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
 					}
-
 			}
-			
+
 			// Okay, now let's go through each of the topics and 
 			// branch/inherit.
 			print("Processing topics.\n");
@@ -361,7 +362,6 @@ class SpecialBranchInherit extends SpecialPage
 			print("<br />");
 		}
 
-
 		// Okay, let's start the process!
 		unlink($path);
 		$buffer = ob_get_clean();
@@ -375,10 +375,10 @@ class SpecialBranchInherit extends SpecialPage
 	{
 		global $wgOut, $wgArticlePath, $wgScriptPath;
 		global $wgUser;
-		
+
 		$dbr = wfGetDB( DB_SLAVE );
 
-		$this->setHeaders( );	
+		$this->setHeaders( );
 		$wgOut->setPagetitle( 'Documentation Branch And Inheritance' );
 
 		// Security Check
@@ -389,28 +389,33 @@ class SpecialBranchInherit extends SpecialPage
 			return;
 		}
 
-		// Grab all versions available
-		// We need to get all versions from PonyDocsVersion
-		$versions = PonyDocsVersion::GetVersions();
 		ob_start();
 
+		// if title is set we have our product and manual, else take selected product
 		if(isset($_GET['titleName'])) {
-			if(!preg_match('/Documentation:(.*):(.*):(.*)/', $_GET['titleName'], $match)) {
+			if(!preg_match('/Documentation:(.*):(.*):(.*):(.*)/', $_GET['titleName'], $match)) {
 				throw new Exception("Invalid Title to Branch From");
 			}
+			$forceProduct = $match[1];
+			$forceManual = $match[2];
+		} else {
+			$forceProduct = PonyDocsProduct::GetSelectedProduct();
 		}
-		$forceManual = $match[1];
 
+		// Grab all versions available for product
+		// We need to get all versions from PonyDocsProductVersion
+		$versions = PonyDocsProductVersion::GetVersions($forceProduct);
 
 		if(isset($_GET['titleName'])) {
 			?>
 			<input type="hidden" id="force_titleName" value="<?php echo $_GET['titleName'];?>" />
-			<input type="hidden" id="force_sourceVersion" value="<?php echo PonyDocsVersion::GetVersionByName(PonyDocsVersion::GetSelectedVersion())->getName();?>" />
+			<input type="hidden" id="force_sourceVersion" value="<?php echo PonyDocsProductVersion::GetVersionByName($forceProduct, PonyDocsProductVersion::GetSelectedVersion($forceProduct))->getVersionName();?>" />
 			<input type="hidden" id="force_manual" value="<?php echo $forceManual; ?>" />
 			<?php
 		}
 		?>
 
+		<input type="hidden" id="force_product" value="<?php echo $forceProduct; ?>" />
 		<div id="docbranchinherit">
 		<a name="top"></a>
 		<div class="versionselect">
@@ -427,12 +432,11 @@ class SpecialBranchInherit extends SpecialPage
 			?>
 			<h2>Choose a Source Version</h2>
 			<?php
-				// Determine if topic was set, if so, we should fetch version 
-				// from currently selected version.
+				// Determine if topic was set, if so, we should fetch version from currently selected version.
 				if(isset($_GET['titleName'])) {
-					$version = PonyDocsVersion::GetVersionByName(PonyDocsVersion::GetSelectedVersion());
+					$version = PonyDocsProductVersion::GetVersionByName($forceProduct, PonyDocsProductVersion::GetSelectedVersion($forceProduct));
 					?>
-					You have selected a topic.  We are using the version you are currently browsing: <?php echo $version->getName();?>
+					You have selected a topic.  We are using the version you are currently browsing: <?php echo $version->getVersionName();?>
 					<?php
 				}
 				else {
@@ -441,9 +445,9 @@ class SpecialBranchInherit extends SpecialPage
 						<?php
 						foreach($versions as $version) {
 							?>
-							<option value="<?php echo $version->getName();?>"><?php echo $version->getName() . " - " . $version->getStatus();?></option>
+							<option value="<?php echo $version->getVersionName();?>"><?php echo $version->getVersionName() . " - " . $version->getVersionStatus();?></option>
 							<?php
-						}		
+						}
 						?>
 					</select>
 					<?php
@@ -454,9 +458,9 @@ class SpecialBranchInherit extends SpecialPage
 				<?php
 				foreach($versions as $version) {
 					?>
-					<option value="<?php echo $version->getName();?>"><?php echo $version->getName() . " - " . $version->getStatus();?></option>
+					<option value="<?php echo $version->getVersionName();?>"><?php echo $version->getVersionName() . " - " . $version->getVersionStatus();?></option>
 					<?php
-				}		
+				}
 				?>
 			</select>
 			<p>
@@ -530,4 +534,6 @@ class SpecialBranchInherit extends SpecialPage
 		$wgOut->addHTML($buffer);
 		return true;
 	}
-};
+}
+
+?>

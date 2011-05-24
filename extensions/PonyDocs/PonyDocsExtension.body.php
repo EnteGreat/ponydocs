@@ -1704,7 +1704,7 @@ HEREDOC;
 					// latest released version in the topic.
 					$targetVersion = "latest";
 					foreach($topicVersions as $version) {
-						if($version->getStatus() == "released") {
+						if($version->getVersionStatus() == "released") {
 							$targetVersion = $version->getVersionName();
 						}
 					}

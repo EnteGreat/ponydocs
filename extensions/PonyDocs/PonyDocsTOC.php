@@ -60,7 +60,7 @@ class PonyDocsTOC
 	 * @var array
 	 */
 	protected $mItemList = array( );
-	
+
 	/**
 	 * This stores the table of contents generated as well as the previous/next links.
 	 * @FIXME:  Add 'start' link?
@@ -219,7 +219,6 @@ class PonyDocsTOC
 		 * in special indices.
 		 */
 
-
 		// Our title is our url.  We should check to see if 
 		// latest is our version.  If so, we want to FORCE 
 		// the URL to include /latest/ as the version 
@@ -243,7 +242,6 @@ class PonyDocsTOC
 				$latest = true;
 			}
 		}
-
 
 		$cache = PonyDocsCache::getInstance();
 		$key = "TOCCACHE-" . $selectedProduct . "-" . $this->pManual->getShortName() . "-" . $selectedVersion;
@@ -371,13 +369,13 @@ class PonyDocsTOC
 				}
 			}
 		}
-		
+
 		/**
 		 * Figure out previous and next links.  Previous should point to previous topic regardless of section, so our best bet
 		 * is to skip any 'level=0'.  Next works the same way.
 		 */
 		$prev = $next = $idx = -1;
-		
+
 		if( $currentIndex >= 0 )
 		{
 			$idx = $currentIndex;
@@ -390,7 +388,7 @@ class PonyDocsTOC
 					break;
 				} 
 			}
-			
+
 			$idx = $currentIndex;
 			while( $idx <= sizeof( $toc ))
 			{
@@ -401,15 +399,15 @@ class PonyDocsTOC
 					break;
 				}
 			}
-			
+
 			if( $prev != -1 )
 				$prev = array(	'link' => $toc[$prev]['link'],
 								'text' => $toc[$prev]['text'] );
-			if( $next != -1 )			
+			if( $next != -1 )
 				$next = array( 'link' => $toc[$next]['link'],
 							   'text' => $toc[$next]['text'] );
 		}
-		
+
 		/**
 		 * You should typically capture this by doing:
 		 * list( $toc, $prev, $next, $start ) = $ponydocstoc->loadContent( );
@@ -420,12 +418,12 @@ class PonyDocsTOC
 		$obj->toc = $toc;
 		$obj->prev = $prev;
 		$obj->next = $next;
-		$obj->start = $start;		
+		$obj->start = $start;
 		$cache->addKey( $tocKey, $obj );*/
-		
+
 		return array( $toc, $prev, $next, $start );
 	}
-	
+
 	/**
 	 * Normalize a section name by converting its text to an anchor.  This should strip strange characters (which?) and convert
 	 * spaces to underscores, which is slightly different than normalizing a topic name.
