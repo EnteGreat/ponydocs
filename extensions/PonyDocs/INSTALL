@@ -1,6 +1,6 @@
 
 ---------------------------------------------
-PonyDocs 1.0 Alpha 2 - Mar 13, 2011
+PonyDocs 1.0 Alpha 3 - May 24, 2011
 ---------------------------------------------
 
 Open Source documentation based on MediaWiki
@@ -14,7 +14,7 @@ Splunk > Open Source FTW!
 
 
 ---------------------------------------------
-Requirements
+Requirements & Assumptions
 ---------------------------------------------
 1. You're a sysadmin
 2. You have a MediaWiki system at the ready
@@ -23,6 +23,13 @@ Requirements
 5. You know this is Alpha ;)
 6. You promise to read AND follow all these steps IN ORDER
 7. You've made a backup of your mediawiki DB in case you didn't meet the previous requirement
+
+It is further assumed that have 4 classes of users:
+
+* Anonymous and guests who are logged in - these are folks who fall into the * (default) or "user" group.  They can *only* read and can not edit any pages.
+* Employees - folks who are in the "Employee" group and can edit any single page but not use any advanced PonyDoc functions like creating TOCs, Versions and Branching or inheriting
+* Editors - folks who can do it all, short of editing user perms and are in the "PRODUCT-docteam" group. There is a per product docteam group so if you had a product called "Foo", the editor would need to be in the "Foo-Docteam" group
+* Admins - folks who can add and remove Employees and Editors to the different product docteam groups
 
 ---------------------------------------------
 Quick Install Instructions
@@ -95,11 +102,37 @@ There is a PonyDocs skin that is provided in this archive.  In order to see addi
 
 	$wgDefaultSkin = 'ponydocs';
 
--------  4) Add your administrator user to appropriate user groups. ------- 
+-------  4) Define your products . -------
 
-Visit your Mediawiki's Special:UserRights page and modify your administrator user to be added to the user group defined by PONYDOCS_AUTHOR_GROUP in your PonyDocs.config.php. 
+Update your LocalSettings.php to include a list of products.  There needs to be at least one defined.  If you don't define one, PonyDocs will default to a "Splunk" product.  Here is one product defined (Foo):
 
-------- 5) Create your first product version. ------- 
+	// NOTE: this *must* match what is in Documentation:Products.
+	// This will be fixed in later versions
+	$ponyDocsProductsList = array(
+			'Foo'
+		);
+
+And here is three:
+
+	// NOTE: this *must* match what is in Documentation:Products.
+	// This will be fixed in later versions
+	$ponyDocsProductsList = array(
+			'Foo',
+			'Bar',
+			'Bash',
+		);
+
+------- 5) Add your administrator user to appropriate user groups. -------
+
+Visit your Mediawiki's Special:UserRights page and modify your administrator user to be added to the *-docteam group based on which products you want to edit.  EG Foo-docteam
+
+------- 6) Create your first product  -------
+
+TODO - heather and bob will be here!
+
+	Documentation:Products
+
+------- 7) Create your first product version. -------
 
 Login as your administrator user and visit the Documentation:Versions page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:Versions .  You'll need to Create this page.
 
@@ -113,7 +146,7 @@ VERSION can be any alphanumeric string.  It should match your software's version
 
 Once saved, you'll be able to move to the next step, defining your first manual. As you add more versions of your product, add more lines to the Documentation:Versions page.
 
--------  6) Creating your first manual. ------- 
+-------  8) Creating your first manual. -------
 
 Now head to /Documentation:Manuals .  You'll need to create this page.
 
@@ -124,7 +157,7 @@ The Documentation:Manuals page defines the Manuals available for your versions. 
 
 Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:Versions).  By clicking on the Manual name, you'll proceed to the next step. (Alpha Bug: You may have to edit and save the Document:Manuals page in order to make the "Click manual to create TOC..." note go away after you've created the TOC).
 
-------- 7) Creating your first Table of Contents and auto-generating your first Documentation topic. ------- 
+------- 9) Creating your first Table of Contents and auto-generating your first Documentation topic. -------
 
 Clicking on the Installation Manual link in Documentation:Manuals will have the system direct you to Documentation:InstallationTOC1.0 (If your manual name was Installation and your first version is 1.0).  TOC pages contain the Table of Contents of the manual for that version.  The TOC page consists of Section Names and the topics which reside under those sections.  Create the page, and put the following in the TOC page.
 
