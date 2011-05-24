@@ -46,9 +46,10 @@ class SpecialDocTopics extends SpecialPage
 		$wgOut->setPagetitle( 'Documentation Topics Listing' );
 
 		// Security Check
+		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 		$groups = $wgUser->getGroups( );
 
-		if(!in_array( PONYDOCS_AUTHOR_GROUP, $groups)) {
+		if(!in_array( $authProductGroup, $groups)) {
 			$wgOut->addHTML("<p>Sorry, but you do not have permission to access this Special page.</p>");
 			return;
 		}

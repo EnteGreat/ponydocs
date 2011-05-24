@@ -165,6 +165,7 @@ class PonyDocsWiki
 	public function generateSideBar( )
 	{
 		global $wgArticlePath, $wgScriptPath, $wgUser;
+		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 		
 		$g = $wgUser->getAllGroups( );
 		
@@ -177,13 +178,13 @@ class PonyDocsWiki
 		/**
 		 * Show Special pages if employee or author.
 		 */
-		if( in_array( PONYDOCS_AUTHOR_GROUP, $g ) || in_array( PONYDOCS_EMPLOYEE_GROUP, $g ))
+		if( in_array( $authProductGroup, $g ) || in_array( PONYDOCS_EMPLOYEE_GROUP, $g ))
 			$sidebar['navigation'][] = array( 'text' => 'Special Pages', 'href' => str_replace( '$1', 'Special:Specialpages', $wgArticlePath ));
 			
 		/**
 		 * TOC List Mgmt if author.
 		 */
-		if( in_array( PONYDOCS_AUTHOR_GROUP, $g ))
+		if( in_array( $authorGroupByProduct, $g ))
 			$sidebar['navigation'][] = array( 'text' => 'TOC List Mgmt', 'href' => str_replace( '$1', 'Special:TOCList', $wgArticlePath ));
 			
 		//echo '<pre>'; print_r( $sidebar ); die( );

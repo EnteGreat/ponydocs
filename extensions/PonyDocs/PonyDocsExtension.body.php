@@ -1614,6 +1614,7 @@ HEREDOC;
 	static public function onUserCan( $title, $user, $action, &$result )
 	{
 		global $wgExtraNamespaces;
+		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 
 		if( !strcmp( 'edit', $action ) || !strcmp( 'submit', $action ))
 		{
@@ -1625,13 +1626,13 @@ HEREDOC;
 				!strcmp( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $title->__toString( ) ))
 			{
 				$groups = $user->getGroups();
-				if( !in_array( PONYDOCS_AUTHOR_GROUP, $groups ))
+				if( !in_array( $authProductGroup, $groups ))
 				{
 					$result = false;
 					return false;
 				}
 			}
-
+			
 			/**
 			 * Disallow edit/submit for documentation, FAQ, and Splexicon namespaces (and pages) unless
 			 * the user is in the employee or authors/docteam group.
@@ -1639,7 +1640,7 @@ HEREDOC;
 			if(	( $title->getNamespace( ) == PONYDOCS_DOCUMENTATION_NAMESPACE_ID ) || ( !strcmp( $title->__toString( ), PONYDOCS_DOCUMENTATION_NAMESPACE_NAME ))) 
 			{
 				$groups = $user->getGroups();
-				if( !in_array( PONYDOCS_AUTHOR_GROUP, $groups ) && !in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ))
+				if( !in_array($authProductGroup, $groups ) && !in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ))
 				{
 					$result = false;
 					return false;
@@ -2065,6 +2066,35 @@ HEREDOC;
 		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/docs.js");
 		return true;
 	}
+	
+	/**
+	 * This function will take the constant for the base author group and concatinate
+	 * it with the current product.  It accepts either the type of "product" or "preview"
+	 * 
+	 * This same formula is used to define the groups per
+	 * product, thus you can check if the current author in the current product has permission
+	 * to edit, branch or inherit with:
+	 * 	$groups = $wgUser->getAllGroups( );
+	 * 	if( in_array( getDerivedGroup(), $groups ){
+	 * 		//do something protected here
+	 * 	}
+	 * 	
+	 * @return string or boolean false on failure
+	 */
+	static public function getDerivedGroup($type = 'product'){
+
+		$product = PonyDocsProduct::GetSelectedProduct();
+		if ($type == 'product'){
+			return $product.PONYDOCS_BASE_AUTHOR_GROUP;
+		}
+		if ($type == 'preview'){
+			return $product.PONYDOCS_BASE_PREVIEW_GROUP;
+		}
+
+		// if we're here we failed
+		return false;
+	}
+
 
 };
 
