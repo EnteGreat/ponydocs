@@ -274,7 +274,7 @@ class SpecialBranchInherit extends SpecialPage
 						foreach($manualData['sections'] as $sectionName => $topics) {
 							$addData[$sectionName] = array();
 							foreach($topics as $topic) {
-								if($topic['action'] != 'ignore') {
+								if(!isset($topic['action']) || (isset($topic['action']) && $topic['action'] != 'ignore')) {
 									$addData[$sectionName][] = $topic['text'];
 								}
 							}
@@ -297,12 +297,12 @@ class SpecialBranchInherit extends SpecialPage
 					$fp = fopen($path, "w+");
 					fputs($fp, "Completed " . $numOfTopicsCompleted . " of " . $numOfTopics . " Total: " . ((int)($numOfTopicsCompleted / $numOfTopics * 100)) . "%");
 					fclose($fp);
-					if($topic['action'] == "ignore") {
+					if(isset($topic['action']) && $topic['action'] == "ignore") {
 						print("<div class=\"normal\">Ignoring topic: " . $topic['title'] . "</div>");
 						$numOfTopicsCompleted++;
 						continue;
 					}
-					else if($topic['action'] == "branchpurge") {
+					else if(isset($topic['action']) && $topic['action'] == "branchpurge") {
 						try {
 							print("<div class=\"normal\">Attempting to branch topic " . $topic['title'] . " and remove existing topic.</div>");
 							$lastTopicTarget = PonyDocsBranchInheritEngine::branchTopic($topic['title'], $targetVersion, $sectionName, $topic['text'], true, false, true);
@@ -311,7 +311,7 @@ class SpecialBranchInherit extends SpecialPage
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
 						}
 					}
-					else if($topic['action'] == "branch") {
+					else if(isset($topic['action']) && $topic['action'] == "branch") {
 						try {
 							print("<div class=\"normal\">Attempting to branch topic " . $topic['title'] . "</div>");
 							$lastTopicTarget = PonyDocsBranchInheritEngine::branchTopic($topic['title'], $targetVersion, $sectionName, $topic['text'], false, true, true);
@@ -320,7 +320,7 @@ class SpecialBranchInherit extends SpecialPage
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
 						}
 					}
-					else if($topic['action'] == "branchsplit") {
+					else if(isset($topic['action']) && $topic['action'] == "branchsplit") {
 						try {
 							print("<div class=\"normal\">Attempting to branch topic " . $topic['title'] . " and split from existing topic.</div>");
 							$lastTopicTarget = PonyDocsBranchInheritEngine::branchTopic($topic['title'], $targetVersion, $sectionName, $topic['text'], false, true, true);
@@ -329,7 +329,7 @@ class SpecialBranchInherit extends SpecialPage
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
 						}
 					}
-					else if($topic['action'] == "inherit") {
+					else if(isset($topic['action']) && $topic['action'] == "inherit") {
 						try {
 							print("<div class=\"normal\">Attempting to inherit topic " . $topic['title'] . "</div>");
 							$lastTopicTarget = PonyDocsBranchInheritEngine::inheritTopic($topic['title'], $targetVersion, $sectionName, $topic['text'], false, true);
@@ -338,7 +338,7 @@ class SpecialBranchInherit extends SpecialPage
 							print("<div class=\"error\">Exception: " . $e->getMessage() . "</div>");
 						}
 					}
-					else if($topic['action'] == "inheritpurge") {
+					else if(isset($topic['action']) && $topic['action'] == "inheritpurge") {
 						try {
 							print("<div class=\"normal\">Attempting to inherit topic " . $topic['title'] . " and remove existing topic.</div>");
 							$lastTopicTarget = PonyDocsBranchInheritEngine::inheritTopic($topic['title'], $targetVersion, $sectionName, $topic['text'], true, true, true);
@@ -384,7 +384,6 @@ class SpecialBranchInherit extends SpecialPage
 		// Security Check
 		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 		$groups = $wgUser->getGroups( );
-
 		if(!in_array( $authProductGroup, $groups)) {
 			$wgOut->addHTML("<p>Sorry, but you do not have permission to access this Special page.</p>");
 			return;

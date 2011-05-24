@@ -2078,25 +2078,31 @@ HEREDOC;
 	 * 	if( in_array( getDerivedGroup(), $groups ){
 	 * 		//do something protected here
 	 * 	}
-	 * 	
+	 *
 	 * @return string or boolean false on failure
 	 */
 	static public function getDerivedGroup($type = 'product'){
 
 		$product = PonyDocsProduct::GetSelectedProduct();
 		if ($type == 'product'){
-			return $product.'-'.PONYDOCS_BASE_AUTHOR_GROUP;
+			return $product . '-' . PONYDOCS_BASE_AUTHOR_GROUP;
 		}
 		if ($type == 'preview'){
-			return $product.'-'.PONYDOCS_BASE_PREVIEW_GROUP;
+			return $product . '-' . PONYDOCS_BASE_PREVIEW_GROUP;
 		}
 
 		// if we're here we failed
 		return false;
 	}
 
+	static public function getTempDir() {
+		if (!defined('PONYDOCS_TEMP_DIR')) {
+			throw new Exception('Temporary directory is undefined');
+		}
+		return PONYDOCS_TEMP_DIR;
+	}
 
-};
+}
 
 /**
  * End of file.

@@ -203,8 +203,8 @@ class PonyDocsBranchInheritEngine {
 		// Okay, source article exists.
 		// Add the appropriate version cateogry
 		// Check for existing category
-		if(!preg_match("\[\[Category:V:" . $productName . ":" . $version->getVersionName() . "\]\]", $content)) {
-			$content = $existingArticle->getContent();
+		$content = $existingArticle->getContent();
+		if(!preg_match("/\[\[Category:V:" . preg_quote($productName . ":" . $version->getVersionName()) . "\]\]/", $content)) {
 			$content .= "[[Category:V:" . $productName . ":" . $version->getVersionName() . "]]";
 			// Save the article as an edit
 			$existingArticle->doEdit($content, "Inherited topic " . $topicTitle . " with version: " . $productName . ":" . $version->getVersionName(), EDIT_UPDATE);

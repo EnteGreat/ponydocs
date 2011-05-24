@@ -40,6 +40,8 @@ define('PONYDOCS_DEFAULT_PRODUCT', 'Splunk');
 
 // category cache expiration in seconds
 define('CATEGORY_CACHE_TTL', 300);
+define('PONYDOCS_TEMP_DIR', '/tmp/');
+
 
 // Implicit group for all visitors.
 $wgGroupPermissions['*']['createaccount']   = false;
