@@ -22,24 +22,37 @@ Requirements & Assumptions
 4. You can run SQL commands on the MediaWiki DB
 5. You know this is Alpha ;)
 6. You promise to read AND follow all these steps IN ORDER
-7. You've made a backup of your mediawiki DB in case you didn't meet the previous requirement
+7. You've made a backup of your mediawiki DB in case you didn't meet the
+   previous requirement
 
 It is further assumed that have 4 classes of users:
 
-* Anonymous and guests who are logged in - these are folks who fall into the * (default) or "user" group.  They can *only* read and can not edit any pages.
-* Employees - folks who are in the "Employee" group and can edit any single page but not use any advanced PonyDoc functions like creating TOCs, Versions and Branching or inheriting
-* Editors - folks who can do it all, short of editing user perms and are in the "PRODUCT-docteam" group. There is a per product docteam group so if you had a product called "Foo", the editor would need to be in the "Foo-Docteam" group
-* Admins - folks who can add and remove Employees and Editors to the different product docteam groups
+* Anonymous and guests who are logged in - these are folks who fall into the *
+  (default) or "user" group.  They can *only* read and can not edit any pages.
+* Employees - folks who are in the "Employee" group and can edit any single page
+  but not use any advanced PonyDoc functions like creating TOCs, Versions and
+  Branching or inheriting
+* Editors - folks who can do it all, short of editing user perms and are in the
+  "PRODUCT-docteam" group. There is a per product docteam group so if you had a
+  product called "Foo", the editor would need to be in the "Foo-Docteam" group
+* Admins - folks who can add and remove Employees and Editors to the different
+  product docteam groups
 
 ---------------------------------------------
 Quick Install Instructions
 ---------------------------------------------
 
-Notes: Please complete all install instructions before attempting to use your new PonyDocs installation.  Failure to do so will result in frustration and keyboard tossing.
+Notes: Please complete all install instructions before attempting to use your
+new PonyDocs installation.  Failure to do so will result in frustration and
+keyboard tossing.
 
-------- 1) Configuring Apache ------- 
+------- 1) Configure Apache -------
 
-Modify your apache configuration for the use of friendly urls.  Modify your host to enable rewrite rules.  The following is an example of the apache configuration, if mediawiki was installed at the base of your html directory.  If your mediawiki instance resides in a sub-directory, modify the configuration accordingly.
+Modify your apache configuration for the use of friendly urls.  Modify your host
+to enable rewrite rules.  The following is an example of the apache
+configuration, if mediawiki was installed at the base of your html directory.
+If your mediawiki instance resides in a sub-directory, modify the configuration
+accordingly.
 
 	==== START SAMPLE APACHE CONFIGURATION ====
 	RewriteEngine On
@@ -63,15 +76,23 @@ Restart Apache at this time so Rewrite Rules will take affect.
 
 ------- 2) Modify LocalSettings.php ------- 
 
-Modify your LocalSettings.php file to have an additional namespace of Documentation.  
+Modify your LocalSettings.php file to have an additional namespace of
+Documentation.  
 
-Alpha Note: Currently, the namespace for PonyDocs is Documentation.  We will be writing in support to change this Namespace name, but for now, keep it Documentation.  You can change the index (100) of the Documentation namespace, as that customization is currently supported.
+Alpha Note: Currently, the namespace for PonyDocs is Documentation.  We will be
+writing in support to change this Namespace name, but for now, keep it
+Documentation.  You can change the index (100) of the Documentation namespace,
+as that customization is currently supported.
 
 Example:
 
 	$wgExtraNamespaces[100] = "Documentation";
 
-There are additional user permission flags that are defined.  These are branchtopic, branchmanual, inherit, viewall.  Modify your $wgGroupPermissions to add these permissions to your existing groups.  You can also create new groups for your permissions.  Review http://www.mediawiki.org/wiki/Manual:User_rights for more information.  
+There are additional user permission flags that are defined.  These are
+branchtopic, branchmanual, inherit, viewall.  Modify your $wgGroupPermissions to
+add these permissions to your existing groups.  You can also create new groups
+for your permissions.  Review http://www.mediawiki.org/wiki/Manual:User_rights
+for more information.  
 
 An example in your LocalSettings.php file would be:
 
@@ -80,31 +101,43 @@ An example in your LocalSettings.php file would be:
 	$wgGroupPermissions['docteam']['inherit']	 = true; // Custom permission to inherit a topic.
 	$wgGroupPermissions['docteam']['viewall']	 = true; // Custom permission to handle View All link for topics.
 
-Some mediawiki instances do not have $wgArticlePath property defined.  Please make sure this is defined in your LocalSettings.php.  Refer to: http://www.mediawiki.org/wiki/Manual:$wgArticlePath for more information.
+Some mediawiki instances do not have $wgArticlePath property defined.  Please
+make sure this is defined in your LocalSettings.php.  Refer to:
+http://www.mediawiki.org/wiki/Manual:$wgArticlePath for more information.
 
 Example, if mediawiki was installed at the root of your html directory:
 
 	$wgArticlePath = '/$1';
 
--------  3) Install PonyDocs extension and Configure Mediawiki to Load it. ------- 
+-------  3) Install PonyDocs extension and Configure Mediawiki to Load it. -------
 
 Move the extensions/PonyDocs directory into your Mediawiki's extensions directory.
 
-Modify the PonyDocs.config.php file in the PonyDocs extension directory to fit your environment.
+Modify the PonyDocs.config.php file in the PonyDocs extension directory to fit
+your environment.
 
-Update your mediawiki database schema by running the schema.sql file in the sql directory of the PonyDocs extension directory.
+Update your mediawiki database schema by running the schema.sql file in the sql
+directory of the PonyDocs extension directory.
 
-Finally, update your LocalSettings.php to load the extension. Add the following line to the bottom of your LocalSettings.php in your Mediawiki root directory.
+Finally, update your LocalSettings.php to load the extension. Add the following
+line to the bottom of your LocalSettings.php in your Mediawiki root directory.
 
 	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
 
-There is a PonyDocs skin that is provided in this archive.  In order to see additional Documentation features, you should use this skin by moving the contents of the skin/ directory (two files and one directory) to  MEDIAWIKIBASE/skins/.  Customize this skin to fit your environment. To activate the skin, update the wgDefaultSkin value in LocalSettings.php:
+There is a PonyDocs skin that is provided in this archive.  In order to see
+additional Documentation features, you should use this skin by moving the
+contents of the skin/ directory (two files and one directory) to
+MEDIAWIKIBASE/skins/.  Customize this skin to fit your environment. To activate
+the skin, update the wgDefaultSkin value in LocalSettings.php:
 
 	$wgDefaultSkin = 'ponydocs';
 
--------  4) Define your products . -------
+-------  4) Define your products in the code. -------
 
-Update your LocalSettings.php to include a list of products.  There needs to be at least one defined.  If you don't define one, PonyDocs will default to a "Splunk" product.  Here is one product defined (Foo):
+Update your LocalSettings.php to include a list of products. This list will be
+used to determine user groups. There needs to be at least one defined.  If you
+don't define one, PonyDocs will default to a "Splunk" product.  Here is one
+product defined (Foo):
 
 	// NOTE: this *must* match what is in Documentation:Products.
 	// This will be fixed in later versions
@@ -124,50 +157,107 @@ And here is three:
 
 ------- 5) Add your administrator user to appropriate user groups. -------
 
-Visit your Mediawiki's Special:UserRights page and modify your administrator user to be added to the *-docteam group based on which products you want to edit.  EG Foo-docteam
+Visit your Mediawiki's Special:UserRights page and modify your administrator
+user to be added to the *-docteam group based on which products you want to
+edit, e.g. Foo-docteam
 
-------- 6) Create your first product  -------
+------- 6) Create your products on the front-end. -------
 
-Login as your administrator user and visit the Documentation:Products page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:Products .  You'll need to Create this page.
+Log in as your administrator user and visit the Documentation:Products page.  If
+Mediawiki was installed at the base of your documentation root, then simply go
+to /Documentation:Products .  Click on the "Create" tab at the top of the page
+to edit the page and add new products.
 
-The Documentation:Products page contains a listing of all your products.Each line in Documentation:Products must follow the syntax of {{#product:SHORT_NAME|LONG_NAME}} to define a product.  It uses this format:
+The Documentation:Products page contains a listing of all your products. Each
+line defines a single product.  A product definition uses this format:
 
-    {{#products:SHORT_NAME|LONG_NAME}} 
+    {{#products:productShortName|displayName}}
 
-SHORT_NAME can be any alphanumeric string.  It is the test that will be used later in this document.  LONG_NAME is the Human readable name of the product you are documenting. 
+productShortName can be any alphanumeric string (no spaces allowed).
+displayName is the human readable name of the product you are documenting.
 
-    {{#version:1.0|unreleased}}
-
-Once saved, you'll be able to move to the next step, defining your versions. As you add more products, add more lines to the Documentation:Products page.
+Once the page is saved, you'll be able to move to the next step, defining your
+versions. As you add more products, add more lines to the Documentation:Products
+page. Don't forget to add corresponding elements to the array in
+LocalSettings.php, as mentioned in Step 4 above.
 
 ------- 7) Create your first product version. -------
 
-Login as your administrator user and visit the Documentation:(SHORT_NAME):Versions page.  If Mediawiki was installed at the base of your documentation root, then simply go to /Documentation:(SHORT_NAME):Versions .  You'll need to Create this page.
+Logged in as your administrator user, visit the
+Documentation:productShortName:Versions page.  (productShortName is the name of
+the product(s) defined above.  If Mediawiki was installed at the base of your
+documentation root, then simply go to /Documentation:productShortName:Versions .
+Click on the "Create" tab at the top of the page to edit the page and add new
+versions.
 
-The Documentation:(SHORT_NAME):Versions page contains a listing of all versions of a product defined by it's SHORT_NAME (see above), as well as the status of that version.  The status can be 'released', 'unreleased' and 'preview'.  For regular users, only 'released' can be seen.  For documentation teams, all version can be seen.  For Customer group, the 'preview' versions can also be seen.  Each line in Documentation:Versions must follow the syntax of {{#version:name|status}} to define a version.  It uses this format:
+The Documentation:productShortName:Versions page contains a listing of all
+versions of a product, as well as the status of that version.  The status can be
+"released", "unreleased" or "preview".  For regular users, only 'released'
+versions can be seen.  For documentation teams, all versions can be seen.  There
+is also a "productShortName-preview" group which can see preview versions for
+that product.  Each line in Documentation:productShortName:Versions must use the
+following syntax to define a version:
 
-	{{#version:VERSION|STATUS}} 
+	{{#version:versionName|status}}
 
-VERSION can be any alphanumeric string.  It should match your software's version.  STATUS is either "released" or "unreleased".  For example, to initialize version 1.0 of your product, have the following line in your Documentation:(SHORT_NAME):Versions page:
+versionName can be any alphanumeric string (no spaces allowed).  It should match
+your software's version.  status is either "released" or "unreleased".  For
+example, to initialize version 1.0 of your product, have the following line
+in your Documentation:productShortName:Versions page:
 
 	{{#version:1.0|unreleased}}
 
-Once saved, you'll be able to move to the next step, defining your first manual. As you add more versions of your product, add more lines to the Documentation:(SHORT_NAME):Versions page.
+Once the Documentation:productShortName:Versions page is saved, you'll be able
+to move to the next step, defining your first manual. As you add more versions
+of your product, add more lines to the Documentation:productShortName:Versions
+page.
 
--------  8) Creating your first manual. -------
+-------  8) Create your first manual. -------
 
-Now head to /Documentation:(SHORT_NAME):Manuals .  You'll need to create this page.
+Now head to /Documentation:productShortName:Manuals .  Click on the "Create" tab
+at the top of the page to edit the page and add new versions.
 
-The Documentation:(SHORT_NAME):Manuals page defines the Manuals available for a product version.  A version can have all the manuals, or a sub-set of the manuals you define here.  You'll create the links of the manuals to your first version in the next step.  For now, you'll need to define the first manual.  Each line in Documentation:(SHORT_NAME):Manuals must follow the syntax of {{#manual:shortName|displayName}} where shortName is a nospaces short version name of the manual (For example, 'admin'), and the displayName can have spaces and is the full name of the Manual (For example, 'Administration').  The following lines creates two manuals called Installation and FAQ.
+The Documentation:productShortName:Manuals page defines the Manuals available
+for a product version.  A version can have all the manuals, or a sub-set of the
+manuals you define here.  You'll create the links of the manuals to your first
+version in the next step.  For now, you'll need to define the first manual.
+Each line in Documentation:productShortName:Manuals must use the following
+syntax to define a manual:
+
+    {{#manual:manualShortName|displayName}}
+
+manualShortName can be any alphanumeric string (no spaces allowed). For example,
+"Admin". displayName is the human readable name of the manual. It can have
+spaces and is the full name of the Manual. For example, "Administration".
+
+The following lines create two manuals called Installation and FAQ:
 
 	{{#manual:Installation|Installation Manual}}
 	{{#manual:FAQ|FAQ}} 
 
-Once saved, you will see the listing of your manuals.  Each manual name will be a link to create the Table of Contents for your current version (in this case, the first version you created in Documentation:(SHORT_NAME):Versions).  By clicking on the Manual name, you'll proceed to the next step. (Alpha Bug: You may have to edit and save the Document:(SHORT_NAME):Manuals page in order to make the "Click manual to create TOC..." note go away after you've created the TOC).
+Once saved, you will see the listing of your manuals.  Each manual name will be
+a link to create the Table of Contents for your current version (in this case,
+the first version you created in Documentation:productShortName:Versions).  By
+clicking on the Manual name, you'll proceed to the next step. (ALPHA BUG: You
+may have to edit and save the Document:productShortName:Manuals page in order to
+make the "Click manual to create TOC..." note go away after you've created the
+TOC.)
 
-------- 9) Creating your first Table of Contents and auto-generating your first Documentation topic. -------
+------- 9) Create your first Table of Contents (TOC) and auto-generating your first Documentation topic. -------
 
-Clicking on the Installation Manual link in Documentation:(SHORT_NAME):Manuals will have the system direct you to Documentation:(SHORT_NAME):InstallationTOC1.0 (If your manual name was Installation and your first version is 1.0).  TOC pages contain the Table of Contents of the manual for that version.  The TOC page consists of Section Names and the topics which reside under those sections.  Create the page, and put the following in the TOC page.
+Clicking on the Installation Manual link in
+Documentation:productShortName:Manuals will have the system direct you to
+Documentation:productShortName:InstallationTOC1.0 (if your manual name was
+Installation and your first version is 1.0).  TOC pages contain the Table of
+Contents of the manual for that version.  The TOC page consists of Section Names
+and the topics which reside under those sections.  Click on the "Create" tab at
+the top of the TOC page to edit the TOC page. Use the following syntax to create
+the TOC for this manual:
+
+    Section Header
+    * {{#topic:Topic Title}}
+
+For example:
 
 	Getting Started
 	* {{#topic:Before You Begin}}
@@ -176,13 +266,17 @@ Clicking on the Installation Manual link in Documentation:(SHORT_NAME):Manuals w
 	* {{#topic:Disk Permissions}}
 	* {{#topic:Database Errors}}
 
-	[[Category:V:(SHORT_NAME):1.0]]
+	[[Category:V:productShortName:1.0]]
 
-Note the use of the Category tag inside the TOC, which should autopopulated when the page was created. This will ensure the TOC is linked to version 1.0.  You must have this category tag present in order for the TOC to properly render for that version.
+Note the use of the Category tag inside the TOC, which should have been
+autopopulated when the page was created. This will ensure the TOC is linked to
+version 1.0.  You must have this category tag present in order for the TOC to
+properly render for that version.
 
-This will create a section called 'Getting Started', with your first topic being 'Before You Begin'
-
-When you save the edit to your first TOC page, links to your new topics will automatically be created. (ALPHA BUG: You may have to save your edits to the TOC page twice).  Clicking on the topic in the TOC page will take you to the new topic, which you'll be able to edit with your new content.
+When you save the edit to your first TOC page, links to your new topics will
+automatically be created. (ALPHA BUG: You may have to save your edits to the TOC
+page twice.)  Clicking on the topic in the TOC page will take you to the new
+topic, which you'll be able to edit with your new content.
 
 Should get you started!  Have fun!
 
@@ -196,11 +290,17 @@ A. You likely missed running the schema.sql file in step 3.
 Q. Why can't I edit or create any docs pages?
 A. Go back to step 4 and make sure your user in the in the docs group
 
-Q. I've created all the pages, but the drop down for "product version" or "select manual" is empty.  Why?
-A. Reset to the backup you made before starting and try again.  Though there are some corners you can paint yourself into, this system has been tested and should work if you follow the steps in order.
+Q. I've created all the pages, but the drop down for "product version" or
+   "select manual" is empty.  Why?
+A. Reset to the backup you made before starting and try again.  Though there are
+   some corners you can paint yourself into, this system has been tested and
+   should work if you follow the steps in order.
 
-Q. I created my first TOC, but it is either empty or the there aren't links to click like step 7 says there will be.  What gives?
-A. Edit and re-save the page and your content should be there and the links should be clickable. This is a known Alpha bug.
+Q. I created my first TOC, but it is either empty or the there aren't links to
+   click like step 7 says there will be.  What gives?
+A. Edit and re-save the page and your content should be there and the links
+   should be clickable. This is a known Alpha bug.
 
-Q. I've created the TOC pages, so why do I still see the "Click manual to create TOC..." notice on the Document:Manuals page?
+Q. I've created the TOC pages, so why do I still see the "Click manual to create
+   TOC..." notice on the Document:Manuals page?
 A. Save and edit this page and those should go away.  This is an known Alpha bug.
