@@ -636,6 +636,7 @@ if($this->data['copyrightico']) { ?>
 			{
 				$this->data['titletext'] = 'Products Management';
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:shortName|displayName}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in /extensions/PonyDocs/.config.php $ponyDocsProductsList.</i></span>');
 			}
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))
 			{
@@ -761,10 +762,11 @@ if($this->data['copyrightico']) { ?>
 		global $wgUser, $wgTitle, $wgArticle, $wgArticlePath, $wgScriptPath, $wgUser;
 
 		$groups = $wgUser->getGroups( );
+		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 
 		if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $wgTitle->__toString( ), $match ))
 		{
-			if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || in_array( PONYDOCS_AUTHOR_GROUP, $groups ))
+			if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || in_array( $authProductGroup, $groups ))
 			{
 				array_pop( $match );  array_shift( $match );  array_shift( $match );
 				$title = 'Documentation:' . implode( ':', $match );
@@ -805,8 +807,9 @@ if($this->data['copyrightico']) { ?>
 		global $wgUser, $wgArticlePath, $wgArticle, $wgTitle;
 
 		$groups = $wgUser->getGroups( );
+		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 
-		if( in_array( 'bureaucrat', $groups ) || in_array( PONYDOCS_AUTHOR_GROUP, $groups ))
+		if( in_array( 'bureaucrat', $groups ) || in_array( $authProductGroup		, $groups ))
 		{
 			$this->data['nav_urls']['special_doctopics'] = array(
 				'href' => str_replace( '$1', 'Special:DocTopics', $wgArticlePath ),
