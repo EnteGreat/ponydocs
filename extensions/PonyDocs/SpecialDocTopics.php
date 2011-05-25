@@ -46,14 +46,12 @@ class SpecialDocTopics extends SpecialPage
 		$wgOut->setPagetitle( 'Documentation Topics Listing' );
 
 		// Security Check
-		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 		$groups = $wgUser->getGroups( );
 
-		if(!in_array( $authProductGroup, $groups)) {
+		if(!in_array( PONYDOCS_BASE_AUTHOR_GROUP, $groups)) {
 			$wgOut->addHTML("<p>Sorry, but you do not have permission to access this Special page.</p>");
 			return;
 		}
-
 
 		$wgOut->addHTML( 	"<p>This page lists all topics in the Documentation namespace.  For each, the title(s) are listed
 							along with the versions they are tagged for.  A list of TOC management pages which list this
@@ -69,7 +67,7 @@ class SpecialDocTopics extends SpecialPage
 		 * TO from a TOC page which shares one or more version tags with it.  So we can at least reduce the number
 		 * of TOC pages to search
 		 */
-		$res = $dbr->select( 'page', 'page_title', "page_namespace = '" . PONYDOCS_DOCUMENTATION_NAMESPACE . "'", __METHOD__ );
+		$res = $dbr->select( 'page', 'page_title', "page_namespace = '" . PONYDOCS_DOCUMENTATION_NAMESPACE_ID . "'", __METHOD__ );
 
 		/**
 		 * This will hold a LIST of base topic names to build off of.
@@ -150,7 +148,7 @@ class SpecialDocTopics extends SpecialPage
 			 */
 
 			$toc = 'Documentation:' . $product . ':' . $manual . 'TOC';
-			
+
 			$res = $dbr->select( 'categorylinks', 'cl_sortkey',
 				array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $toc )) . "%'",
 						"cl_to IN ('V:$product:" . implode( "','V:$product:", $allVersions ) . "')" ), __METHOD__ );
@@ -233,5 +231,5 @@ class SpecialDocTopics extends SpecialPage
 		$wgOut->addHTML( $html );
 
 	}
-};
+}
 ?>

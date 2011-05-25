@@ -202,7 +202,7 @@ class PonyDocsProductVersion
 			* If we're here, we don't have a version set previously.
 			* Get latest RELEASED version and set the our active version to it..
 			*/
-		$authProductGroup = PonyDocsExtension::getDerivedGroup('product');
+		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
 		if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
 			self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
 		}
@@ -293,8 +293,8 @@ class PonyDocsProductVersion
 		 * Validate 'STATUS' is valid; if it is not, we ignore it.  THis will populate
 		 * $this->versionsList (and others) properly and return it.
 		 */
-		$authProductGroup = PonyDocsExtension::getDerivedGroup('product');
-		$authPreviewGroup = PonyDocsExtension::getDerivedGroup('preview');
+		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
+		$authPreviewGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_VERSION, $productName);
 		$versions = explode( "\n", $content );
 		foreach( $versions as $v )
 		{
@@ -468,9 +468,9 @@ class PonyDocsProductVersion
 	{
 		global $wgUser;
 		$groups = $wgUser->getGroups( );
-		$authProductGroup = PonyDocsExtension::getDerivedGroup('product');
-		$authPreviewGroup = PonyDocsExtension::getDerivedGroup('preview');
-		
+		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
+		$authPreviewGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_VERSION, $productName);
+
 		if( in_array( $authProductGroup, $groups ) || in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || preg_match(PONYDOCS_CRAWLER_AGENT_REGEX,$_SERVER['HTTP_USER_AGENT']) || $_SERVER['REMOTE_ADDR'] == $ponydocsMediaWiki['CrawlerAddress'])
 		{
 			return self::$sVersionMap[$productName];

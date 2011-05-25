@@ -156,7 +156,7 @@ class PonyDocsWiki
 
 		return $out;
 	}
-	
+
 	/**
 	 * Populate toolbox link set and return.  Should be based on user groups/access.  Only used if MediaWiki:Sidebar is EMPTY.
 	 *
@@ -165,34 +165,35 @@ class PonyDocsWiki
 	public function generateSideBar( )
 	{
 		global $wgArticlePath, $wgScriptPath, $wgUser;
-		$authProductGroup = PonyDocsExtension::getDerivedGroup();
-		
+		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT);
+
 		$g = $wgUser->getAllGroups( );
-		
+
 		$sidebar = array( 'navigation' => array(
 			array( 'text' => 'Main Page', 'href' => str_replace( '$1', 'Main_Page', $wgArticlePath )),
 			array( 'text' => 'Help', 'href' => str_replace( '$1', 'helppage', $wgArticlePath ))
 			)
 		);
-		
+
 		/**
 		 * Show Special pages if employee or author.
 		 */
 		if( in_array( $authProductGroup, $g ) || in_array( PONYDOCS_EMPLOYEE_GROUP, $g ))
 			$sidebar['navigation'][] = array( 'text' => 'Special Pages', 'href' => str_replace( '$1', 'Special:Specialpages', $wgArticlePath ));
-			
+
 		/**
 		 * TOC List Mgmt if author.
 		 */
 		if( in_array( $authorGroupByProduct, $g ))
 			$sidebar['navigation'][] = array( 'text' => 'TOC List Mgmt', 'href' => str_replace( '$1', 'Special:TOCList', $wgArticlePath ));
-			
+
 		//echo '<pre>'; print_r( $sidebar ); die( );
-			
+
 		return $sidebar;
 	}
-} ;
+}
 
 /**
  * End of file
  */
+?>

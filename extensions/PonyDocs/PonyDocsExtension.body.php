@@ -35,6 +35,9 @@ class PonyDocsExtension
 	const URLMODE_NORMAL = 0;
 	const URLMODE_ALIASED = 1;
 
+	const ACCESS_GROUP_PRODUCT = 0;
+	const ACCESS_GROUP_VERSION = 1;
+
 	protected static $speedProcessingEnabled;
 
 	/**
@@ -73,10 +76,7 @@ class PonyDocsExtension
 		{
 			$wgHooks['ArticleFromTitle'][] = 'PonyDocsExtension::onArticleFromTitle_NoVersion';
 		}
-
 	}
-
-
 
 	/**
 	 * This sets $_SERVER[PATH_INFO] based on the article path and request URI if PATH_INFO is not set.  You should
@@ -99,9 +99,8 @@ class PonyDocsExtension
 				$_SERVER['PATH_INFO'] = $wgArticlePath;
 			}
 		}
-
 		return $_SERVER['PATH_INFO'];
-    }
+	}
 
 	/**
 	 * Return the URL mode (aliased or normal).
@@ -278,10 +277,9 @@ class PonyDocsExtension
 			$row = $dbr->fetchObject( $res );
 			return $row->cl_sortkey;
 		}
-
 		return false;
 	}
-	
+
 	/**
 	 * Hook for ArticleFromTitle.  Takes our title object, rewrites it with the RewriteTitle() method, then creates an instance of
 	 * our custom Article sub-class 'PonyDocsAliasArticle' and stores it in the passed reference.
@@ -307,7 +305,7 @@ class PonyDocsExtension
 
 		return true;
 	}
-	
+
 	static public function onArticleFromTitle_NoVersion( &$title, &$article )
 	{
 		global $wgArticlePath;
@@ -329,12 +327,11 @@ class PonyDocsExtension
 		/**
 		 * First create a list of versions to which the current user has access to.
 		 */
-		
 		$versionList = array_reverse( PonyDocsVersion::GetVersions( true ));
 		$versionNameList = array( );
 		foreach( $versionList as $pV )
 			$versionNameList[] = $pV->getName( );
-		
+
 		/**
 		 * Create a list of existing versions for this topic.  The list contains PonyDocsVersion instances.  Only store
 		 * UNIQUE instances and valid pointers.  Once done, sort them so that the LATEST version is at the front of
@@ -350,10 +347,10 @@ class PonyDocsExtension
 					$existingVersions[] = $pVersion;
 			}
 		}
-		
+
 		usort( $existingVersions, 'PonyDocs_versionCmp' );
 		$existingVersions = array_reverse( $existingVersions );
-	
+
 		/**
 		 * Now filter out versions the user does not have access to from the top;  once we find the version for this topic
 		 * to which the user has access, create our Article object and replace our title (to not redirect) and return true.
@@ -365,7 +362,6 @@ class PonyDocsExtension
 				/**
 				 * Look up topic name and redirect to URL.
 				 */
-				
 				$res = $dbr->select( 'categorylinks', 'cl_sortkey', 
 									array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $title->__toString( ))) . ":%'",
 											"cl_to = 'V:" . $pV->getName( ) . "'" ), __METHOD__ );
@@ -385,11 +381,11 @@ class PonyDocsExtension
 
 				if( !$article->exists( ))
 					$article = null;
-		
+
 				return true;
 			}
 		}
-		
+
 		/**
 		 * Invalid redirect -- go to Main_Page or something.
 		 */
@@ -758,7 +754,7 @@ class PonyDocsExtension
 
 		return true;
 	}
-	
+
 	/**
 	 * Hook for 'ArticleSave' which is called when a request to save an article is made BUT BEFORE anything 
 	 * is done.  We trap these for certain special circumstances and perform additional processing.  Otherwise
@@ -891,7 +887,6 @@ class PonyDocsExtension
 				}
 			}
 
-
 			//echo '<pre>'; print_r( $duplicateVersions ); die();
 
 			/**
@@ -987,7 +982,7 @@ HEREDOC;
 	 * When creating the link in Documentation namespace, it uses the CURRENT MANUAL being viewed.. and the selected version?
 	 */
 	static public function onArticleSave_AutoLinks( &$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags )
-	{		
+	{
 		global $wgRequest, $wgOut, $wgArticlePath, $wgRequest, $wgScriptPath;
 
 		// Dangerous.  Only set the flag if you know that you should be skipping 
@@ -1001,7 +996,7 @@ HEREDOC;
 			return true;
 
 		$dbr = wfGetDB( DB_SLAVE );
-		
+
 		if( preg_match_all( "/\[\[([" . Title::legalChars( ) . "]*)([|]?(.*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		//if( preg_match_all( "/\[\[([A-Za-z0-9,:._ -]*)([|]?([A-Za-z0-9,:._?#!@$+= -]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		{
@@ -1449,13 +1444,11 @@ HEREDOC;
 			if( preg_match( $m, $wgTitle->__toString( )))
 				$doStripH1 = true;
 
-
 		if( !strcmp( $action, 'submit' ) && preg_match( '/^Someone else has changed this page/i', $text ))
 		{
 			$text = '';
 			return true;
 		}
-
 
 		/**
 		 * Strip out ANY H1 HEADER.  This has the nice effect of only stripping it out during render and not during edit or
@@ -1632,7 +1625,7 @@ HEREDOC;
 					return false;
 				}
 			}
-			
+
 			/**
 			 * Disallow edit/submit for documentation, FAQ, and Splexicon namespaces (and pages) unless
 			 * the user is in the employee or authors/docteam group.
@@ -1743,7 +1736,9 @@ HEREDOC;
 	/**
 	 * Returns the manual data for a version in cache.  If the cache is not populated for 
 	 * that version, then build it and return it.
-	 *
+	 * @param string $product product short name
+	 * @param string $version version name
+	 * @return array of manual navigation items
 	 */
 	static public function fetchNavDataForVersion($product, $version) {
 		global $ponydocsMediaWiki;
@@ -1864,7 +1859,6 @@ HEREDOC;
 			die();
 		}
 		return false;
-
 	}
 
 	static public function handle404(&$out) {
@@ -1877,7 +1871,6 @@ HEREDOC;
 		$wgOut->setStatusCode(404);
 		return true;
 	}
-
 
 	/**
 	 * Called when an article is deleted, we want to purge any doclinks entries 
@@ -2066,7 +2059,7 @@ HEREDOC;
 		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/docs.js");
 		return true;
 	}
-	
+
 	/**
 	 * This function will take the constant for the base author group and concatinate
 	 * it with the current product.  It accepts either the type of "product" or "preview"
@@ -2079,22 +2072,40 @@ HEREDOC;
 	 * 		//do something protected here
 	 * 	}
 	 *
+	 * @param int $type access group to retrieve (either for product or version)
+	 * @param string $productName short name of product
 	 * @return string or boolean false on failure
 	 */
-	static public function getDerivedGroup($type = 'product'){
-
-		$product = PonyDocsProduct::GetSelectedProduct();
-		if ($type == 'product'){
-			return $product . '-' . PONYDOCS_BASE_AUTHOR_GROUP;
-		}
-		if ($type == 'preview'){
-			return $product . '-' . PONYDOCS_BASE_PREVIEW_GROUP;
+	static public function getDerivedGroup($type = self::ACCESS_GROUP_PRODUCT, $productName = NULL){
+		// if product not specified, take product from session
+		if (is_null($productName)) {
+			$product = PonyDocsProduct::GetSelectedProduct();
+		} else {
+			$product = $productName;
 		}
 
-		// if we're here we failed
-		return false;
+		switch ($type) {
+			case self::ACCESS_GROUP_PRODUCT:
+				$group = $product . '-' . PONYDOCS_BASE_AUTHOR_GROUP;
+				break;
+
+			case self::ACCESS_GROUP_VERSION:
+				$group = $product . '-' . PONYDOCS_BASE_PREVIEW_GROUP;
+				break;
+
+			default:
+				// if we're here we failed
+				$group = false;
+		}
+
+		return $group;
 	}
 
+	/**
+	 * Get configured temporary directory path
+	 * @return string value of configured directory constant
+	 * @throw Exception when constant doesn't exist
+	 */
 	static public function getTempDir() {
 		if (!defined('PONYDOCS_TEMP_DIR')) {
 			throw new Exception('Temporary directory is undefined');

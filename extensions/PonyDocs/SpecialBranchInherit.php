@@ -381,16 +381,6 @@ class SpecialBranchInherit extends SpecialPage
 		$this->setHeaders( );
 		$wgOut->setPagetitle( 'Documentation Branch And Inheritance' );
 
-		// Security Check
-		$authProductGroup = PonyDocsExtension::getDerivedGroup();
-		$groups = $wgUser->getGroups( );
-		if(!in_array( $authProductGroup, $groups)) {
-			$wgOut->addHTML("<p>Sorry, but you do not have permission to access this Special page.</p>");
-			return;
-		}
-
-		ob_start();
-
 		// if title is set we have our product and manual, else take selected product
 		if(isset($_GET['titleName'])) {
 			if(!preg_match('/Documentation:(.*):(.*):(.*):(.*)/', $_GET['titleName'], $match)) {
@@ -401,6 +391,16 @@ class SpecialBranchInherit extends SpecialPage
 		} else {
 			$forceProduct = PonyDocsProduct::GetSelectedProduct();
 		}
+
+		// Security Check
+		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $forceProduct);
+		$groups = $wgUser->getGroups( );
+		if(!in_array( $authProductGroup, $groups)) {
+			$wgOut->addHTML("<p>Sorry, but you do not have permission to access this Special page.</p>");
+			return;
+		}
+
+		ob_start();
 
 		// Grab all versions available for product
 		// We need to get all versions from PonyDocsProductVersion
