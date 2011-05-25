@@ -246,140 +246,150 @@ class PonyDocsTemplate extends QuickTemplate {
 	<div id="p-documentation" class="portlet">
 		<h5>documentation</h5>
 		<div id="documentationBody" class="pBody">
-			<div class="product">
-				<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
-				<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
-				<?php
-					foreach( $this->data['products'] as $idx => $data ) {
-						echo '<option value="' . $data['name'] . '" ';
-						if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
-							echo 'selected';
-						echo '>' . $data['label'] . '</option>';
-					}
-				?>
-				</select>
-			</div>
-		<?php
-		$versions = PonyDocsProductVersion::GetVersions($this->data['selectedProduct'], true);
-		if(!count($versions)) {
-			?>
-				<p>
-				No Product Versions Defined.
-				</p>
 			<?php
-		}
-		else {
-			$manuals = PonyDocsProductManual::GetDefinedManuals($this->data['selectedProduct'], true);
-			if(!count($manuals)) {
-				?>
+				if (!count($this->data['products'])) {
+			?>
 					<p>
-					No product manuals defined.
+						No products defined.
 					</p>
-				<?php
-			}
-			else {
-				?>
-					<p>
-					<div class="productVersion">
+			<?php
+				} else {
+			?>
+					<div class="product">
+						<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
+						<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
 						<?php
-						// do quick manip
-						$found = false;
-						for($i =(count($this->data['versions']) - 1); $i >= 0; $i--){
-							
-							$this->data['versions'][$i]['label'] = $this->data['versions'][$i]['name'];
-							if(!$found && $this->data['versions'][$i]['status'] == "released") {
-								$this->data['versions'][$i]['label'] .= " (latest release)";
-								$found = true;
-							}
-						}
-						?>
-						<label for='docsVersionSelect'  class="navlabels">Product version:&nbsp;</label><br />
-						<select id="docsVersionSelect" name="selectedVersion" onChange="AjaxChangeVersion();">
-						<?php
-							foreach( $this->data['versions'] as $idx => $data ) {
-
+							foreach( $this->data['products'] as $idx => $data ) {
 								echo '<option value="' . $data['name'] . '" ';
-								if( !strcmp( $data['name'], $this->data['selectedVersion'] )) {
+								if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
 									echo 'selected';
-								}
 								echo '>' . $data['label'] . '</option>';
 							}
 						?>
 						</select>
-						
 					</div>
-					
-					<div class="productManual">
-						<label for="docsManualSelect" class="navlabels">Select manual:&nbsp;</label><br />
-						<select id="docsManualSelect" name="selectedManual" onChange="changeManual();">
-						<?php
-						$navData = PonyDocsExtension::fetchNavDataForVersion($this->data['selectedProduct'], $this->data['selectedVersion']);
-						print "<option value=''>Pick One...</option>";
-						//loop through nav array and look for current URL
-						foreach ($navData as $manual){
-							$selected = "";
-							if( !strcmp( $this->data['manualname'], $manual['longName'] )) {
-								$selected = " selected ";
-							}
-							print "<option value='". $manual['firstUrl'] . "'   $selected>";
-							print $manual['longName'];
-							print '</option>';
-						}
+			<?php
+					$versions = PonyDocsProductVersion::GetVersions($this->data['selectedProduct'], true);
+					if(!count($versions)) {
 						?>
-						</select>
-					</div>
-					</p>
-					<p>
-					<?php
-					if(sizeof($this->data['manualtoc'])) {
-						?>
-						<p>
-						<a href="<?php echo str_replace('$1', '', $wgArticlePath);?>index.php?title=<?php echo $wgTitle->__toString();?>&action=pdfbook">Pdf Version</a>
-						</p>
+							<p>
+							No Product Versions Defined.
+							</p>
 						<?php
-						$inUL = false;
-						$listid = "";
-						foreach( $this->data['manualtoc'] as $idx => $data )
-						{
-							if( 0 == $data['level'] )
-							{
-								if( $inUL )
-								{
-									echo '</ul></div>';
-									$inUL = false;
-								}
-								$listid = "list" . $idx;
-								echo '<div class="wikiSidebarBox collapsible">';
-								echo '<h3>' . $data['text'] . '</h3>';
-								echo '<ul>';
-								$inUL = true;
-							}
-							else if( 1 == $data['level'] )
-							{
-								if( $data['current'] ) {
-									echo '<li class="expanded">' . $data['text'] . '</li>';
-								}
-								else
-									echo '<li><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
-							}
-							else
-							{
-								if( $data['current'] )
-									echo '<li class="expanded" style="margin-left: 13px;">' . $data['text'] . '</li>';
-								else
-									echo '<li style="margin-left: 13px;"><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
-							}
-						}
-						if( $inUL )
-							echo '</ul></div>';
 					}
-					?>
-					</p>
+					else {
+						$manuals = PonyDocsProductManual::GetDefinedManuals($this->data['selectedProduct'], true);
+						if(!count($manuals)) {
+							?>
+								<p>
+								No product manuals defined.
+								</p>
+							<?php
+						}
+						else {
+							?>
+								<p>
+								<div class="productVersion">
+									<?php
+									// do quick manip
+									$found = false;
+									for($i =(count($this->data['versions']) - 1); $i >= 0; $i--){
+										
+										$this->data['versions'][$i]['label'] = $this->data['versions'][$i]['name'];
+										if(!$found && $this->data['versions'][$i]['status'] == "released") {
+											$this->data['versions'][$i]['label'] .= " (latest release)";
+											$found = true;
+										}
+									}
+									?>
+									<label for='docsVersionSelect'  class="navlabels">Product version:&nbsp;</label><br />
+									<select id="docsVersionSelect" name="selectedVersion" onChange="AjaxChangeVersion();">
+									<?php
+										foreach( $this->data['versions'] as $idx => $data ) {
 
-				<?php
-			}
-		}
-		?>
+											echo '<option value="' . $data['name'] . '" ';
+											if( !strcmp( $data['name'], $this->data['selectedVersion'] )) {
+												echo 'selected';
+											}
+											echo '>' . $data['label'] . '</option>';
+										}
+									?>
+									</select>
+									
+								</div>
+								
+								<div class="productManual">
+									<label for="docsManualSelect" class="navlabels">Select manual:&nbsp;</label><br />
+									<select id="docsManualSelect" name="selectedManual" onChange="changeManual();">
+									<?php
+									$navData = PonyDocsExtension::fetchNavDataForVersion($this->data['selectedProduct'], $this->data['selectedVersion']);
+									print "<option value=''>Pick One...</option>";
+									//loop through nav array and look for current URL
+									foreach ($navData as $manual){
+										$selected = "";
+										if( !strcmp( $this->data['manualname'], $manual['longName'] )) {
+											$selected = " selected ";
+										}
+										print "<option value='". $manual['firstUrl'] . "'   $selected>";
+										print $manual['longName'];
+										print '</option>';
+									}
+									?>
+									</select>
+								</div>
+								</p>
+								<p>
+								<?php
+								if(sizeof($this->data['manualtoc'])) {
+									?>
+									<p>
+									<a href="<?php echo str_replace('$1', '', $wgArticlePath);?>index.php?title=<?php echo $wgTitle->__toString();?>&action=pdfbook">Pdf Version</a>
+									</p>
+									<?php
+									$inUL = false;
+									$listid = "";
+									foreach( $this->data['manualtoc'] as $idx => $data )
+									{
+										if( 0 == $data['level'] )
+										{
+											if( $inUL )
+											{
+												echo '</ul></div>';
+												$inUL = false;
+											}
+											$listid = "list" . $idx;
+											echo '<div class="wikiSidebarBox collapsible">';
+											echo '<h3>' . $data['text'] . '</h3>';
+											echo '<ul>';
+											$inUL = true;
+										}
+										else if( 1 == $data['level'] )
+										{
+											if( $data['current'] ) {
+												echo '<li class="expanded">' . $data['text'] . '</li>';
+											}
+											else
+												echo '<li><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
+										}
+										else
+										{
+											if( $data['current'] )
+												echo '<li class="expanded" style="margin-left: 13px;">' . $data['text'] . '</li>';
+											else
+												echo '<li style="margin-left: 13px;"><a href="' . wfUrlencode($data['link']) . '">' . $data['text'] . '</a></li>';
+										}
+									}
+									if( $inUL )
+										echo '</ul></div>';
+								}
+								?>
+								</p>
+
+							<?php
+						}
+					}
+				}
+			?>
 		</div>
 	</div>
 <?php
