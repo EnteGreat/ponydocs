@@ -37,7 +37,7 @@ require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
 
 /// FIXME Is there a way to enable sessions for anonymous traffic in mediawiki?
-session_start();
+// session_start();
 
 // check for empty product list
 if (!isset ($ponyDocsProductsList) || sizeof($ponyDocsProductsList) == 0){
@@ -563,7 +563,7 @@ function efSearchParserFunction_Render( $input, $args, $parser )
 	
 	$output =	'<div class="inlineQuery">' .
 				'<code>' . htmlentities($text) . '</code>' .
-				'<a title="Run this search on your PonyDocs server" href="javascript:alert(\'Use the “share this event” link in your PonyDocs Server to activate this button\');">' .
+				'<a title="Run this search on your PonyDocs server" href="javascript:alert(\'Use the ï¿½share this eventï¿½ link in your PonyDocs Server to activate this button\');">' .
 				'<img width="31" height="24" border="0" align="absmiddle" alt="Search" src="' .
 				$ponydocsMediaWiki['DotComHost'] . '/images/base/query_button.png"/>' .
 				'</a><br/></div>';
