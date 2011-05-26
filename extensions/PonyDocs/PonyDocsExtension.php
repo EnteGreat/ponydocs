@@ -208,8 +208,6 @@ function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 {
 	global $wgArticlePath, $wgUser, $wgScriptPath;
 
-	$dbr = wfGetDB( DB_SLAVE );
-
 	$valid = true;
 	if( !preg_match( PONYDOCS_PRODUCTMANUAL_REGEX, $param1 ) || !strlen( $param1 ) || !strlen( $param2 ))
 	{
@@ -220,6 +218,10 @@ function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 	$productName = PonyDocsProduct::GetSelectedProduct();
 	$version = PonyDocsProductVersion::GetSelectedVersion( $productName );
 
+	// don't cache Documentation:[product]:Manuals pages because when we switch selected version the content will come from cache
+	$parser->disableCache();
+
+	$dbr = wfGetDB( DB_SLAVE );
 	$res = $dbr->select( 'categorylinks', array( 'cl_sortkey', 'cl_to' ), array(
 						"LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $productName )) . ':' . $dbr->strencode( strtolower( $manualName )) . "toc%'",
 						"cl_to = 'V:" . $productName . ':' . $version . "'" ), __METHOD__ );
