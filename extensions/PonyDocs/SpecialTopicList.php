@@ -13,7 +13,7 @@ require_once( $IP . '/includes/SpecialPage.php' );
 $wgSpecialPages['TopicList'] = 'SpecialTopicList';
 
 /**
- * This page should be passed a title which contains 'Documentation:<manual>:<topic>' only OR, if w/o params, shows all.
+ * This page should be passed a title which contains 'Documentation:<product>:<manual>:<topic>' only OR, if w/o params, shows all.
  * It is intended to show all topics of the given name.
  */
 class SpecialTopicList extends SpecialPage
@@ -25,12 +25,12 @@ class SpecialTopicList extends SpecialPage
 	{
 		SpecialPage::__construct( 'TopicList' );
 	}
-	
+
 	public function getDescription( )
 	{
 		return 'Show Topic Listing';
 	}
-	
+
 	/**
 	 * This is called upon loading the special page.  It should write output to the page with $wgOut.  If passed a topic
 	 * as 'topic' it lists all pages for that topic;  else it displays EVERYTHING for the selected version?
@@ -59,20 +59,21 @@ class SpecialTopicList extends SpecialPage
 
 		if( !preg_match( '/Documentation:(.*):(.*):(.*)/i', $topic, $match ))
 			return;
-			
+
 		$dbr = wfGetDB( DB_SLAVE );
 
-		$this->setHeaders( );	
+		$this->setHeaders( );
 		$wgOut->setPagetitle( 'Topic Listing For ' . $topic );
 		$wgOut->addHTML( '<h2>Topic Listing For Topic <b>'. $match[3] . '</b> in ' . $match[2] . ' manual for ' . $match[1] . ' product.</h2>' );
 
 		$q =	"SELECT DISTINCT(cl_sortkey) " .
 				"FROM categorylinks " .
-				"WHERE LOWER(cl_sortkey) LIKE '" . strtolower( $topic ) . ":%'";
+				"WHERE LOWER(CAST(cl_sortkey AS CHAR)) LIKE '" . strtolower( $topic ) . ":%'";
 
 		$res = $dbr->query( $q, __METHOD__ );
 		if( !$res->numRows( ))
 		{
+error_log($q);
 			return;
 		}
 
@@ -104,7 +105,7 @@ class SpecialTopicList extends SpecialPage
 		$wgOut->addHTML( '</ul><br><br>' );
 		return;
 	}
-};
+}
 
 /**
  * End of file.

@@ -44,6 +44,11 @@ class SpecialDocumentLinks extends SpecialPage {
 
 		$this->setHeaders();
 		$title =  $wgRequest->getVal('t');
+		if (empty($title)) {
+			$wgOut->setPagetitle("Documentation Linkage" );
+			$wgOut->addHTML('No topic specified.');
+			return;
+		}
 		$wgOut->setPagetitle("Documentation Linkage For " . $title );
 		$dbr = wfGetDB( DB_SLAVE );
 		$title = Title::newFromText($title);
