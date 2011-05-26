@@ -166,7 +166,6 @@ class PonyDocsTopic
 					$tempVersions[] = $v;
 			}
 		}
-
 		// Sort by Version, by doing a natural sort
 		// Also remove any duplicates.
 		/// FIXME - what is this really doing? tempVersions index is int per above code!

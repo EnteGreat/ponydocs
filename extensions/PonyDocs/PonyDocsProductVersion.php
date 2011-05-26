@@ -230,7 +230,6 @@ class PonyDocsProductVersion
 	 */
 	static public function SetSelectedVersion( $productName, $v )
 	{
-		global $_SESSION;
 		$_SESSION['wsVersion'][$productName] = $v;
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/$v");}
 		return $v;

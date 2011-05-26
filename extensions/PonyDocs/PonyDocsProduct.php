@@ -206,7 +206,7 @@ class PonyDocsProduct
 	 */
 	static public function GetSelectedProduct( )
 	{
-		global $wgUser, $_SESSION;
+		global $wgUser;
 
 		$groups = $wgUser->getGroups();
 		self::LoadProducts();
@@ -226,7 +226,7 @@ class PonyDocsProduct
 				return $_SESSION['wsProduct'];
 			}
 		}
-		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected product; will attempt to set default.");}
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected product; will attempt to set default");}
 		/// If we are here there is no product set, use default product from configuration
 		self::SetSelectedProduct(PONYDOCS_DEFAULT_PRODUCT);
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected product " . $_SESSION['wsProduct']);}
@@ -235,7 +235,7 @@ class PonyDocsProduct
 
 	static public function SetSelectedProduct( $p )
 	{
-		global $_SESSION;
+		//global $_SESSION;
 		$_SESSION['wsProduct'] = $p;
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected product to $p");}
 		return $p;

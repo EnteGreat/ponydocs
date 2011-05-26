@@ -56,9 +56,9 @@ class PonyDocsExtension
 		 * Then we need to register a hook to do the translation of this to a real topic name.
 		 */
 		//if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
+		//if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
 		if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
 			$this->mURLMode = PonyDocsExtension::URLMODE_ALIASED;
-			return;
 		}
 		else if( preg_match( '/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/(.*)\/(.*)\/(.*)\/(.*)$/i', $_SERVER['PATH_INFO'], $match ))
 		{
@@ -71,7 +71,6 @@ class PonyDocsExtension
 		 * 	Documentation:<product>:<manual>:<topic>
 		 * With no version.  Use the latest RELEASED version of the topic.
 		 */
-
 		else if( preg_match( '/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation:([^:]+):([^:]+):([^:]+)$/i', $_SERVER['PATH_INFO'], $match ))
 		{
 			$wgHooks['ArticleFromTitle'][] = 'PonyDocsExtension::onArticleFromTitle_NoVersion';

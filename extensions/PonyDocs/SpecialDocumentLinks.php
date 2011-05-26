@@ -55,12 +55,11 @@ class SpecialDocumentLinks extends SpecialPage {
 		$article = new Article($title);
 		$content = $article->getContent();
 		$topic = new PonyDocsTopic($article);
-		$splunkVersions = $topic->getProductVersions();
-		$versions = array();
+		$versions = $topic->getProductVersions();
+		//$versions = array();
 		$mediaWikiTitle = $article->getTitle()->getFullText();
 		$mediaWikiTitle = str_replace(" ", "_", $mediaWikiTitle);
-
-		foreach($splunkVersions as $ver) {
+		foreach($versions as $ver) {
 		?>
 
 			The following is in-bound links to <?php echo $title; ?> from other Documentation namespace topics.

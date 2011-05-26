@@ -36,9 +36,6 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
 require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
 
-/// FIXME Is there a way to enable sessions for anonymous traffic in mediawiki?
-// session_start();
-
 // check for empty product list
 if (!isset ($ponyDocsProductsList) || sizeof($ponyDocsProductsList) == 0){
 	$ponyDocsProductsList[] = PONYDOCS_DEFAULT_PRODUCT;
@@ -170,7 +167,16 @@ $wgPonyDocs = new PonyDocsExtension( );
  */
 function efPonyDocsSetup()
 {
-	global $wgPonyDocs;
+	global $wgPonyDocs, $wgScriptPath;
+	// force mediawiki to start session for anonymous traffic
+	if (session_id() == '') {
+		wfSetupSession();
+		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . "] started session");}
+	}
+	// Set selected product from URL
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:](.*)[\/|:]/i', $_SERVER['PATH_INFO'], $match)) {
+		PonyDocsProduct::SetSelectedProduct($match[1]);
+	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
 }
 
