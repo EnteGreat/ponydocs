@@ -68,12 +68,11 @@ class SpecialTopicList extends SpecialPage
 
 		$q =	"SELECT DISTINCT(cl_sortkey) " .
 				"FROM categorylinks " .
-				"WHERE LOWER(CAST(cl_sortkey AS CHAR)) LIKE '" . strtolower( $topic ) . ":%'";
+				"WHERE LOWER(CAST(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $topic ) ) . ":%'";
 
 		$res = $dbr->query( $q, __METHOD__ );
 		if( !$res->numRows( ))
 		{
-error_log($q);
 			return;
 		}
 

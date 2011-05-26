@@ -47,7 +47,7 @@ class SpecialTOCList extends SpecialPage
 
 		/**
 		 * We need to select ALL pages of the form:
-		 * 	Documentation:<manualShortName>TOC*
+		 * 	Documentation:<productShortName>:<manualShortName>TOC*
 		 * We should group these by manual and then by descending version order.  The simplest way is by assuming that every TOC
 		 * page is linked to at least one version (category) and thus has an entry in the categorylinks table.  So to do this we
 		 * must run this query for each manual type, which involes getting the list of manuals defined.
@@ -81,15 +81,15 @@ class SpecialTOCList extends SpecialPage
 				else
 					$wgOut->addHTML( 'None<br>' );
 			}
-		} 
+		}
 
 		$html = '<h2>Other Useful Management Pages</h2>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $productName . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br/>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $productName . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br/>' .
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
 
 		$wgOut->addHTML( $html );
 	}
-};
+}
 
 /**
  * End of file.
