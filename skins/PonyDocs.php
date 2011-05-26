@@ -778,7 +778,7 @@ if($this->data['copyrightico']) { ?>
 		{
 			if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || in_array( $authProductGroup, $groups ))
 			{
-				array_pop( $match );  array_shift( $match );  array_shift( $match );
+				array_pop( $match );  array_shift( $match );
 				$title = 'Documentation:' . implode( ':', $match );
 
 				$this->data['content_actions']['viewall'] = array(
