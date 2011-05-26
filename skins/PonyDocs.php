@@ -79,11 +79,6 @@ class PonyDocsTemplate extends QuickTemplate {
 		global $wgUser, $wgExtraNamespaces, $wgTitle, $wgArticlePath, $IP;
 		global $wgRevision, $action, $wgRequest;
 
-		// force mediawiki to start session for anonymous traffic
-		if (session_id() == '') {
-			wfSetupSession();
-		}
-
 		PonyDocsProduct::LoadProducts();
 		$this->data['selectedProduct'] = PonyDocsProduct::GetSelectedProduct( );
 		PonyDocsProductVersion::LoadVersionsForProduct($this->data['selectedProduct']);
