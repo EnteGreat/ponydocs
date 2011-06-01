@@ -174,7 +174,7 @@ function efPonyDocsSetup()
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . "] started session");}
 	}
 	// Set selected product from URL
-	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:](.*)[\/|:]/i', $_SERVER['PATH_INFO'], $match)) {
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:](['.PONYDOCS_PRODUCT_LEGALCHARS.'])[\/|:]/i', $_SERVER['PATH_INFO'], $match)) {
 		PonyDocsProduct::SetSelectedProduct($match[1]);
 	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
