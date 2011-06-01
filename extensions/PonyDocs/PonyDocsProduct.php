@@ -217,7 +217,7 @@ class PonyDocsProduct
 		if( isset( $_SESSION['wsProduct'] ) && strlen( $_SESSION['wsProduct'] )) {
 			// Make sure product exists.
 			if(!array_key_exists($_SESSION['wsProduct'], self::$sProductList)) {
-				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] product not found in " . print_r(self::$sProductList, true));}
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] product " . $_SESSION['wsProduct'] . " not found in " . print_r(self::$sProductList, true));}
 				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] unsetting product key " . $_SESSION['wsProduct']);}
 				unset($_SESSION['wsProduct']);
 			}
