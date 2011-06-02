@@ -177,6 +177,10 @@ function efPonyDocsSetup()
 	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]?/i', $_SERVER['PATH_INFO'], $match)) {
 		PonyDocsProduct::SetSelectedProduct($match[1]);
 	}
+	// Set selected version from URL
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]{1}(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)[\/|:]/i', $_SERVER['PATH_INFO'], $match)) {
+		PonyDocsProductVersion::SetSelectedVersion($match[1], $match[2]);
+	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
 }
 
