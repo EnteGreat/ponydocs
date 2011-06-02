@@ -1022,18 +1022,35 @@ HEREDOC;
 					{
 						/**
 						 * Handle [[Documentation:Manual:Topic]] referencing selected version -AND-
-						 * [[Documentation:User:HowToFoo:1.0]] as an explicit link to a page.
+						 * [[Documentation:User:HowToFoo]] as an explicit link to a page.
+						 * [[Documentation:Product:Manual:Topic|Some Alternate Text]]
 						 */
-						if( sizeof( $pieces ) == 3 )
+						if( sizeof( $pieces ) == 3 || sizeof( $pieces ) == 4 )
 						{
-							$product = PonyDocsProduct::GetSelectedProduct( );
-							$version = PonyDocsProductVersion::GetSelectedVersion( $product );
+							if ( sizeof($pieces) == 3) {
+								$product = PonyDocsProduct::GetSelectedProduct();
+								$manual = $pieces[1];
+								$topic = $pieces[2];
+							} else {
+								$product = $pieces[1];
+								$manual = $pieces[2];
+								$topic = $pieces[3];
+							}
+
+							// if link is to current product, get currect selected version, otherwise we have to guess
+							// and get the latest released version of the linked product
+							if ($product == PonyDocsProduct::GetSelectedProduct()) {
+								$version = PonyDocsProductVersion::GetSelectedVersion( $product );
+							} else {
+								$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
+								$version = $pVersion->getVersionName();
+							}
 
 							/**
 							 * Does this topic exist?  Look for a topic with this name tagged for the current version and current product.
 							 * If nothing is found, we create a new article.
 							 */
-							$sqlMatch = 'Documentation:' . $product . ':' . $pieces[1] . ':' . $pieces[2];
+							$sqlMatch = 'Documentation:' . $product . ':' . $manual . ':' . $topic;
 							$res = $dbr->select( 	'categorylinks', 'cl_sortkey', array(
 													"LOWER(cl_sortkey) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
 													"cl_to = 'V:" . $dbr->strencode( $product ) . ':' . $dbr->strencode( $version ) . "'" ), __METHOD__ );
@@ -1058,37 +1075,9 @@ HEREDOC;
 									$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
 									$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+									if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 								}
 							}
-						}
-
-						/**
-						 * Explicit link of the form:
-						 * [[Documentation:Manual:Topic:Version|Some Alternate Text]]
-						 */
-						else if( sizeof( $pieces ) == 4 )
-						{
-							$product = PonyDocsProduct::GetSelectedProduct( );
-							$version = PonyDocsProductVersion::GetSelectedVersion( $product );
-							$topicTitle = $match[1];
-
-							$tempArticle = new Article( Title::newFromText( $topicTitle ));
-							if( !$tempArticle->exists( ))
-							{
-								//echo "- Adding new article with title $topicTitle.<br>";
-								/**
-								 * Create the new article in the system;  if we have alternate text then set our H1 to this.
-								 */
-								$content = '';
-								if( strlen( $match[3] ))
-									$content = '= ' . $match[3] . " =\n";
-								else
-									$content = '= ' . $topicTitle . " =\n";
-
-								$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
-
-								$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
-							} 
 						}
 
 						/**
@@ -1099,6 +1088,7 @@ HEREDOC;
 						{
 							$product = $pieces[1];
 							$version = PonyDocsProductVersion::GetSelectedVersion( $product );
+							$version = $pieces[4];
 							$topicTitle = $match[1];
 
 							$tempArticle = new Article( Title::newFromText( $topicTitle ));
@@ -1117,6 +1107,7 @@ HEREDOC;
 								$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
 								$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+								if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 							} 
 						}
 					}
@@ -1139,8 +1130,9 @@ HEREDOC;
 								$content = '= ' . $match[3] . " =\n";
 							else
 								$content = '= ' . $match[1] . " =\n";
-								
+
 							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created " . $match[1] . " using link " . $match[1] . " in " . $title->__toString( ));}
 						}
 					}
 
@@ -1188,6 +1180,7 @@ HEREDOC;
 							$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
 							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 						}
 					}
 				}
@@ -1498,7 +1491,7 @@ HEREDOC;
 				{
 					$pieces = explode( ':', $match[1] );
 					/**
-					 * [[Documentation:User:Topic]] => Documentation/<currentProduct>/<currentVersion>/User/Topic
+					 * [[Documentation:Manual:Topic]] => Documentation/<currentProduct>/<currentVersion>/Manual/Topic
 					 */
 					if( 3 == sizeof( $pieces ))
 					{
@@ -1536,11 +1529,11 @@ HEREDOC;
 					}
 
 					/**
-					 * [[Documentation:User:Topic:Version]] => Documentation/<currentProduct>/Version/User/Topic
+					 * [[Documentation:Product:Manual:Topic]] => Documentation/Product/<whatversion>/Manual/Topic
 					 */
 					else if( 4 == sizeof( $pieces ))
 					{
-						$href = str_replace( '$1', 'Documentation/' . $pieces[3] . '/' . $pieces[1] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[2] ), $wgArticlePath );
+						$href = str_replace( '$1', 'Documentation/' . $pieces[1] . '/' . PonyDocsProductVersion::GetSelectedVersion($pieces[1]) . '/' . $pieces[2] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[3] ), $wgArticlePath );
 						$href .= $match[2];
 						$text = str_replace( $match[0], '[http://' . $_SERVER['SERVER_NAME'] . $href . ' ' . ( strlen( $match[4] ) ? $match[4] : $match[1] ) . ']', $text );
 					}
