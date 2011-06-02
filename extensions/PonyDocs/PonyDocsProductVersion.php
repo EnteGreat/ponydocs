@@ -519,7 +519,15 @@ class PonyDocsProductVersion
 
 		return isset( self::$sVersionList[$productName][$earliest] ) ? self::$sVersionList[$productName][$earliest] : null;
 	}
-};
+
+	static public function clearNAVCache( PonyDocsProductVersion $version ) {
+		error_log("INFO [" . __METHOD__ . "] Deleting cache entry of NAV for product " . $version->getProductName() . " version " . $version->getVersionName());
+		$cache = PonyDocsCache::getInstance();
+		$key = "NAVDATA-" . $version->getProductName() . "-" . $version->getVersionName();
+		$cache->remove($key);
+	}
+
+}
 
 /**
  * This is a callback for usort() which compares two versions to determine which is earlier.  It is passed

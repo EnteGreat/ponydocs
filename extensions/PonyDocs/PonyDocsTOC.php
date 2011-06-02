@@ -443,9 +443,6 @@ class PonyDocsTOC
 		$key = "TOCCACHE-" . $product->getShortName() . "-" . $manual->getShortName() . "-" . $version->getVersionName();
 		$cache = PonyDocsCache::getInstance();
 		$cache->remove($key);
-		// Also remove NAVDATA cache, since the first Article may have changed.
-		$key = "NAVDATA-" . $product->getShortName() . "-" . $version->getVersionName();
-		$cache->remove($key);
 	}
 }
 

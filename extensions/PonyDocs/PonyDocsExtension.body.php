@@ -668,6 +668,7 @@ class PonyDocsExtension
 			if($pManual) {
 				foreach($manVersionList as $version) {
 					PonyDocsTOC::clearTOCCache($pManual, $version, $pProduct);
+					PonyDocsProductVersion::clearNAVCache($version);
 				}
 			}
 
@@ -1920,9 +1921,20 @@ HEREDOC;
 		if($manual) {
 			foreach($manVersionList as $version) {
 				PonyDocsTOC::clearTOCCache($manual, $version, $product);
+				PonyDocsProductVersion::clearNAVCache($version);
 			}
 		}
 		PonyDocsExtension::clearArticleCategoryCache($article);
+
+		// if this is product versions page, clear navigation cache
+		if ( preg_match( PONYDOCS_PRODUCTVERSION_TITLE_REGEX, $title->__toString(), $matches ) ) {
+			// reload to get updated version list
+			PonyDocsProductVersion::LoadVersionsForProduct($productName, true);
+			$prodVersionList = PonyDocsProductVersion::GetVersions($productName);
+			foreach($prodVersionList as $version) {
+				PonyDocsProductVersion::clearNAVCache($version);
+			}
+		}
 
 		return true;
 	}
