@@ -49,5 +49,6 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     protected function _logout()
     {
         $this->open("http://lightswitch-ponydocs.splunk.com/index.php?title=Special:UserLogout");
+        $this->deleteAllVisibleCookies();
     }
 }
