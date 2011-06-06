@@ -1,6 +1,6 @@
 <?php
 
-class AddVersionTagToTopic extends AbstractAction
+class Storm_AddVersionTagToTopic extends AbstractAction
 {
     public function setUp()
     {
@@ -16,11 +16,11 @@ class AddVersionTagToTopic extends AbstractAction
             'employee'       => TRUE,
             'splunk_docteam' => FALSE,
             'storm_docteam'  => TRUE,
-            'docteam'        => TRUE
+            // 'docteam'        => TRUE
         );
     }
     
-    public function testStorm()
+    public function testAddVersionTagToTopic()
     {
         foreach ($this->_users as $user => $allowed)
         {
@@ -55,8 +55,8 @@ class AddVersionTagToTopic extends AbstractAction
                 
             }
             
-            if ($user != 'anonymous') $this->open("http://lightswitch-ponydocs.splunk.com/index.php?title=Special:UserLogout");
+            if ($user != 'anonymous') $this->_logout();
         }
-  }
+    }
 }
 ?>

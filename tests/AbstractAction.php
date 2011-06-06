@@ -29,26 +29,26 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     
     public function setUp()
     {
-        $this->setBrowser("*chrome");
-        $this->setBrowserUrl("http://lightswitch-ponydocs.splunk.com/");
-        $this->setHost('10.1.7.225');
+        $this->setBrowser('*chrome');
+        $this->setBrowserUrl('http://' . TEST_HOST);
+        $this->setHost(RC_SERVER_IP);
         $this->setPort(4444);
     }
     
     protected function _login($user)
     {
-        $this->open("http://lightswitch-ponydocs.splunk.com/index.php?title=Special:UserLogin");
-        $this->assertEquals("Log in / create account - PonyDocs", $this->getTitle());
-        $this->type("wpName1", self::$_passwords[$user]['username']);
-        $this->type("wpPassword1", self::$_passwords[$user]['password']);
-        $this->click("wpLoginAttempt");
-        $this->waitForPageToLoad("30000");
-        $this->assertEquals("Main Page - PonyDocs", $this->getTitle());
+        $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogin');
+        $this->assertEquals('Log in / create account - PonyDocs', $this->getTitle());
+        $this->type('wpName1', self::$_passwords[$user]['username']);
+        $this->type('wpPassword1', self::$_passwords[$user]['password']);
+        $this->click('wpLoginAttempt');
+        $this->waitForPageToLoad('10000');
+        $this->assertEquals('Main Page - PonyDocs', $this->getTitle());
     }
     
     protected function _logout()
     {
-        $this->open("http://lightswitch-ponydocs.splunk.com/index.php?title=Special:UserLogout");
+        $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogout');
         $this->deleteAllVisibleCookies();
     }
 }
