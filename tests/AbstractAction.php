@@ -44,6 +44,32 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         $this->assertTrue($this->isElementPresent('link=Log out'));
     }
     
+    public function testMain()
+    {
+        error_log('Testing: ' . get_class($this));
+        
+        foreach ($this->_users as $user => $allowed)
+        {
+            error_log('User: ' . $user . ':' . (($allowed) ? 'Allowed' : 'Not Allowed'));
+            
+            if ($user != 'anonymous') $this->_login($user);
+            
+            if ($allowed)
+            {
+                $this->_allowed($user);
+            }
+            else
+            {
+                $this->_notAllowed($user);
+            }
+            
+            if ($user != 'anonymous') $this->_logout();
+        }
+    }
+    
+    abstract protected function _allowed($user);
+    abstract protected function _notAllowed($user);
+    
     protected function _logout()
     {
         $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogout');
@@ -60,9 +86,18 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         
         $mysql->autocommit(FALSE);
         
-        $result = $mysql->query('\. ' . $sql) or $mysql->rollback();
+        $result = $mysql->query('\. ' . $sql);
         
-        $mysql->commit();
-        $mysql->autocommit(TRUE);
+        if (!$result)
+        {
+            error_log('Database Error: ' . $mysql->error);
+            
+            $mysql->rollback();
+        }
+        else
+        {
+            $mysql->commit();
+            $mysql->autocommit(TRUE);
+        }
     }
 }

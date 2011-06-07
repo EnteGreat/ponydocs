@@ -19,42 +19,35 @@ class Any_ViewReleasedVersion extends AbstractAction {
 		);
 
 	}
-
-	public function testViewReleasedVersion() {
-		foreach ($this->_users as $user => $allowed) {
-			if ($user != 'anonymous') $this->_login($user);
-
-			if ($allowed) {
-				print "testing allowed user: ". $user . "\n";
-				$this->open("/Main_Page");
-				$this->assertTrue($this->isTextPresent("1.0 (latest release)"));
-				$this->select("docsManualSelect", "label=Splunk Installation Manual");
-				$this->waitForPageToLoad("10000");
-				// Topic page viewable
-				$this->assertEquals("Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:1.0 - PonyDocs", $this->getTitle());
-				$this->assertTrue($this->isTextPresent("Whats in Splunk Installation Manual"));
-				$this->assertTrue($this->isTextPresent("Find what you need"));
-				$this->click("link=History");
-				$this->waitForPageToLoad("10000");
-				// History page viewable
-				$this->assertEquals("22:18, 1 June 2011", $this->getText("link=exact:22:18, 1 June 2011"));
-				$this->click("mw-oldid-80");
-				$this->click("css=#mw-history-compare > div:nth(1) > input.historysubmit");
-				$this->waitForPageToLoad("10000");
-				// Can compare revisions
-				$this->assertTrue($this->isTextPresent("'''1.0'''"));
-				$this->click("css=#mw-diff-ntitle1 > strong > a:nth(1)");
-				$this->waitForPageToLoad("10000");
-				// Can view source
-				$this->assertTrue($this->isElementPresent("wpTextbox1"));
-			} else {
-				print "testing NOT allowed user: ". $user . "\n";
-				// always allowed
-			}
-
-			if ($user != 'anonymous') $this->_logout();
-		}
-	}
+    
+    protected function _allowed($user)
+    {
+        $this->open("/Main_Page");
+        $this->assertTrue($this->isTextPresent("1.0 (latest release)"));
+        $this->select("docsManualSelect", "label=Splunk Installation Manual");
+        $this->waitForPageToLoad("10000");
+        // Topic page viewable
+        $this->assertEquals("Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:1.0 - PonyDocs", $this->getTitle());
+        $this->assertTrue($this->isTextPresent("Whats in Splunk Installation Manual"));
+        $this->assertTrue($this->isTextPresent("Find what you need"));
+        $this->click("link=History");
+        $this->waitForPageToLoad("10000");
+        // History page viewable
+        $this->assertEquals("22:18, 1 June 2011", $this->getText("link=exact:22:18, 1 June 2011"));
+        $this->click("mw-oldid-80");
+        $this->click("css=#mw-history-compare > div:nth(1) > input.historysubmit");
+        $this->waitForPageToLoad("10000");
+        // Can compare revisions
+        $this->assertTrue($this->isTextPresent("'''1.0'''"));
+        $this->click("css=#mw-diff-ntitle1 > strong > a:nth(1)");
+        $this->waitForPageToLoad("10000");
+        // Can view source
+        $this->assertTrue($this->isElementPresent("wpTextbox1"));
+    }
+    
+    protected function _notAllowed($user)
+    {
+    }
 }
 
 ?>
