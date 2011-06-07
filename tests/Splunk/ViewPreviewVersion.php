@@ -21,7 +21,6 @@ class Splunk_ViewPreviewVersion extends AbstractAction {
 
     protected function _allowed($user)
     {
-		print "testing allowed user: ". $user . "\n";
 		$this->open("/Main_Page");
 		// Preview version is in dropdown
 		$this->assertStringStartsWith("1.0 (latest release)2.0", $this->getText("docsVersionSelect"));
@@ -36,7 +35,6 @@ class Splunk_ViewPreviewVersion extends AbstractAction {
 
     protected function _notAllowed($user)
     {
-		print "testing not allowed user: ". $user . "\n";
 		$this->open("/Main_Page");
 		// Preview version is not in dropdown
 		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"));

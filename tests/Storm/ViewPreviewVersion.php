@@ -21,7 +21,6 @@ class Storm_ViewPreviewVersion extends AbstractAction {
 
     protected function _allowed($user)
     {
-		print "testing allowed user: ". $user . "\n";
 		$this->open("/Main_Page");
 		$this->select("docsProductSelect", "label=Storm");
 		$this->click("css=option[value=Storm]");
@@ -41,7 +40,6 @@ class Storm_ViewPreviewVersion extends AbstractAction {
 
     protected function _notAllowed($user)
     {
-		print "testing NOT allowed user: ". $user . "\n";
         $this->open("/Main_Page");
         if ($user != 'logged_in') { // this is hella janky - needed for logged_in because it immediately follows anonymous; anon can't log out/clear cookie
 			$this->select("docsProductSelect", "label=Storm");
