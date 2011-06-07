@@ -28,6 +28,7 @@ class Any_MoveTopic extends AbstractAction {
 			if ($user != 'anonymous') $this->_login($user);
 
 			if ($allowed) {
+				print "testing allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
 				$this->waitForPageToLoad("10000");
@@ -41,6 +42,7 @@ class Any_MoveTopic extends AbstractAction {
 				// Topic moved
 				$this->assertEquals("Move succeeded", $this->getText("firstHeading"));
 			} else {
+				print "testing NOT allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
 				$this->waitForPageToLoad("10000");
@@ -48,7 +50,15 @@ class Any_MoveTopic extends AbstractAction {
 				$this->waitForPageToLoad("10000");
 				$this->assertFalse($this->isElementPresent("link=Move"));
 				$this->open("/Special:MovePage/Documentation:Splunk:User:WaystoaccessSplunk:1.0");
-				$this->assertTrue($this->isTextPresent("You do not have permission to do that"));
+				if ($user == 'anonymous') {
+					$this->assertTrue($this->isTextPresent("You do not have permission to do that"));
+				} else {
+					$this->type("wpNewTitle", "Documentation:Splunk:User:WaystoaccessSplunktest:1.0");
+					$this->click("wpMove");
+					$this->waitForPageToLoad("10000");
+					// Topic not allowed to be moved
+					$this->assertTextPresent("You are not allowed to execute the action you have requested.");
+				}
 			}
 
 			if ($user != 'anonymous') $this->_logout();

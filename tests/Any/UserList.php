@@ -28,6 +28,7 @@ class Any_UserList extends AbstractAction {
 			if ($user != 'anonymous') $this->_login($user);
 
 			if ($allowed) {
+				print "testing allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
 				$this->waitForPageToLoad("10000");
@@ -35,8 +36,14 @@ class Any_UserList extends AbstractAction {
 				$this->waitForPageToLoad("10000");
 				// View user groups
 				$this->assertTrue($this->isTextPresent("The following is a list of user groups defined on this wiki, with their associated access rights"));
-				$this->click("link=(list of members)");
+				$this->click("link=Users");
 				$this->waitForPageToLoad("10000");
+				$this->type("wpTextbox1", "test");
+				$this->click("wpSave");
+				$this->waitForPageToLoad("30000");
+				// Edit user group page
+				$this->assertTrue($this->isTextPresent("test"));
+				$this->open("/Special:ListUsers");
 				// View user list
 				$this->assertTrue($this->isTextPresent("RandomUser"));
 				$this->type("offset", "e");
@@ -52,6 +59,7 @@ class Any_UserList extends AbstractAction {
 				// Edit user page
 				$this->assertTrue($this->isTextPresent("random user page"));
 			} else {
+				print "testing NOT allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
 				$this->waitForPageToLoad("10000");
@@ -59,6 +67,12 @@ class Any_UserList extends AbstractAction {
 				$this->waitForPageToLoad("10000");
 				// List user groups
 				$this->assertFalse($this->isTextPresent("The following is a list of user groups defined on this wiki, with their associated access rights"));
+				$this->open("/index.php?title=PonyDocs:Users&action=edit&redlink=1");
+				$this->type("wpTextbox1", "test");
+				$this->click("wpSave");
+				$this->waitForPageToLoad("30000");
+				// Edit user group page
+				$this->assertFalse($this->isTextPresent("test"));
 				$this->open("/Special:ListUsers");
 				// List users
 				$this->assertFalse($this->isTextPresent("RandomUser"));

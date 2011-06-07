@@ -29,6 +29,7 @@ class Any_Watchlist extends AbstractAction {
 			if ($user != 'anonymous') $this->_login($user);
 
 			if ($allowed) {
+				print "testing allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
 				$this->waitForPageToLoad("10000");
@@ -98,6 +99,7 @@ class Any_Watchlist extends AbstractAction {
 					}
 				}
 			} else {
+				print "testing NOT allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
 				$this->waitForPageToLoad("10000");

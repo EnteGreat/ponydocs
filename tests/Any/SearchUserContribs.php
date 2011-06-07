@@ -25,6 +25,7 @@ class Any_SearchUserContribs extends AbstractAction {
 			if ($user != 'anonymous') $this->_login($user);
 
 			if ($allowed) {
+				print "testing allowed user: ". $user . "\n";
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
 				$this->waitForPageToLoad("10000");
@@ -36,6 +37,7 @@ class Any_SearchUserContribs extends AbstractAction {
 				// Search succeeded
 				$this->assertEquals("22:43, 1 June 2011", $this->getText("link=exact:22:43, 1 June 2011"));
 			} else {
+				print "testing NOT allowed user: ". $user . "\n";
 				// always allowed
 			}
 
