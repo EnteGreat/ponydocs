@@ -20,7 +20,7 @@
         <browser
             name="Firefox on My LapTop"
             browser="*chrome"
-            host="10.1.5.133"<!-- Set this to your laptop/pc -->
+            host="{YOUR_RC_SERVER_HERE}"
             port="4444"
             timeout="10000" />
     </selenium>
@@ -28,6 +28,6 @@
         <ini name="error_reporting" value="E_ALL | E_STRICT | E_DEPRECATED" />
         <ini name="date.timezone" value="America/Los_Angeles" />
         <ini name="display_errors" value="on" />
-        <const name="TEST_HOST" value="lightswitch-ponydocs.splunk.com" /><!-- Set this to your beer -->
+        <const name="TEST_HOST" value="{YOUR_BEER_SERVER_HERE}" />
     </php>
 </phpunit>
