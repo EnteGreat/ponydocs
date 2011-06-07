@@ -16,6 +16,9 @@
         <testsuite name="Any Tests">
             <directory suffix=".php">Any</directory>
         </testsuite>
+        <testsuite name="Splunk Tests">
+            <directory suffix=".php">Splunk</directory>
+        </testsuite>
     </testsuites>
     <selenium>
         <browser
