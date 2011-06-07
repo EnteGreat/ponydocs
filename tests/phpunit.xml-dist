@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="bootstrap.php"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    colors="true"
+    processIsolation="true"
+    backupGlobals="false"
+    >
+    <testsuites>
+        <testsuite name="Storm Tests">
+            <directory suffix=".php">Storm</directory>
+        </testsuite>
+        <testsuite name="Any Tests">
+            <directory suffix=".php">Any</directory>
+        </testsuite>
+    </testsuites>
+    <selenium>
+        <browser
+            name="Firefox on My LapTop"
+            browser="*chrome"
+            host="10.1.5.133"<!-- Set this to your laptop/pc -->
+            port="4444"
+            timeout="10000" />
+    </selenium>
+    <php>
+        <ini name="error_reporting" value="E_ALL | E_STRICT | E_DEPRECATED" />
+        <ini name="date.timezone" value="America/Los_Angeles" />
+        <ini name="display_errors" value="on" />
+        <const name="TEST_HOST" value="lightswitch-ponydocs.splunk.com" /><!-- Set this to your beer -->
+    </php>
+</phpunit>

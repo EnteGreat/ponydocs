@@ -29,10 +29,7 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     
     public function setUp()
     {
-        $this->setBrowser('*chrome');
         $this->setBrowserUrl('http://' . TEST_HOST);
-        $this->setHost(RC_SERVER_IP);
-        $this->setPort(4444);
     }
     
     protected function _login($user)
@@ -44,6 +41,7 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         $this->click('wpLoginAttempt');
         $this->waitForPageToLoad('10000');
         $this->assertEquals('Main Page - PonyDocs', $this->getTitle());
+        $this->assertTrue($this->isElementPresent('link=Log out'));
     }
     
     protected function _logout()
