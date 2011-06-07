@@ -7,6 +7,7 @@
     colors="true"
     processIsolation="true"
     backupGlobals="false"
+    verbose="true"
     >
     <testsuites>
         <testsuite name="Storm Tests">
@@ -27,7 +28,8 @@
     <php>
         <ini name="error_reporting" value="E_ALL | E_STRICT | E_DEPRECATED" />
         <ini name="date.timezone" value="America/Los_Angeles" />
-        <ini name="display_errors" value="on" />
+        <ini name="display_errors" value="off" />
+        <ini name="error_log" value="error.log" />
         <const name="TEST_HOST" value="{YOUR_BEER_SERVER_HERE}" />
     </php>
 </phpunit>
