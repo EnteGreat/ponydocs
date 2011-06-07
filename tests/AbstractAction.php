@@ -54,14 +54,7 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
             
             if ($user != 'anonymous') $this->_login($user);
             
-            if ($allowed)
-            {
-                $this->_allowed($user);
-            }
-            else
-            {
-                $this->_notAllowed($user);
-            }
+            ($allowed) ? $this->_allowed($user) : $this->_notAllowed($user);
             
             if ($user != 'anonymous') $this->_logout();
         }
