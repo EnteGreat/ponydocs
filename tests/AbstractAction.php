@@ -50,7 +50,9 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         
         foreach ($this->_users as $user => $allowed)
         {
-            error_log('User: ' . $user . ':' . (($allowed) ? 'Allowed' : 'Not Allowed'));
+            $perm = $allowed ? 'Allowed' : 'Not Allowed';
+            
+            error_log('User: ' . $user . ' -> ' . $perm);
             
             if ($user != 'anonymous') $this->_login($user);
             
@@ -72,25 +74,11 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     
     public function tearDown()
     {
-        $sql   = dirname(__FILE__) . '/sql/ponydocs.sql';
-        $mysql = mysqli_init();
-        
-        $mysql->real_connect('localhost', 'root', '', 'ponydocs');
-        
-        $mysql->autocommit(FALSE);
-        
-        $result = $mysql->query('\. ' . $sql);
-        
-        if (!$result)
-        {
-            error_log('Database Error: ' . $mysql->error);
-            
-            $mysql->rollback();
-        }
-        else
-        {
-            $mysql->commit();
-            $mysql->autocommit(TRUE);
-        }
+        $dir      = dirname(__FILE__);
+        $response = shell_exec('cd ' . escapeshellarg($dir)
+                  . DIRECTORY_SEPARATOR
+                  . 'sql && mysql -u root ponydocs < ponydocs.sql');
+                  
+        error_log('SQL Response: ' . $response);
     }
 }
