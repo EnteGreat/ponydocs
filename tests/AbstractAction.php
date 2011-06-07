@@ -59,6 +59,9 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
             ($allowed) ? $this->_allowed($user) : $this->_notAllowed($user);
             
             if ($user != 'anonymous') $this->_logout();
+            
+            $this->deleteAllVisibleCookies();
+            $this->tearDown();
         }
     }
     
@@ -68,8 +71,6 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     protected function _logout()
     {
         $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogout');
-        $this->deleteAllVisibleCookies();
-        $this->tearDown();
     }
     
     public function tearDown()

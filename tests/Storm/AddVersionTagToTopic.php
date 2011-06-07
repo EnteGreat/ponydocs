@@ -22,12 +22,16 @@ class Storm_AddVersionTagToTopic extends AbstractAction
     
     protected function _allowed($user)
     {
+        // Create
+        $this->open("/Main_Page");
+        $this->waitForPageToLoad("10000");
         $this->assertEquals("Main Page - PonyDocs", $this->getTitle());
         $this->select("docsProductSelect", "Storm");
         $this->waitForPageToLoad("10000");
         $this->select("docsManualSelect", "Storm Installation Manual");
         $this->waitForPageToLoad("10000");
         $this->assertEquals("Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0 - PonyDocs", $this->getTitle());
+        $this->assertTrue($this->isElementPresent("link=Edit"), $user);
         $this->click("link=Edit");
         $this->waitForPageToLoad("10000");
         $this->assertEquals("Editing Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0 - PonyDocs", $this->getTitle());
@@ -36,6 +40,8 @@ class Storm_AddVersionTagToTopic extends AbstractAction
         $this->waitForPageToLoad("10000");
         $this->assertTrue($this->isElementPresent("link=exact:V:Storm:1.1"));
         $this->assertEquals("Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0 - PonyDocs", $this->getTitle());
+        
+        // Delete
         $this->click("link=Edit");
         $this->waitForPageToLoad("10000");
         $this->assertEquals("Editing Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0 - PonyDocs", $this->getTitle());
@@ -47,6 +53,14 @@ class Storm_AddVersionTagToTopic extends AbstractAction
     
     protected function _notAllowed($user)
     {
-        
+        // Create
+        $this->open("/Main_Page");
+        $this->waitForPageToLoad("10000");
+        $this->select("docsProductSelect", "Storm");
+        $this->waitForPageToLoad("10000");
+        $this->select("docsManualSelect", "Storm Installation Manual");
+        $this->waitForPageToLoad("10000");
+        $this->assertEquals("Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0 - PonyDocs", $this->getTitle());
+        $this->assertFalse($this->isElementPresent("link=Edit"), $user);
     }
 }
