@@ -33,6 +33,7 @@ class Any_SearchUserContribs extends AbstractAction {
 				$this->type("target", "Admin");
 				$this->click("css=input[type=submit]");
 				$this->waitForPageToLoad("30000");
+				// Search succeeded
 				$this->assertEquals("22:43, 1 June 2011", $this->getText("link=exact:22:43, 1 June 2011"));
 			} else {
 				// always allowed

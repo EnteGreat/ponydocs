@@ -44,6 +44,7 @@ class Any_Watchlist extends AbstractAction {
 				$this->waitForPageToLoad("30000");
 				$this->click("link=all");
 			    $this->waitForPageToLoad("30000");
+				// Watch topic succeeded
 				$this->assertTrue($this->isElementPresent("link=exact:Documentation:Splunk:User:SplunkOverview:1.0"));
 				foreach ($editTypes as $editType) {
 					if ($editType == 'regular') {
@@ -51,6 +52,7 @@ class Any_Watchlist extends AbstractAction {
 						for ($second = 0; ; $second++) {
 							if ($second >= 60) $this->fail("timeout");
 							try {
+								// Edit watchlist link is there
 								if ($this->isElementPresent("link=View and edit watchlist")) break;
 							} catch (Exception $e) {}
 							sleep(1);
@@ -60,6 +62,7 @@ class Any_Watchlist extends AbstractAction {
 						$this->click("titles[]");
 						$this->click("css=input[type=submit]");
 						$this->waitForPageToLoad("30000");
+						// Topic edit/removal succeeded
 						$this->assertTrue($this->isTextPresent("1 title was removed from your watchlist:"));
 
 					} else if ($editType == 'raw') {
@@ -67,6 +70,7 @@ class Any_Watchlist extends AbstractAction {
 						for ($second = 0; ; $second++) {
 							if ($second >= 60) $this->fail("timeout");
 							try {
+								// Edit raw watchlist link is there
 								if ($this->isElementPresent("link=Edit raw watchlist")) break;
 							} catch (Exception $e) {}
 							sleep(1);
@@ -79,6 +83,7 @@ class Any_Watchlist extends AbstractAction {
 						for ($second = 0; ; $second++) {
 							if ($second >= 60) $this->fail("timeout");
 							try {
+								// Topics were added via raw watchlist edit tool
 								if ($this->isTextPresent("titles were added") || $this->isTextPresent("title was added")) break;
 							} catch (Exception $e) {}
 							sleep(1);
@@ -87,6 +92,7 @@ class Any_Watchlist extends AbstractAction {
 						$this->type("titles", "");
 						$this->click("css=input[type=submit]");
 						$this->waitForPageToLoad("30000");
+						// Topics were removed via raw watchlist edit tool
 						$this->assertTrue($this->isTextPresent("titles were removed") || $this->isTextPresent("title was removed"));
 
 					}

@@ -38,6 +38,7 @@ class Any_MoveTopic extends AbstractAction {
 				$this->type("wpNewTitle", "Documentation:Splunk:User:WaystoaccessSplunktest:1.0");
 				$this->click("wpMove");
 				$this->waitForPageToLoad("30000");
+				// Topic moved
 				$this->assertEquals("Move succeeded", $this->getText("firstHeading"));
 			} else {
 				$this->open("/Main_Page");
