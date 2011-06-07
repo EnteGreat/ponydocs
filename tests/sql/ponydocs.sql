@@ -12,7 +12,7 @@
 
 -- --------------------------------------------------------
 
-DROP TABLE `archive`, `category`, `categorylinks`, `change_tag`, `externallinks`, `external_user`, `filearchive`, `hitcounter`, `image`, `imagelinks`, `interwiki`, `ipblocks`, `job`, `l10n_cache`, `langlinks`, `logging`, `log_search`, `math`, `objectcache`, `oldimage`, `page`, `pagelinks`, `page_props`, `page_restrictions`, `ponydocs_cache`, `ponydocs_doclinks`, `protected_titles`, `querycache`, `querycachetwo`, `querycache_info`, `recentchanges`, `redirect`, `revision`, `searchindex`, `site_stats`, `tag_summary`, `templatelinks`, `text`, `trackbacks`, `transcache`, `updatelog`, `user`, `user_groups`, `user_newtalk`, `user_properties`, `valid_tag`, `watchlist`;
+DROP TABLE IF EXISTS `archive`, `category`, `categorylinks`, `change_tag`, `externallinks`, `external_user`, `filearchive`, `hitcounter`, `image`, `imagelinks`, `interwiki`, `ipblocks`, `job`, `l10n_cache`, `langlinks`, `logging`, `log_search`, `math`, `objectcache`, `oldimage`, `page`, `pagelinks`, `page_props`, `page_restrictions`, `ponydocs_cache`, `ponydocs_doclinks`, `protected_titles`, `querycache`, `querycachetwo`, `querycache_info`, `recentchanges`, `redirect`, `revision`, `searchindex`, `site_stats`, `tag_summary`, `templatelinks`, `text`, `trackbacks`, `transcache`, `updatelog`, `user`, `user_groups`, `user_newtalk`, `user_properties`, `valid_tag`, `watchlist`;
 
 -- 
 -- Table structure for table `archive`
