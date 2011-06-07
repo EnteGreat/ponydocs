@@ -49,4 +49,14 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogout');
         $this->deleteAllVisibleCookies();
     }
+    
+    public function tearDown()
+    {
+        $sql_file = dirname(__FILE__) . '/sql/ponydocs.sql';
+        $mysql    = mysqli_init();
+        
+        $mysql->real_connect('localhost', 'root', '', 'ponydocs');
+        $mysql->multi_query('DROP DATABASE `ponydocs`;CREATE DATABASE `ponydocs`;USE `ponydocs`;\. ' . $sql_file);
+        $mysql->free_result();
+    }
 }
