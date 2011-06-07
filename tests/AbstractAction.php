@@ -78,7 +78,5 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
         $response = shell_exec('cd ' . escapeshellarg($dir)
                   . DIRECTORY_SEPARATOR
                   . 'sql && mysql -u root ponydocs < ponydocs.sql');
-                  
-        error_log('SQL Response: ' . $response);
     }
 }
