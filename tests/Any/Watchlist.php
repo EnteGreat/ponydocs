@@ -31,7 +31,7 @@ class Any_Watchlist extends AbstractAction {
 			if ($allowed) {
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->click("link=Watch");
 				for ($second = 0; ; $second++) {
 					if ($second >= 60) $this->fail("timeout");
@@ -41,9 +41,9 @@ class Any_Watchlist extends AbstractAction {
 					sleep(1);
 				}
 				$this->click("link=watchlist");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->click("link=all");
-			    $this->waitForPageToLoad("30000");
+			    $this->waitForPageToLoad("10000");
 				// Watch topic succeeded
 				$this->assertTrue($this->isElementPresent("link=exact:Documentation:Splunk:User:SplunkOverview:1.0"));
 				foreach ($editTypes as $editType) {
@@ -58,10 +58,10 @@ class Any_Watchlist extends AbstractAction {
 							sleep(1);
 						}
 						$this->click("link=View and edit watchlist");
-						$this->waitForPageToLoad("30000");
+						$this->waitForPageToLoad("10000");
 						$this->click("titles[]");
 						$this->click("css=input[type=submit]");
-						$this->waitForPageToLoad("30000");
+						$this->waitForPageToLoad("10000");
 						// Topic edit/removal succeeded
 						$this->assertTrue($this->isTextPresent("1 title was removed from your watchlist:"));
 
@@ -76,10 +76,10 @@ class Any_Watchlist extends AbstractAction {
 							sleep(1);
 						}
 						$this->click("link=Edit raw watchlist");
-					    $this->waitForPageToLoad("30000");
+					    $this->waitForPageToLoad("10000");
 						$this->type("titles", "Documentation:Splunk:User:SplunkOverview:1.0\nDocumentation:Splunk:User:SplunkOverview:2.0\nSplunk:User:SplunkOverview:1.0");
 						$this->click("css=input[type=submit]");
-						$this->waitForPageToLoad("30000");
+						$this->waitForPageToLoad("10000");
 						for ($second = 0; ; $second++) {
 							if ($second >= 60) $this->fail("timeout");
 							try {
@@ -91,7 +91,7 @@ class Any_Watchlist extends AbstractAction {
 
 						$this->type("titles", "");
 						$this->click("css=input[type=submit]");
-						$this->waitForPageToLoad("30000");
+						$this->waitForPageToLoad("10000");
 						// Topics were removed via raw watchlist edit tool
 						$this->assertTrue($this->isTextPresent("titles were removed") || $this->isTextPresent("title was removed"));
 
@@ -100,7 +100,7 @@ class Any_Watchlist extends AbstractAction {
 			} else {
 				$this->open("/Main_Page");
 				$this->select("docsManualSelect", "label=Splunk User Manual");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->assertFalse($this->isElementPresent("link=Watch"));
 				$this->open("/index.php?title=Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:1.0&action=watch");
 				$this->assertTrue($this->isTextPresent("You must be logged in to modify your watchlist."));

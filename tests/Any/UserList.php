@@ -30,33 +30,33 @@ class Any_UserList extends AbstractAction {
 			if ($allowed) {
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->click("link=User group rights");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// View user groups
 				$this->assertTrue($this->isTextPresent("The following is a list of user groups defined on this wiki, with their associated access rights"));
 				$this->click("link=(list of members)");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// View user list
 				$this->assertTrue($this->isTextPresent("RandomUser"));
 				$this->type("offset", "e");
 				$this->click("css=input[type=submit]");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// Filter user list
 				$this->assertFalse($this->isElementPresent("link=Docteam"));
 				$this->click("link=RandomUser");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->type("wpTextbox1", "random user page");
 				$this->click("wpSave");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// Edit user page
 				$this->assertTrue($this->isTextPresent("random user page"));
 			} else {
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->click("link=User group rights");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// List user groups
 				$this->assertFalse($this->isTextPresent("The following is a list of user groups defined on this wiki, with their associated access rights"));
 				$this->open("/Special:ListUsers");

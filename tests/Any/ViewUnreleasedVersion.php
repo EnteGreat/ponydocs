@@ -34,13 +34,13 @@ class Any_ViewUnreleasedVersion extends AbstractAction {
 				$this->assertEquals("1.0 (latest release)2.03.0", $this->getText("docsVersionSelect"));
 				$this->select("docsVersionSelect", "label=3.0");
 				$this->click("css=option[value=3.0]");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->select("docsManualSelect", "label=Splunk Installation Manual");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// Unreleased Manual is viewable
 				$this->assertEquals("Whats in Splunk Installation Manual", $this->getText("Whats_in_Splunk_Installation_Manual"));
 				$this->click("link=System Requirements for Splunk");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// Unreleased Topic is viewable
 				$this->assertEquals("System Requirements for Splunk", $this->getText("System_Requirements_for_Splunk"));
 			} else {

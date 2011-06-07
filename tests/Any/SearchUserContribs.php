@@ -27,12 +27,12 @@ class Any_SearchUserContribs extends AbstractAction {
 			if ($allowed) {
 				$this->open("/Main_Page");
 				$this->click("link=Special pages");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->click("link=User contributions");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				$this->type("target", "Admin");
 				$this->click("css=input[type=submit]");
-				$this->waitForPageToLoad("30000");
+				$this->waitForPageToLoad("10000");
 				// Search succeeded
 				$this->assertEquals("22:43, 1 June 2011", $this->getText("link=exact:22:43, 1 June 2011"));
 			} else {
