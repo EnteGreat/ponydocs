@@ -23,7 +23,7 @@ class Storm_CreateTopic extends AbstractAction
     protected function _allowed($user)
     {
         // Create
-        $this->open("http://lightswitch-ponydocs.splunk.com/Documentation:Storm:Manuals");
+        $this->open("/Documentation:Storm:Manuals");
         $this->assertEquals("Documentation:Storm:Manuals - PonyDocs", $this->getTitle(), $user);
         $this->click("link=Storm Installation Manual");
         $this->waitForPageToLoad("10000");
@@ -52,7 +52,7 @@ class Storm_CreateTopic extends AbstractAction
     
     protected function _notAllowed($user)
     {
-        $this->open("http://lightswitch-ponydocs.splunk.com/Documentation:Storm:Manuals");
+        $this->open("/Documentation:Storm:Manuals");
         $this->assertEquals("Documentation:Storm:Manuals - PonyDocs", $this->getTitle(), $user);
         $this->click("link=Storm Installation Manual");
         $this->waitForPageToLoad("10000");
