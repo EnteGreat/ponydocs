@@ -1,7 +1,9 @@
 <?php
-class Storm_ViewPreviewVersion extends AbstractAction {
-	public function setUp() {
 
+class Storm_ViewPreviewVersion extends AbstractAction
+{
+	public function setUp()
+	{
 		parent::setUp();
 
 		$this->_users = array
@@ -16,7 +18,6 @@ class Storm_ViewPreviewVersion extends AbstractAction {
     		'storm_docteam'  => TRUE,
     		'docteam'        => TRUE
 		);
-
 	}
 
     protected function _allowed($user)
@@ -26,7 +27,7 @@ class Storm_ViewPreviewVersion extends AbstractAction {
 		$this->click("css=option[value=Storm]");
 		$this->waitForPageToLoad("10000");
 		// Preview version is in dropdown
-		$this->assertStringStartsWith("1.0 (latest release)1.1", $this->getText("docsVersionSelect"));
+		$this->assertStringStartsWith("1.0 (latest release)1.1", $this->getText("docsVersionSelect"), $user);
 		$this->select("docsVersionSelect", "label=1.1");
 		$this->click("css=option[value=1.1]");
 		$this->waitForPageToLoad("10000");
@@ -35,7 +36,7 @@ class Storm_ViewPreviewVersion extends AbstractAction {
 		$this->click("link=Ways to access Storm");
 		$this->waitForPageToLoad("10000");
 		// Can view preview version topic
-		$this->assertTrue($this->isElementPresent("Ways_to_access_Storm"));
+		$this->assertTrue($this->isElementPresent("Ways_to_access_Storm"), $user);
     }
 
     protected function _notAllowed($user)
@@ -47,10 +48,10 @@ class Storm_ViewPreviewVersion extends AbstractAction {
 			$this->waitForPageToLoad("10000");
 		}
 		// Preview version is not in dropdown
-		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"));
+		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"), $user);
 		$this->open("/Documentation/Storm/1.1/User/WaystoaccessStorm");
 		// Can't view preview version topic
-		$this->assertFalse($this->isElementPresent("Ways_to_access_Storm"));
+		$this->assertFalse($this->isElementPresent("Ways_to_access_Storm"), $user);
     }
 }
 

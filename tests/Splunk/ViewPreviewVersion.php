@@ -1,7 +1,9 @@
 <?php
-class Splunk_ViewPreviewVersion extends AbstractAction {
-	public function setUp() {
 
+class Splunk_ViewPreviewVersion extends AbstractAction
+{
+	public function setUp()
+	{
 		parent::setUp();
 
 		$this->_users = array
@@ -16,33 +18,29 @@ class Splunk_ViewPreviewVersion extends AbstractAction {
     		'storm_docteam'  => TRUE,
     		'docteam'        => TRUE
 		);
-
 	}
 
     protected function _allowed($user)
     {
 		$this->open("/Main_Page");
 		// Preview version is in dropdown
-		$this->assertStringStartsWith("1.0 (latest release)2.0", $this->getText("docsVersionSelect"));
+		$this->assertStringStartsWith("1.0 (latest release)2.0", $this->getText("docsVersionSelect"), $user);
 		$this->select("docsVersionSelect", "label=2.0");
 		$this->click("css=option[value=2.0]");
 		$this->waitForPageToLoad("10000");
-		$this->select("docsManualSelect", "label=Splunk Installation Manual");
+		$this->select("docsManualSelect", "label=Splunk Installation Manual", $user);
 		$this->waitForPageToLoad("10000");
 		// Can view preview version topic
-		$this->assertTrue($this->isElementPresent("Whats_in_Splunk_Installation_Manual"));
+		$this->assertTrue($this->isElementPresent("Whats_in_Splunk_Installation_Manual"), $user);
     }
 
     protected function _notAllowed($user)
     {
 		$this->open("/Main_Page");
 		// Preview version is not in dropdown
-		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"));
+		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"), $user);
 		$this->open("/Documentation/Splunk/2.0/Installation/WhatsinSplunkInstallationManual");
 		// Can't view preview version topic
-		$this->assertFalse($this->isElementPresent("Whats_in_Splunk_Installation_Manual"));
+		$this->assertFalse($this->isElementPresent("Whats_in_Splunk_Installation_Manual"), $user);
     }
 }
-
-
-?>

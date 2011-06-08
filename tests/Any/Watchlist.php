@@ -1,21 +1,22 @@
 <?php
 
-class Any_Watchlist extends AbstractAction {
-	public function setUp() {
-
+class Any_Watchlist extends AbstractAction
+{
+	public function setUp()
+	{
 		parent::setUp();
 
 		$this->_users = array
 		(
-		'admin'          => TRUE,
-		'anonymous'      => FALSE,
-		'logged_in'      => TRUE,
-		'splunk_preview' => TRUE,
-		'storm_preview'  => TRUE,
-		'employee'       => TRUE,
-		'splunk_docteam' => TRUE,
-		'storm_docteam'  => TRUE,
-		'docteam'        => TRUE
+    		'admin'          => TRUE,
+    		'anonymous'      => FALSE,
+    		'logged_in'      => TRUE,
+    		'splunk_preview' => TRUE,
+    		'storm_preview'  => TRUE,
+    		'employee'       => TRUE,
+    		'splunk_docteam' => TRUE,
+    		'storm_docteam'  => TRUE,
+    		'docteam'        => TRUE
 		);
 
 	}
@@ -38,7 +39,7 @@ class Any_Watchlist extends AbstractAction {
         $this->click("link=all");
         $this->waitForPageToLoad("10000");
         // Watch topic succeeded
-        $this->assertTrue($this->isElementPresent("link=exact:Documentation:Splunk:User:SplunkOverview:1.0"));
+        $this->assertTrue($this->isElementPresent("link=exact:Documentation:Splunk:User:SplunkOverview:1.0"), $user);
         foreach ($editTypes as $editType) {
             if ($editType == 'regular') {
 
@@ -56,7 +57,7 @@ class Any_Watchlist extends AbstractAction {
                 $this->click("css=input[type=submit]");
                 $this->waitForPageToLoad("10000");
                 // Topic edit/removal succeeded
-                $this->assertTrue($this->isTextPresent("1 title was removed from your watchlist:"));
+                $this->assertTrue($this->isTextPresent("1 title was removed from your watchlist:"), $user);
 
             } else if ($editType == 'raw') {
 
@@ -86,7 +87,7 @@ class Any_Watchlist extends AbstractAction {
                 $this->click("css=input[type=submit]");
                 $this->waitForPageToLoad("10000");
                 // Topics were removed via raw watchlist edit tool
-                $this->assertTrue($this->isTextPresent("titles were removed") || $this->isTextPresent("title was removed"));
+                $this->assertTrue($this->isTextPresent("titles were removed") || $this->isTextPresent("title was removed"), $user);
 
             }
         }
@@ -97,8 +98,8 @@ class Any_Watchlist extends AbstractAction {
         $this->open("/Main_Page");
         $this->select("docsManualSelect", "label=Splunk User Manual");
         $this->waitForPageToLoad("10000");
-        $this->assertFalse($this->isElementPresent("link=Watch"));
+        $this->assertFalse($this->isElementPresent("link=Watch"), $user);
         $this->open("/index.php?title=Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:1.0&action=watch");
-        $this->assertTrue($this->isTextPresent("You must be logged in to modify your watchlist."));
+        $this->assertTrue($this->isTextPresent("You must be logged in to modify your watchlist."), $user);
     }
 }

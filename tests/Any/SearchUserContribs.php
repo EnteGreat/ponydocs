@@ -31,7 +31,7 @@ class Any_SearchUserContribs extends AbstractAction {
         $this->click("css=input[type=submit]");
         $this->waitForPageToLoad("10000");
         // Search succeeded
-        $this->assertEquals("22:43, 1 June 2011", $this->getText("link=exact:22:43, 1 June 2011"));
+        $this->assertEquals("22:43, 1 June 2011", $this->getText("link=exact:22:43, 1 June 2011"), $user);
     }
     
     protected function _notAllowed($user)
