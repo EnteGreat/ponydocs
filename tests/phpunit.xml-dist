@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
     bootstrap="bootstrap.php"
-    convertErrorsToExceptions="true"
-    convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
-    colors="true"
+    convertErrorsToExceptions="false"
+    convertNoticesToExceptions="false"
+    convertWarningsToExceptions="false"
+    colors="false"
     processIsolation="true"
     backupGlobals="false"
     verbose="true"
+    stopOnError="false"
+    stopOnFailure="false"
     >
     <testsuites>
         <testsuite name="Storm Tests">
@@ -35,4 +37,7 @@
         <ini name="error_log" value="error.log" />
         <const name="TEST_HOST" value="{YOUR_BEER_SERVER_HERE}" />
     </php>
+    <logging>
+        <log type="junit" target="log.xml" />
+    </logging>
 </phpunit>
