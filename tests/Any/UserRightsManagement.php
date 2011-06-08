@@ -1,6 +1,6 @@
 <?php
 
-class Any_MoveTopic extends AbstractAction {
+class Any_UserRightsManagement extends AbstractAction {
 	public function setUp() {
 
 		parent::setUp();
