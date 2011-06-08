@@ -33,7 +33,7 @@ class Any_UserList extends AbstractAction {
         $this->waitForPageToLoad("10000");
         $this->type("wpTextbox1", "test");
         $this->click("wpSave");
-        $this->waitForPageToLoad("30000");
+        $this->waitForPageToLoad("10000");
         // Edit user group page
         $this->assertTrue($this->isTextPresent("test"), $user);
         $this->open("/Special:ListUsers");
@@ -65,7 +65,7 @@ class Any_UserList extends AbstractAction {
         $this->open("/index.php?title=PonyDocs:Users&action=edit&redlink=1");
         $this->type("wpTextbox1", "test");
         $this->click("wpSave");
-        $this->waitForPageToLoad("30000");
+        $this->waitForPageToLoad("10000");
         // Edit user group page
         $this->assertFalse($this->isTextPresent("test"), $user);
         $this->open("/Special:ListUsers");
