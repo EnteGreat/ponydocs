@@ -1,18 +1,4 @@
 <?php
-class Example extends PHPUnit_Extensions_SeleniumTestCase
-{
-  protected function setUp()
-  {
-    $this->setBrowser("*chrome");
-    $this->setBrowserUrl("http://tecate-ponydocs.splunk.com/");
-  }
-
-  public function testMyTestCase()
-  {
-
-  }
-}
-
 
 class Any_ViewDocumentationProductVersionsPages extends AbstractAction {
 	public function setUp() {
