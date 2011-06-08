@@ -22,7 +22,6 @@ class Any_MoveTopic extends AbstractAction {
 
     protected function _allowed($user)
     {
-		print "allowed: ".$user."\n";
 		$this->open("/Main_Page");
 		$this->click("link=Special pages");
 		$this->waitForPageToLoad("10000");
@@ -41,7 +40,6 @@ class Any_MoveTopic extends AbstractAction {
 
     protected function _notAllowed($user)
     {
-		print "not allowed: ".$user."\n";
 		$this->open("/Special:UserRights");
 		// Cannot access user rights management functionality
 		$this->assertTrue($this->isTextPresent("You do not have permission to do that"));
