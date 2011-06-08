@@ -42,9 +42,7 @@ class Any_ViewDocumentationProductVersionsPages extends AbstractAction {
 		$this->open("/index.php?title=Documentation:Splunk:Versions&action=edit");
 		// Content can be edited
 		$this->assertEquals("{{#version:1.0|released}}\n{{#version:2.0|preview}}\n{{#version:3.0|unreleased}}", $this->getValue("wpTextbox1"));
-		$this->open("/index.php?title=Documentation%3ASplunk%3AVersions&action=historysubmit&diff=207&oldid=148");
-		$this->click("mw-oldid-148");
-		$this->click("css=#mw-history-compare > div:nth(1) > input.historysubmit");
+		$this->open("/index.php?title=Documentation%3ASplunk%3AVersions&action=historysubmit&diff=148&oldid=49");
 		$this->waitForPageToLoad("10000");
 		// Revision comparison can be seen
 		$this->assertTrue($this->isTextPresent("Version 1.0 (released)"));
@@ -58,9 +56,7 @@ class Any_ViewDocumentationProductVersionsPages extends AbstractAction {
 		$this->open("/index.php?title=Documentation:Splunk:Versions&action=edit");
 		// Content cannot be seen
 		$this->assertNotEquals("{{#version:1.0|released}}\n{{#version:2.0|preview}}\n{{#version:3.0|unreleased}}", $this->getValue("wpTextbox1"));
-		$this->open("/index.php?title=Documentation%3ASplunk%3AVersions&action=historysubmit&diff=207&oldid=148");
-		$this->click("mw-oldid-148");
-		$this->click("css=#mw-history-compare > div:nth(1) > input.historysubmit");
+		$this->open("/index.php?title=Documentation%3ASplunk%3AVersions&action=historysubmit&diff=148&oldid=49");
 		$this->waitForPageToLoad("10000");
 		// Revision comparison cannot be seen
 		$this->assertFalse($this->isTextPresent("Version 1.0 (released)"));
