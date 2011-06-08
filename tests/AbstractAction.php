@@ -34,25 +34,24 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     
     protected function _login($user)
     {
-        $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogin');
-        $this->assertEquals('Log in / create account - PonyDocs', $this->getTitle());
-        $this->type('wpName1', self::$_passwords[$user]['username']);
-        $this->type('wpPassword1', self::$_passwords[$user]['password']);
-        $this->click('wpLoginAttempt');
-        $this->waitForPageToLoad('10000');
-        $this->assertEquals('Main Page - PonyDocs', $this->getTitle());
-        $this->assertTrue($this->isElementPresent('link=Log out'));
+        $this->open('http://' . TEST_HOST . '/index.php?title=Special:UserLogin', $user);
+        $this->waitForPageToLoad('10000', $user);
+        $this->assertEquals('Log in / create account - PonyDocs', $this->getTitle(), $user);
+        $this->type('wpName1', self::$_passwords[$user]['username'], $user);
+        $this->type('wpPassword1', self::$_passwords[$user]['password'], $user);
+        $this->click('wpLoginAttempt', $user);
+        $this->waitForPageToLoad('10000', $user);
+        $this->assertEquals('Main Page - PonyDocs', $this->getTitle(), $user);
+        $this->assertTrue($this->isElementPresent('link=Log out'), $user);
     }
     
     public function testMain()
     {
-        error_log('Testing: ' . get_class($this));
+        error_log('--- Testing: [' . get_class($this) . '] ---');
         
         foreach ($this->_users as $user => $allowed)
         {
-            $perm = $allowed ? 'Allowed' : 'Not Allowed';
-            
-            error_log('User: ' . $user . ' -> ' . $perm);
+            error_log('User: ' . $user . ' -> ' . ($$allowed ? 'Allowed' : 'Not Allowed'));
             
             if ($user != 'anonymous') $this->_login($user);
             
@@ -62,7 +61,11 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
             
             $this->deleteAllVisibleCookies();
             $this->tearDown();
+            $this->open('/');
+            $this->waitForPageToLoad('10000');
         }
+        
+        error_log('--- Done: [' . get_class($this) . '] ---');
     }
     
     abstract protected function _allowed($user);
