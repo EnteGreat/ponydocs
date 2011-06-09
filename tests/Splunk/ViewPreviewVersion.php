@@ -15,7 +15,7 @@ class Splunk_ViewPreviewVersion extends AbstractAction
     		'storm_preview'  => FALSE,
     		'employee'       => TRUE,
     		'splunk_docteam' => TRUE,
-    		'storm_docteam'  => TRUE,
+    		'storm_docteam'  => FALSE,
     		'docteam'        => FALSE
 		);
 	}
@@ -24,7 +24,7 @@ class Splunk_ViewPreviewVersion extends AbstractAction
     {
 		$this->open("/Main_Page");
 		// Preview version is in dropdown
-		$this->assertStringStartsWith("1.0 (latest release)2.0", $this->getText("docsVersionSelect"), $user);
+		$this->assertStringStartsWith("1.01.1 (latest release)", $this->getText("docsVersionSelect"), $user);
 		$this->select("docsVersionSelect", "label=2.0");
 		$this->click("css=option[value=2.0]");
 		$this->waitForPageToLoad("10000");
@@ -38,7 +38,7 @@ class Splunk_ViewPreviewVersion extends AbstractAction
     {
 		$this->open("/Main_Page");
 		// Preview version is not in dropdown
-		$this->assertEquals("1.0 (latest release)", $this->getText("docsVersionSelect"), $user);
+		$this->assertEquals("1.01.1 (latest release)", $this->getText("docsVersionSelect"), $user);
 		$this->open("/Documentation/Splunk/2.0/Installation/WhatsinSplunkInstallationManual");
 		// Can't view preview version topic
 		$this->assertFalse($this->isElementPresent("Whats_in_Splunk_Installation_Manual"), $user);
