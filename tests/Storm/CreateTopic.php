@@ -13,7 +13,7 @@ class Storm_CreateTopic extends AbstractAction
             'logged_in'      => FALSE,
             'splunk_preview' => FALSE,
             'storm_preview'  => FALSE,
-            'employee'       => FALSE,
+            'employee'       => TRUE,
             'splunk_docteam' => FALSE,
             'storm_docteam'  => TRUE,
             'docteam'        => FALSE
