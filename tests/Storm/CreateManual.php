@@ -16,7 +16,7 @@ class Storm_CreateManual extends AbstractAction
             'employee'       => FALSE,
             'splunk_docteam' => FALSE,
             'storm_docteam'  => TRUE,
-            'docteam'        => TRUE
+            'docteam'        => FALSE
         );
     }
     

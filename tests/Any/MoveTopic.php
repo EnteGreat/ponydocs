@@ -15,7 +15,7 @@ class Any_MoveTopic extends AbstractAction {
     		'employee'       => FALSE,
     		'splunk_docteam' => TRUE,
     		'storm_docteam'  => TRUE,
-    		'docteam'        => TRUE
+    		'docteam'        => FALSE
 		);
 
 	}

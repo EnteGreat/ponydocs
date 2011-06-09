@@ -16,7 +16,7 @@ class Storm_ViewPreviewVersion extends AbstractAction
     		'employee'       => TRUE,
     		'splunk_docteam' => TRUE,
     		'storm_docteam'  => TRUE,
-    		'docteam'        => TRUE
+    		'docteam'        => FALSE
 		);
 	}
 

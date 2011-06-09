@@ -16,7 +16,7 @@ class Storm_AddVersionTagToTopic extends AbstractAction
             'employee'       => TRUE,
             'splunk_docteam' => FALSE,
             'storm_docteam'  => TRUE,
-            'docteam'        => TRUE
+            'docteam'        => FALSE
         );
     }
     

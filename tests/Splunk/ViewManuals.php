@@ -16,7 +16,7 @@ class Splunk_ViewManuals extends AbstractAction
             'employee'       => FALSE,
             'splunk_docteam' => TRUE,
             'storm_docteam'  => FALSE,
-            'docteam'        => TRUE
+            'docteam'        => FALSE
         );
     }
     

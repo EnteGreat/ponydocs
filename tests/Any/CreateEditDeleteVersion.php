@@ -16,7 +16,7 @@ class Any_CreateEditDeleteVersion extends AbstractAction
     		'employee'       => FALSE,
     		'splunk_docteam' => FALSE,
     		'storm_docteam'  => FALSE,
-    		'docteam'        => TRUE
+    		'docteam'        => FALSE
 		);
 	}
 

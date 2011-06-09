@@ -13,10 +13,10 @@ class Splunk_CreateTopic extends AbstractAction
             'logged_in'      => FALSE,
             'splunk_preview' => FALSE,
             'storm_preview'  => FALSE,
-            'employee'       => FALSE,
+            'employee'       => TRUE,
             'splunk_docteam' => TRUE,
             'storm_docteam'  => FALSE,
-            'docteam'        => TRUE
+            'docteam'        => FALSE
         );
     }
     
