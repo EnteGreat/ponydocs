@@ -47,11 +47,15 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
     
     public function testMain()
     {
-        error_log('--- Testing: [' . get_class($this) . '] ---');
+        $class = get_class($this);
+        
+        error_log('--- Testing: [' . $class . '] ---');
         
         foreach ($this->_users as $user => $allowed)
         {
-            error_log('User: ' . $user . ' -> ' . ($$allowed ? 'Allowed' : 'Not Allowed'));
+            $perm  =  $allowed ? 'Allowed' : 'Not Allowed';
+            
+            error_log('User: ' . $user . ' -> ' . $perm);
             
             if ($user != 'anonymous') $this->_login($user);
             
@@ -65,7 +69,7 @@ abstract class AbstractAction extends PHPUnit_Extensions_SeleniumTestCase
             $this->waitForPageToLoad('10000');
         }
         
-        error_log('--- Done: [' . get_class($this) . '] ---');
+        error_log('--- Done: [' . $class . '] ---');
     }
     
     abstract protected function _allowed($user);
