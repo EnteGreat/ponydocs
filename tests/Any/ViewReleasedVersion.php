@@ -24,7 +24,7 @@ class Any_ViewReleasedVersion extends AbstractAction
     protected function _allowed($user)
     {
         $this->open("/Main_Page");
-        $this->assertTrue($this->isTextPresent("1.0 (latest release)"), $user);
+        $this->assertTrue($this->isTextPresent("1.1 (latest release)"), $user);
         $this->select("docsManualSelect", "label=Splunk Installation Manual");
         $this->waitForPageToLoad("10000");
         // Topic page viewable
