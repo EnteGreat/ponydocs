@@ -36,7 +36,7 @@
         <ini name="display_errors" value="off" />
         <ini name="error_log" value="error.log" />
         <const name="TEST_HOST" value="{YOUR_BEER_SERVER_HERE}" />
-        <const name="DB_NAME" value="localhost" />
+        <const name="DB_NAME" value="ponydocs" />
     </php>
     <logging>
         <log type="junit" target="log.xml" />
