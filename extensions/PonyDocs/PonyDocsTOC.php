@@ -231,8 +231,8 @@ class PonyDocsTOC
 			$latest = true;
 		}
 
-		$selectedProduct = PonyDocsProduct::GetSelectedProduct();
-		$selectedVersion = PonyDocsProductVersion::GetSelectedVersion($selectedProduct);
+		$selectedProduct = $this->pProduct->getShortName();
+		$selectedVersion = $this->pInitialVersion->getVersionName();
 
 
 		// Okay, let's determine if the VERSION that the user is in is latest, 
