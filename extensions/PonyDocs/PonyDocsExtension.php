@@ -31,7 +31,6 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsCategoryLinks.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsCategoryPageHandler.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocumentLinks.php");
 require_once( "$IP/extensions/PonyDocs/PonyDocsPdfBook.php");
-
 require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
 require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
