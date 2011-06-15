@@ -8,7 +8,6 @@ define('PONYDOCS_BASE_PREVIEW_GROUP', 'preview');
 define('PONYDOCS_CRAWLER_AGENT_REGEX', '/gsa/');
 
 
-define('PONYDOCS_PRODUCT_NAME', 'Example Product');
 define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . str_replace("$1", "", $wgArticlePath) . 'extensions/PonyDocs/images/pony.png');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_NAME', 'Documentation');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_ID', 100);

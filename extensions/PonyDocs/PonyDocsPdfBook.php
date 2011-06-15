@@ -85,7 +85,8 @@ class PonyDocsPdfBook {
 
 		$productName = $pieces[1];
 		$ponydocs = PonyDocsWiki::getInstance($productName);
-		$pProduct = PonyDocsProduct::GetProductByShortName($pieces[1]);
+		$pProduct = PonyDocsProduct::GetProductByShortName($productName);
+		$productLongName = $pProduct->getLongName();
 
 		if(PonyDocsProductManual::isManual($productName, $pieces[2])) {
 			$pManual = PonyDocsProductManual::GetManualByShortName($productName, $pieces[2]);
@@ -184,7 +185,7 @@ class PonyDocsPdfBook {
 		$titlepagefile = "$wgUploadDirectory/" .uniqid('ponydocs-pdf-book-title');
 		$fh = fopen($titlepagefile, 'w+');
 
-		$titleText = "<br><br><br><br><center><img src=\"" . PONYDOCS_PRODUCT_LOGO_URL .  "\"><br /><h2>" . PONYDOCS_PRODUCT_NAME . " " . $book . "</h2><h3>Version: " . $versionText . "</h3><h4>Generated: " . date('n/d/Y h:i a', time()) . "<br /> " . PONYDOCS_PDF_COPYRIGHT_MESSAGE . "</h4>";
+		$titleText = "<br><br><br><br><center><img src=\"" . PONYDOCS_PRODUCT_LOGO_URL .  "\"><br /><h2>" . $productLongName . " " . $book . "</h2><h3>Version: " . $versionText . "</h3><h4>Generated: " . date('n/d/Y h:i a', time()) . "<br /> " . PONYDOCS_PDF_COPYRIGHT_MESSAGE . "</h4>";
 
 		fwrite($fh, $titleText);
 		fclose($fh);
