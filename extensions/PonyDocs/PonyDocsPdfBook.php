@@ -77,15 +77,15 @@ class PonyDocsPdfBook {
 
 		// Determine articles to gather
 		$articles = array();
-		$ponydocs = PonyDocsWiki::getInstance();
 		$pieces = explode(":", $wgTitle->__toString());
 		// Try and get rid of the TOC portion of the title
 		if(strpos($pieces[2], "TOC")) {
 			$pieces[2] = substr($pieces[2], 0, strpos($pieces[2], "TOC"));
 		}
 
+		$productName = $pieces[1];
+		$ponydocs = PonyDocsWiki::getInstance($productName);
 		$pProduct = PonyDocsProduct::GetProductByShortName($pieces[1]);
-		$productName = $pProduct->getShortName();
 
 		if(PonyDocsProductManual::isManual($productName, $pieces[2])) {
 			$pManual = PonyDocsProductManual::GetManualByShortName($productName, $pieces[2]);
@@ -220,7 +220,7 @@ class PonyDocsPdfBook {
 		// Okay, let's add an entry to the error log to dictate someone 
 		// requested a pdf
 		error_log("INFO [PonyDocsPdfBook::onUnknownAction] " . php_uname('n') . ": fresh serve username=\"" . $wgUser->getName() . "\" version=\"$versionText\" " . " manual=\"" . $book . "\"");
-		PonyDocsPdfBook::servePdf($pdfFileName, $versionText, $book);
+		PonyDocsPdfBook::servePdf($pdfFileName, $productName, $versionText, $book);
 		// No more processing
 		return false;
 	}
