@@ -354,7 +354,7 @@ class PonyDocsProductVersion
 	 */
 	static public function & GetVersionByName( $productName, $name )
 	{
-		if( preg_match( '/^v:(.*)/i', $name, $match ))
+		if( preg_match( '/^v:.*:(.*)/i', $name, $match ))
 			$name = $match[1];	
 		if( isset( self::$sVersionMap[$productName][$name] ))
 			return self::$sVersionMap[$productName][$name] ;
