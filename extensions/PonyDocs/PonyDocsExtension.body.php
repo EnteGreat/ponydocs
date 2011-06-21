@@ -701,7 +701,7 @@ class PonyDocsExtension
 					{
 						$content = 	"= " . $m[1] . "=\n\n" ;
 						foreach( $manVersionList as $pVersion )
-							$content .= '[[Category:V:' . $pProduct->getShortName() . ':' . $pVersion->getVersionName( ) . ']]';
+							$content .= '[[Category:V:' . $pProduct->getShortName() . ':' . $pVersion->getVersionName( ) . "]]\n";
 
 						$topicArticle->doEdit( $content, '', EDIT_NEW );
 					}
