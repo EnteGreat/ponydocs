@@ -1090,7 +1090,7 @@ CREATE TABLE `splunk_comments` (
   `comment` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `topic` (`title`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1099,6 +1099,7 @@ CREATE TABLE `splunk_comments` (
 
 LOCK TABLES `splunk_comments` WRITE;
 /*!40000 ALTER TABLE `splunk_comments` DISABLE KEYS */;
+INSERT INTO `splunk_comments` VALUES (1,'Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0','Olopez77',1308354506,'Topic is useful however, consider posting or adding to this document the appropriate link to a training video on the subject.'),(2,'Documentation:Storm:Installation:WhatsintheStormInstallationManual:1.0','Rlolkema',1308354506,'event_rederers.conf, priority.<br />It says here that the highest number wins. 2 is higher than 1, but Priority 1 is usually more important than Priority 2. Is it true that the smallest number wins?'),(3,'Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:2.0','Hellolindsay',1308354506,'This is a good online for URL-encoding \"return_to\" : http://quick-encoder.com/url'),(4,'Documentation:Splunk:Installation:WhatsinSplunkInstallationManual:2.0','Rm90495',1308354506,'You should only use the SPLUNK_IGNORE_SELINUX variable if you have previously run the following command to set SELIUX correctly <br /><br />chcon -c -v -R -u system_u -r object_r -t lib_t $SPLUNK_HOME/lib 2>&1 > /dev/null');
 /*!40000 ALTER TABLE `splunk_comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1424,4 +1425,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-06-16 15:04:01
+-- Dump completed on 2011-06-21 11:50:02
