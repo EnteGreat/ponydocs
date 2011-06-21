@@ -1042,11 +1042,11 @@ HEREDOC;
 							if ($product == PonyDocsProduct::GetSelectedProduct()) {
 								$version = PonyDocsProductVersion::GetSelectedVersion( $product );
 							} else {
-							    if (PonyDocsProduct::IsProduct($product))
-                                {
-                                    $pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
-                                    $version = $pVersion->getVersionName();
-                                }
+								if (PonyDocsProduct::IsProduct($product))
+								{
+									$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
+									$version = $pVersion->getVersionName();
+								}
 							}
 
 							/**

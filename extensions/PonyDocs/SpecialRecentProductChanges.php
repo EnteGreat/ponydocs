@@ -1,6 +1,6 @@
 <?php
 if( !defined( 'MEDIAWIKI' ))
-    die( "PonyDocs MediaWiki Extension" );
+	die( "PonyDocs MediaWiki Extension" );
 
 /**
  * Needed since we subclass it;  it doesn't seem to be loaded elsewhere.
@@ -20,20 +20,20 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 	var $rcOptions, $rcSubpage;
 
 	public function __construct() {
-	    
+		
   		SpecialPage::__construct( 'RecentProductChanges');
 		$this->includable( true);
 	}
-    
-    /**
-     * Returns a human readable description of this special page.
-     *
-     * @returns string
-     */
-    public function getDescription( )
-    {
-        return 'Recent Product Changes';
-    }
+	
+	/**
+	 * Returns a human readable description of this special page.
+	 *
+	 * @returns string
+	 */
+	public function getDescription( )
+	{
+		return 'Recent Product Changes';
+	}
 
 	/**
 	 * Get a FormOptions object containing the default options
@@ -48,12 +48,12 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 		$opts->add( 'limit', (int)$wgUser->getOption( 'rclimit' ) );
 		$opts->add( 'from', '' );
 
-		$opts->add( 'hideminor',     $wgUser->getBoolOption( 'hideminor' ) );
-		$opts->add( 'hidebots',      true  );
-		$opts->add( 'hideanons',     false );
-		$opts->add( 'hideliu',       false );
+		$opts->add( 'hideminor',	 $wgUser->getBoolOption( 'hideminor' ) );
+		$opts->add( 'hidebots',	  true  );
+		$opts->add( 'hideanons',	 false );
+		$opts->add( 'hideliu',	   false );
 		$opts->add( 'hidepatrolled', $wgUser->getBoolOption( 'hidepatrolled' ) );
-		$opts->add( 'hidemyself',    false );
+		$opts->add( 'hidemyself',	false );
 
 		$opts->add( 'namespace', '', FormOptions::INTNULL );
 		$opts->add( 'invert', false );
@@ -61,7 +61,7 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 		$opts->add( 'categories', '' );
 		$opts->add( 'categories_any', false );
 		$opts->add( 'tagfilter', '' );
-        $opts->add( 'product', isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
+		$opts->add( 'product', isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
 		return $opts;
 	}
 
@@ -103,11 +103,11 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 		}
 
 		$conds[] = 'rc_timestamp >= ' . $dbr->addQuotes( $cutoff );
-        
-        // Selected product changes
-        $product = addslashes(isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
-        
-        $conds[] = 'rc_title LIKE "' . $product . '%"';
+		
+		// Selected product changes
+		$product = addslashes(isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
+		
+		$conds[] = 'rc_title LIKE "' . $product . '%"';
 
 		$hidePatrol = $wgUser->useRCPatrol() && $opts['hidepatrolled'];
 		$hideLoggedInUsers = $opts['hideliu'] && !$forcebot;
@@ -115,8 +115,8 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 
 		if( $opts['hideminor'] )  $conds['rc_minor'] = 0;
 		if( $opts['hidebots'] )   $conds['rc_bot'] = 0;
-		if( $hidePatrol )         $conds['rc_patrolled'] = 0;
-		if( $forcebot )           $conds['rc_bot'] = 1;
+		if( $hidePatrol )		 $conds['rc_patrolled'] = 0;
+		if( $forcebot )		   $conds['rc_bot'] = 1;
 		if( $hideLoggedInUsers )  $conds[] = 'rc_user = 0';
 		if( $hideAnonymousUsers ) $conds[] = 'rc_user != 0';
 

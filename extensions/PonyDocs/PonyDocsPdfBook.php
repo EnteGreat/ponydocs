@@ -14,20 +14,20 @@ if (!defined('MEDIAWIKI')) die('Not an entry point.');
 define('PONYDOCS_PDFBOOK_VERSION', '1.1, 2010-04-22');
 
 $wgExtensionCredits['parserhook'][] = array(
-	'name'	      => 'PonyDocsPdfBook',
-	'author'      => 'Taylor Dondich and [http://www.organicdesign.co.nz/nad User:Nad]',
+	'name'		  => 'PonyDocsPdfBook',
+	'author'	  => 'Taylor Dondich and [http://www.organicdesign.co.nz/nad User:Nad]',
 	'description' => 'Composes a book from documentation and exports as a PDF book',
-	'url'	      => 'http://www.splunk.com',
-	'version'     => PONYDOCS_PDFBOOK_VERSION
+	'url'		  => 'http://www.splunk.com',
+	'version'	 => PONYDOCS_PDFBOOK_VERSION
 	);
 
 // Catch the pdfbook action
 $wgHooks['UnknownAction'][] = "PonyDocsPdfBook::onUnknownAction";
 
 // Add a new pdf log type
-$wgLogTypes[]             = 'ponydocspdf';
-$wgLogNames['ponydocspdf']      = 'ponydocspdflogpage';
-$wgLogHeaders['ponydocspdf']      = 'ponydocspdflogpagetext';
+$wgLogTypes[]			 = 'ponydocspdf';
+$wgLogNames['ponydocspdf']	  = 'ponydocspdflogpage';
+$wgLogHeaders['ponydocspdf']	  = 'ponydocspdflogpagetext';
 $wgLogActions['ponydocspdf/book'] = 'ponydocspdflogentry';
 
 
@@ -63,12 +63,12 @@ class PonyDocsPdfBook {
 
 		# Initialise PDF variables
 		$layout  = '--firstpage toc';
-		$left    = '1cm';
+		$left	= '1cm';
 		$right   = '1cm';
-		$top     = '1cm';
+		$top	 = '1cm';
 		$bottom  = '1cm';
-		$font    = 'Arial';
-		$size    = '12';
+		$font	= 'Arial';
+		$size	= '12';
 		$linkcol = '4d9bb3';
 		$levels  = '2';
 		$exclude = array();
@@ -135,7 +135,7 @@ class PonyDocsPdfBook {
 		$wgArticlePath = $wgServer.$wgArticlePath;
 		$wgScriptPath  = $wgServer.$wgScriptPath;
 		$wgUploadPath  = $wgServer.$wgUploadPath;
-		$wgScript      = $wgServer.$wgScript;
+		$wgScript	  = $wgServer.$wgScript;
 		$currentSection = '';
 		foreach ($articles as $section => $subarticles) {
 			foreach($subarticles as $article) {
@@ -148,14 +148,14 @@ class PonyDocsPdfBook {
 						$currentSection = $section;
 					}		
 					$article = new Article($title);
-					$text    = $article->fetchContent();
-					$text    = preg_replace('/<!--([^@]+?)-->/s', '@@'.'@@$1@@'.'@@', $text); # preserve HTML comments
+					$text	= $article->fetchContent();
+					$text	= preg_replace('/<!--([^@]+?)-->/s', '@@'.'@@$1@@'.'@@', $text); # preserve HTML comments
 						$text   .= '__NOTOC__';
-					$opt->setEditSection(false);    # remove section-edit links
+					$opt->setEditSection(false);	# remove section-edit links
 						$wgOut->setHTMLTitle($ttext);   # use this so DISPLAYTITLE magic works
-						$out     = $wgParser->parse($text, $title, $opt, true, true);
+						$out	 = $wgParser->parse($text, $title, $opt, true, true);
 					$ttext   = $wgOut->getHTMLTitle();
-					$text    = $out->getText();
+					$text	= $out->getText();
 					$text = preg_replace('|<h1>|', "<h2>", $text);
 					$text = preg_replace('|<h2>|', "<h3>", $text);
 					$text = preg_replace('|<h3>|', "<h4>", $text);
@@ -166,9 +166,9 @@ class PonyDocsPdfBook {
 					$text = preg_replace('|<a[^\<]*>|', '', $text);
 					$text = preg_replace('|</a>|', '', $text);
 
-					$text    = preg_replace('|(<img[^>]+?src=")(/.+?>)|', "$1$wgServer$2", $text); 
-					$text    = preg_replace('|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', '', $text); # non-printable areas
-					$text    = preg_replace('|@{4}([^@]+?)@{4}|s', '<!--$1-->', $text);                  # HTML comments hack
+					$text	= preg_replace('|(<img[^>]+?src=")(/.+?>)|', "$1$wgServer$2", $text); 
+					$text	= preg_replace('|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', '', $text); # non-printable areas
+					$text	= preg_replace('|@{4}([^@]+?)@{4}|s', '<!--$1-->', $text);				  # HTML comments hack
 					$ttext   = basename($ttext);
 					$html   .= utf8_decode("$h2$text\n");
 				}
@@ -192,7 +192,7 @@ class PonyDocsPdfBook {
 
 		$format = 'manual'; 	/* @todo Modify so single topics can be printed in pdf */
 		$footer = $format == 'single' ? '...' : '.1.';
-		$toc    = $format == 'single' ? '' : " --toclevels $levels";
+		$toc	= $format == 'single' ? '' : " --toclevels $levels";
 
 		# Send the file to the client via htmldoc converter
 		$wgOut->disable();

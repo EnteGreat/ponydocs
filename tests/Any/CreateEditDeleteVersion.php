@@ -8,20 +8,20 @@ class Any_CreateEditDeleteVersion extends AbstractAction
 
 		$this->_users = array
 		(
-    		'admin'          => TRUE,
-    		'anonymous'      => FALSE,
-    		'logged_in'      => FALSE,
-    		'splunk_preview' => FALSE,
-    		'storm_preview'  => FALSE,
-    		'employee'       => FALSE,
-    		'splunk_docteam' => FALSE,
-    		'storm_docteam'  => FALSE,
-    		'docteam'        => FALSE
+			'admin'		  => TRUE,
+			'anonymous'	  => FALSE,
+			'logged_in'	  => FALSE,
+			'splunk_preview' => FALSE,
+			'storm_preview'  => FALSE,
+			'employee'	   => FALSE,
+			'splunk_docteam' => FALSE,
+			'storm_docteam'  => FALSE,
+			'docteam'		=> FALSE
 		);
 	}
 
-    protected function _allowed($user)
-    {
+	protected function _allowed($user)
+	{
 		// Splunk
 		$this->open("/Documentation:Splunk:Versions");
 		$this->click("link=Edit");
@@ -69,12 +69,12 @@ class Any_CreateEditDeleteVersion extends AbstractAction
 		$this->waitForPageToLoad("10000");
 		// Version deleted
 		$this->assertFalse($this->isTextPresent("Version 1.3.1 (preview)"), $user);
-    }
+	}
 
-    protected function _notAllowed($user)
-    {
+	protected function _notAllowed($user)
+	{
 		// Splunk
-        $this->open("/Documentation:Splunk:Versions");
+		$this->open("/Documentation:Splunk:Versions");
 
 		// TODO They really shouldn't even be able to see this page!
 		

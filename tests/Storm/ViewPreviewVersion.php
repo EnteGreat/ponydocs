@@ -8,20 +8,20 @@ class Storm_ViewPreviewVersion extends AbstractAction
 
 		$this->_users = array
 		(
-    		'admin'          => TRUE,
-    		'anonymous'      => FALSE,
-    		'logged_in'      => FALSE,
-    		'splunk_preview' => FALSE,
-    		'storm_preview'  => TRUE,
-    		'employee'       => TRUE,
-    		'splunk_docteam' => FALSE,
-    		'storm_docteam'  => TRUE,
-    		'docteam'        => FALSE
+			'admin'		  => TRUE,
+			'anonymous'	  => FALSE,
+			'logged_in'	  => FALSE,
+			'splunk_preview' => FALSE,
+			'storm_preview'  => TRUE,
+			'employee'	   => TRUE,
+			'splunk_docteam' => FALSE,
+			'storm_docteam'  => TRUE,
+			'docteam'		=> FALSE
 		);
 	}
 
-    protected function _allowed($user)
-    {
+	protected function _allowed($user)
+	{
 		$this->open('/Main_Page');
 		$this->select('docsProductSelect', 'label=Storm');
 		// $this->click('css=option[value=Storm]');
@@ -37,11 +37,11 @@ class Storm_ViewPreviewVersion extends AbstractAction
 		$this->waitForPageToLoad('10000');
 		// Can view preview version topic
 		$this->assertTrue($this->isElementPresent('Ways_to_access_Storm'), $user);
-    }
+	}
 
-    protected function _notAllowed($user)
-    {
-        $this->open('/Main_Page');
+	protected function _notAllowed($user)
+	{
+		$this->open('/Main_Page');
 		$this->select('docsProductSelect', 'label=Storm');
 		$this->waitForPageToLoad('10000');
 		// Preview version is not in dropdown
@@ -49,7 +49,7 @@ class Storm_ViewPreviewVersion extends AbstractAction
 		$this->open('/Documentation/Storm/1.1/User/WaystoaccessStorm');
 		// Can't view preview version topic
 		$this->assertFalse($this->isElementPresent('Ways_to_access_Storm'), $user);
-    }
+	}
 }
 
 

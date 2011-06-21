@@ -8,20 +8,20 @@ class Any_ViewProducts extends AbstractAction
 
 		$this->_users = array
 		(
-    		'admin'          => TRUE,
-    		'anonymous'      => FALSE,
-    		'logged_in'      => FALSE,
-    		'splunk_preview' => FALSE,
-    		'storm_preview'  => FALSE,
-    		'employee'       => FALSE,
-    		'splunk_docteam' => FALSE,
-    		'storm_docteam'  => FALSE,
-    		'docteam'        => TRUE
+			'admin'		  => TRUE,
+			'anonymous'	  => FALSE,
+			'logged_in'	  => FALSE,
+			'splunk_preview' => FALSE,
+			'storm_preview'  => FALSE,
+			'employee'	   => FALSE,
+			'splunk_docteam' => FALSE,
+			'storm_docteam'  => FALSE,
+			'docteam'		=> TRUE
 		);
 	}
 
-    protected function _allowed($user)
-    {
+	protected function _allowed($user)
+	{
 		$this->open("/Documentation:Products");
 		// Content can be seen
 		$this->assertTrue($this->isTextPresent("Splunk (Splunk)"), $user);
@@ -33,11 +33,11 @@ class Any_ViewProducts extends AbstractAction
 		$this->waitForPageToLoad("10000");
 		// Revision comparison can be seen
 		$this->assertTrue($this->isTextPresent("Version 1.0 (released)")); */
-    }
+	}
 
-    protected function _notAllowed($user)
-    {
-        $this->open("/Documentation:Products");
+	protected function _notAllowed($user)
+	{
+		$this->open("/Documentation:Products");
 		// Content cannot be seen
 		$this->assertFalse($this->isTextPresent("Splunk (Splunk)"), $user);
 		$this->open("/index.php?title=Documentation:Products&action=edit");
@@ -49,7 +49,7 @@ class Any_ViewProducts extends AbstractAction
 		$this->waitForPageToLoad("10000");
 		// Revision comparison cannot be seen
 		$this->assertFalse($this->isTextPresent("Version 1.0 (released)")); */
-    }
+	}
 }
 
 ?>

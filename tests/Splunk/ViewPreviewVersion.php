@@ -8,20 +8,20 @@ class Splunk_ViewPreviewVersion extends AbstractAction
 
 		$this->_users = array
 		(
-    		'admin'          => TRUE,
-    		'anonymous'      => FALSE,
-    		'logged_in'      => FALSE,
-    		'splunk_preview' => TRUE,
-    		'storm_preview'  => FALSE,
-    		'employee'       => TRUE,
-    		'splunk_docteam' => TRUE,
-    		'storm_docteam'  => FALSE,
-    		'docteam'        => FALSE
+			'admin'		  => TRUE,
+			'anonymous'	  => FALSE,
+			'logged_in'	  => FALSE,
+			'splunk_preview' => TRUE,
+			'storm_preview'  => FALSE,
+			'employee'	   => TRUE,
+			'splunk_docteam' => TRUE,
+			'storm_docteam'  => FALSE,
+			'docteam'		=> FALSE
 		);
 	}
 
-    protected function _allowed($user)
-    {
+	protected function _allowed($user)
+	{
 		$this->open("/Main_Page");
 		// Preview version is in dropdown
 		$this->assertStringStartsWith("1.01.1 (latest release)", $this->getText("docsVersionSelect"), $user);
@@ -32,15 +32,15 @@ class Splunk_ViewPreviewVersion extends AbstractAction
 		$this->waitForPageToLoad("10000");
 		// Can view preview version topic
 		$this->assertTrue($this->isElementPresent("Whats_in_Splunk_Installation_Manual"), $user);
-    }
+	}
 
-    protected function _notAllowed($user)
-    {
+	protected function _notAllowed($user)
+	{
 		$this->open("/Main_Page");
 		// Preview version is not in dropdown
 		$this->assertEquals("1.01.1 (latest release)", $this->getText("docsVersionSelect"), $user);
 		$this->open("/Documentation/Splunk/2.0/Installation/WhatsinSplunkInstallationManual");
 		// Can't view preview version topic
 		$this->assertFalse($this->isElementPresent("Whats_in_Splunk_Installation_Manual"), $user);
-    }
+	}
 }

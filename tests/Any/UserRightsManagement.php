@@ -7,21 +7,21 @@ class Any_UserRightsManagement extends AbstractAction {
 
 		$this->_users = array
 		(
-    		'admin'          => TRUE,
-    		'anonymous'      => FALSE,
-    		'logged_in'      => FALSE,
-    		'splunk_preview' => FALSE,
-    		'storm_preview'  => FALSE,
-    		'employee'       => FALSE,
-    		'splunk_docteam' => FALSE,
-    		'storm_docteam'  => FALSE,
-    		'docteam'        => FALSE
+			'admin'		  => TRUE,
+			'anonymous'	  => FALSE,
+			'logged_in'	  => FALSE,
+			'splunk_preview' => FALSE,
+			'storm_preview'  => FALSE,
+			'employee'	   => FALSE,
+			'splunk_docteam' => FALSE,
+			'storm_docteam'  => FALSE,
+			'docteam'		=> FALSE
 		);
 
 	}
 
-    protected function _allowed($user)
-    {
+	protected function _allowed($user)
+	{
 		$this->open("/Main_Page");
 		$this->click("link=Special pages");
 		$this->waitForPageToLoad("10000");
@@ -36,14 +36,14 @@ class Any_UserRightsManagement extends AbstractAction {
 		$this->waitForPageToLoad("10000");
 		// User successfully added to group
 		$this->assertTrue($this->isTextPresent("Member of: employees"), $user);
-    }
+	}
 
-    protected function _notAllowed($user)
-    {
+	protected function _notAllowed($user)
+	{
 		$this->open("/Special:UserRights");
 		// Cannot access user rights management functionality
 		$this->assertTrue($this->isTextPresent("You do not have permission to do that"), $user);
-    }
+	}
 }
 
 ?>
