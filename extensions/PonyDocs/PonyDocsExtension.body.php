@@ -992,8 +992,7 @@ HEREDOC;
 		}
 
 		$title = $article->getTitle( );
-		if( !preg_match( '/Documentation:/', $title->__toString( )))
-			return true;
+		if( !preg_match( '/Documentation:/', $title->__toString( ))) return true;
 
 		$dbr = wfGetDB( DB_SLAVE );
 
@@ -1033,6 +1032,7 @@ HEREDOC;
 								$manual = $pieces[1];
 								$topic = $pieces[2];
 							} else {
+							    error_log('Pieces: ' . var_export($pieces, TRUE));
 								$product = $pieces[1];
 								$manual = $pieces[2];
 								$topic = $pieces[3];
@@ -1043,8 +1043,11 @@ HEREDOC;
 							if ($product == PonyDocsProduct::GetSelectedProduct()) {
 								$version = PonyDocsProductVersion::GetSelectedVersion( $product );
 							} else {
-								$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
-								$version = $pVersion->getVersionName();
+							    if (PonyDocsProduct::IsProduct($product))
+                                {
+                                    $pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
+                                    $version = $pVersion->getVersionName();
+                                }
 							}
 
 							/**
