@@ -1032,7 +1032,6 @@ HEREDOC;
 								$manual = $pieces[1];
 								$topic = $pieces[2];
 							} else {
-							    error_log('Pieces: ' . var_export($pieces, TRUE));
 								$product = $pieces[1];
 								$manual = $pieces[2];
 								$topic = $pieces[3];
