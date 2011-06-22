@@ -1004,8 +1004,6 @@ HEREDOC;
 			 * $match[3] = Alternate Text
 			 */
 			
-			error_log('Matches: ' . var_export($matches, TRUE));
-			
 			foreach( $matches as $match )
 			{
 				/**
