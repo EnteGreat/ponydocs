@@ -822,7 +822,7 @@ class PonyDocsExtension
 		/**
 		 * Check to see if we have any version tags -- if we don't we don't care about this and can skip and return true.
 		 */
-		if( preg_match_all( '/\[\[Category:V:([A-Za-z0-9 _.-]*):([A-Za-z0-9 _.-]*)\]\]/is', $text, $matches, PREG_SET_ORDER ))
+		if( preg_match_all( '/\[\[Category:V:([A-Za-z0-9 _.-]*):([A-Za-z0-9 _.-]*)\]\]/i', $text, $matches, PREG_SET_ORDER ))
 		{
 
 			$categories = array( );
