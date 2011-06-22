@@ -176,7 +176,7 @@ class PonyDocsProductVersion
 	 */
 	static public function GetSelectedVersion( $productName )
 	{
-		global $wgUser, $_SESSION;
+		global $wgUser;
 
 		$groups = $wgUser->getGroups();
 

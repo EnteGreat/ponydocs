@@ -701,7 +701,7 @@ class PonyDocsExtension
 					{
 						$content = 	"= " . $m[1] . "=\n\n" ;
 						foreach( $manVersionList as $pVersion )
-							$content .= '[[Category:V:' . $pProduct->getShortName() . ':' . $pVersion->getVersionName( ) . "]]\n";
+							$content .= '[[Category:V:' . $pProduct->getShortName() . ':' . $pVersion->getVersionName( ) . ']]';
 
 						$topicArticle->doEdit( $content, '', EDIT_NEW );
 					}
@@ -1759,6 +1759,7 @@ HEREDOC;
 						// Found first article.
 						$cacheEntry[] = array('shortName' => $manual->getShortName(),
 											  'longName' => $manual->getLongName(),
+											  'firstTitle' => $entry['title'],
 											  'firstUrl' => $entry['link']);
 						break;
 					}
