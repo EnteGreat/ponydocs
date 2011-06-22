@@ -996,13 +996,16 @@ HEREDOC;
 
 		$dbr = wfGetDB( DB_SLAVE );
 
-		if( preg_match_all( "/\[\[([" . Title::legalChars( ) . "]*)([|]?(.*))\]\]/", $text, $matches, PREG_SET_ORDER ))
+		if( preg_match_all( "/\[\[([" . Title::legalChars( ) . "]*)([|]?([^\]]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		//if( preg_match_all( "/\[\[([A-Za-z0-9,:._ -]*)([|]?([A-Za-z0-9,:._?#!@$+= -]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		{
 			/**
 			 * $match[1] = Wiki Link
 			 * $match[3] = Alternate Text
 			 */
+			
+			error_log('Matches: ' . var_export($matches, TRUE));
+			
 			foreach( $matches as $match )
 			{
 				/**
