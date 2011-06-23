@@ -48,9 +48,11 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 	$response = new AjaxResponse( );
 
 	if($force) {
-		// This is coming from the search page.  let's not do any title look up, 
+		// This is coming from the search page.  let's not do any title look up,
 		// and instead just pass back the same url.
-		$response->addText("/" . $title); // Need to make the url non-relative
+		$leadingSlash = "/";
+		if (substr($title, 0,1) == "/") $leadingSlash = "";
+		$response->addText($leadingSlash . $title); // Need to make the url non-relative
 		return $response;
 	}
 
@@ -116,7 +118,9 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 	if($force) {
 		// This is coming from the search page.  let's not do any title look up, 
 		// and instead just pass back the same url.
-		$response->addText("/" . $title); // Need to make the url non-relative
+		$leadingSlash = "/";
+		if (substr($title, 0,1) == "/") $leadingSlash = "";
+		$response->addText($leadingSlash . $title); // Need to make the url non-relative
 		return $response;
 	}
 
