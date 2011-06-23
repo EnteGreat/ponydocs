@@ -634,12 +634,12 @@ if($this->data['copyrightico']) { ?>
 		{
 			if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgTitle->__toString( )))
 			{
-				$this->data['titletext'] = 'Versions Management';
+				$this->data['titletext'] = 'Versions Management - '.$this->data['selectedProduct'];
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name|status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, underscore, and dash.</i></span>');
 			}
 			else if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgTitle->__toString( )))
 			{
-				$this->data['titletext'] = 'Manuals Management';
+				$this->data['titletext'] = 'Manuals Management - '.$this->data['selectedProduct'];
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#manual:manualShortName|displayName}} to define a new manual.  If you omit display name, the short name will be used in links.</i></span>');
 			}
 			else if ( !strcmp( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $wgTitle->__toString( )))
