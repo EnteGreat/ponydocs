@@ -390,6 +390,8 @@ class SpecialBranchInherit extends SpecialPage
 			$forceManual = $match[2];
 		} else {
 			$forceProduct = PonyDocsProduct::GetSelectedProduct();
+			$ponydocs = PonyDocsWiki::getInstance( $forceProduct );
+			$products = $ponydocs->getProductsForTemplate( );
 		}
 
 		// Security Check
@@ -420,7 +422,8 @@ class SpecialBranchInherit extends SpecialPage
 		<a name="top"></a>
 		<div class="versionselect">
 			<h1>Branch and Inheritance Console</h1>
-			Begin by selecting your source version material and a target version below.  You will then be presented with additional screens to specify branch and inherit behavior.
+
+			Begin by selecting your product, source version material and a target version below.  You will then be presented with additional screens to specify branch and inherit behavior.
 			<?php
 			if(isset($_GET['titleName'])) {
 				?>
@@ -430,6 +433,55 @@ class SpecialBranchInherit extends SpecialPage
 				<?php
 			}
 			?>
+
+			<h2>Choose a Product</h2>
+
+			<?php
+			if (isset($_GET['titleName'])) {
+				?>
+				You have selected a product: <?= $forceProduct ?>
+			<?php
+			} else {
+				if (!count($products)) {
+					print "<p>No products defined.</p>";
+				} else {
+				?>
+				<div class="product">
+					<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
+					<?php
+						foreach( $products as $idx => $data ) {
+							echo '<option value="' . $data['name'] . '" ';
+							if( !strcmp( $data['name'], $forceProduct ))
+								echo 'selected';
+							echo '>' . $data['label'] . '</option>';
+						}
+					?>
+					</select>
+				</div>
+
+				<script language="javascript">
+				function AjaxChangeProduct_callback( o ) {
+					document.getElementById('docsProductSelect').disabled = true;
+					var s = new String( o.responseText );
+					document.getElementById('docsProductSelect').disabled = false;
+					window.location.href = s;
+				}
+
+				function AjaxChangeProduct( ) {
+					var productIndex = document.getElementById('docsProductSelect').selectedIndex;
+					var product = document.getElementById('docsProductSelect')[productIndex].value;
+					var title = '<?= $_SERVER['REQUEST_URI'] ?>'; // TODO fix this title
+					var force = true;
+					sajax_do_call( 'efPonyDocsAjaxChangeProduct', [product,title,force], AjaxChangeProduct_callback,true);
+				}
+				</script>
+
+
+			<?php
+				}
+			}
+			?>
+
 			<h2>Choose a Source Version</h2>
 			<?php
 				// Determine if topic was set, if so, we should fetch version from currently selected version.
