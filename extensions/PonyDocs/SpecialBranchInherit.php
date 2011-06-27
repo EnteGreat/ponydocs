@@ -447,7 +447,7 @@ class SpecialBranchInherit extends SpecialPage
 				} else {
 				?>
 				<div class="product">
-					<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
+					<select id="docsProductSelect1" name="selectedProduct" onChange="AjaxChangeProduct1();">
 					<?php
 						foreach( $products as $idx => $data ) {
 							echo '<option value="' . $data['name'] . '" ';
@@ -460,19 +460,19 @@ class SpecialBranchInherit extends SpecialPage
 				</div>
 
 				<script language="javascript">
-				function AjaxChangeProduct_callback( o ) {
-					document.getElementById('docsProductSelect').disabled = true;
+				function AjaxChangeProduct1_callback( o ) {
+					document.getElementById('docsProductSelect1').disabled = true;
 					var s = new String( o.responseText );
-					document.getElementById('docsProductSelect').disabled = false;
+					document.getElementById('docsProductSelect1').disabled = false;
 					window.location.href = s;
 				}
 
-				function AjaxChangeProduct( ) {
-					var productIndex = document.getElementById('docsProductSelect').selectedIndex;
-					var product = document.getElementById('docsProductSelect')[productIndex].value;
+				function AjaxChangeProduct1( ) {
+					var productIndex = document.getElementById('docsProductSelect1').selectedIndex;
+					var product = document.getElementById('docsProductSelect1')[productIndex].value;
 					var title = '<?= $_SERVER['REQUEST_URI'] ?>'; // TODO fix this title
 					var force = true;
-					sajax_do_call( 'efPonyDocsAjaxChangeProduct', [product,title,force], AjaxChangeProduct_callback,true);
+					sajax_do_call( 'efPonyDocsAjaxChangeProduct', [product,title,force], AjaxChangeProduct1_callback,true);
 				}
 				</script>
 
