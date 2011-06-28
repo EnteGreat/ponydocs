@@ -57,9 +57,10 @@ $(function(){
 			function(res) {
 				var el = $(res.responseText);
 				el.css("display", "none");
-				$('#splunk_comment_listing').prepend(el);
-				$('#splunk_comment_listing .splunk_comment:not(:visible)').slideDown();
+				$('#commentListing').prepend(el);
+				$('#commentListing .commentWrapper:not(:visible)').slideDown();
 				$('#splunk_comment_form').hide();
+				$('#noComments').hide();
 				$('#splunk_comment_completed').show();
 			}
 		);	
@@ -69,13 +70,13 @@ $(function(){
 	$('#splunk_comment_comment').val('');
 
 	// Handy event delegation.  Sexy.  No live events.
-	$("#splunk_comment_listing").click(function(event) {
+	$("#commentListing").click(function(event) {
 		event.preventDefault();
 		var el = $(event.target);
 		if(el.hasClass('delete')) {
-			var comment = el.parents('.splunk_comment');
+			var comment = el.parents('.commentWrapper');
 			if(comment) {
-				var commentId = el.parents('.splunk_comment').attr('data-comment-id');
+				var commentId = el.parents('.commentWrapper').attr('data-comment-id');
 				// Delete this comment
 				sajax_do_call('SplunkComments::efSplunkCommentsAjaxDelete', [commentId], function(res) {
 						comment.html(res.responseText);
