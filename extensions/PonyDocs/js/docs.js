@@ -1,6 +1,6 @@
 $(function(){
 	// Set up expand/collapse of toc and sidebar items
-	$('#toc h3, #sidetoc h3, #p-tb h3').click(function(){
+	$('#toc h3, #sidetoc h3, #p-tb strong').click(function(){
 		if ( $(this).is('.collapsed') ) {
 			$(this).removeClass('collapsed').next('ul').slideDown('fast');
 		} else {
@@ -9,8 +9,8 @@ $(function(){
 	});
 
 	//initially collapse all items, except the container parent (wikiSidebarBox) of any items with class 'expanded'
-	$('#sidetoc h3, #p-tb h3').each(function(){
-		if ( !$(this).next('ul').find('.expanded').length ) {
+	$('#sidetoc h3, #p-tb strong').each(function(){
+		if ( !$(this).next('ul').find('.selected').length ) {
 			$(this).addClass('collapsed').next('ul').hide();
 		}
 	});
