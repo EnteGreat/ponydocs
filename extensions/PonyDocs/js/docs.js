@@ -59,8 +59,8 @@ $(function(){
 				el.css("display", "none");
 				$('#commentListing').prepend(el);
 				$('#commentListing .commentWrapper:not(:visible)').slideDown();
+				$('#commentListingTitle').show();
 				$('#splunk_comment_form').hide();
-				$('#noComments').hide();
 				$('#splunk_comment_completed').show();
 			}
 		);	
