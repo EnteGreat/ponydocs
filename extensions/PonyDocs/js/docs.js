@@ -1,20 +1,4 @@
 $(function(){
-	// Set up expand/collapse of toc and sidebar items
-	$('#toc h3, #sidetoc h3, #p-tb strong').click(function(){
-		if ( $(this).is('.collapsed') ) {
-			$(this).removeClass('collapsed').next('ul').slideDown('fast');
-		} else {
-			$(this).addClass('collapsed').next('ul').slideUp('fast');
-		}
-	});
-
-	//initially collapse all items, except the container parent (wikiSidebarBox) of any items with class 'expanded'
-	$('#sidetoc h3, #p-tb strong').each(function(){
-		if ( !$(this).next('ul').find('.selected').length ) {
-			$(this).addClass('collapsed').next('ul').hide();
-		}
-	});
-
 	// Editing check to make sure there are matching <search> and </search> elements.
 	$("#editform").submit(function(event) {
 		// Let's evaluate the content
@@ -29,76 +13,6 @@ $(function(){
 			alert("You have a mismatched number of opened/closed search elements in the edit text.  Please note, we only accept '<search>' and not '<search   >' (note spaces).  Correct and re-submit.");
 			return false;
 		}
-	});
-
-	$('#splunk_comment_comment').keyup(function() {
-		var val = $(this).val();
-		if(val.length > 1000) {
-			val = val.substring(0,1000);
-			$(this).val(val);
-		}
-		if(!val.length) {
-			$('#splunk_comment_charcount').html("0");
-		}
-		else {
-			$('#splunk_comment_charcount').html(val.length);
-		}
-	});
-
-	// Splunk comments handler
-	$("#splunk_comment_submit").click(function() {
-		var commentText = $('#splunk_comment_comment').val();
-		commentText = $.trim(commentText);
-		if(commentText == "") {
-			alert("You must provide something for your comment.");
-			return;
-		}
-		sajax_do_call('SplunkComments::efSplunkCommentsAjaxAdd', [$('#splunk_comment_title').val(), commentText],
-			function(res) {
-				var el = $(res.responseText);
-				el.css("display", "none");
-				$('#commentListing').prepend(el);
-				$('#commentListing .commentWrapper:not(:visible)').slideDown();
-				$('#commentListingTitle').show();
-				$('#splunk_comment_form').hide();
-				$('#splunk_comment_completed').show();
-			}
-		);	
-	});
-
-	// Reset the value (silly browser caching!)
-	$('#splunk_comment_comment').val('');
-
-	// Handy event delegation.  Sexy.  No live events.
-	$("#commentListing").click(function(event) {
-		event.preventDefault();
-		var el = $(event.target);
-		if(el.hasClass('delete')) {
-			var comment = el.parents('.commentWrapper');
-			if(comment) {
-				var commentId = el.parents('.commentWrapper').attr('data-comment-id');
-				// Delete this comment
-				sajax_do_call('SplunkComments::efSplunkCommentsAjaxDelete', [commentId], function(res) {
-						comment.html(res.responseText);
-					});
-			}
-		}
-	});
-
-	// Feedback dialog
-	$("#feedbacktoggle").click(function(event) {
-		$("#feedbackdialogouter").modal({overlayClose:true});
-	});
-
-	$("#splunk_feedback_submit").click(function(event) {
-		var opinion = $("#splunk_feedback_yesno").val();
-		var comment = $("#splunk_feedback_comment").val();
-		var title = $("#splunk_feedback_title").val();
-		var rawtitle = $("#splunk_feedback_rawtitle").val();
-		sajax_do_call('SplunkComments::efSplunkCommentsFeedbackAdd', [opinion,comment,title,rawtitle], function(res) {
-			$.modal.close();
-		});
-
 	});
 
 	// Check for branch inherit
