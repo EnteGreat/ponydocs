@@ -1855,7 +1855,7 @@ HEREDOC;
 			}
 			die();
 		}
-		return false;
+		return true;
 	}
 
 	static public function handle404(&$out) {
