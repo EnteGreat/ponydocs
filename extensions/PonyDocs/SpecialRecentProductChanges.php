@@ -64,6 +64,13 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 		$opts->add( 'product', isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
 		return $opts;
 	}
+	
+	public function outputHeader()
+	{
+		global $wgOut, $wgContLang;
+		
+		$wgOut->addHTML('<h2>' . (isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct()) . '</h2>');
+	}
 
 	/**
 	 * Return an array of conditions depending of options set in $opts
