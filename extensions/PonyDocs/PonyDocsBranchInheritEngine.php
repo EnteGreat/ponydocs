@@ -261,7 +261,7 @@ class PonyDocsBranchInheritEngine {
 		$oldContent = $content = $article->getContent();
 
 		// Remove old Version from old TOC (if exists)
-		preg_match_all("/\[\[Category:V:" . $product->getShortName() . ':' . $targetVersion->getName() . "\]\]/", $content, $matches);
+		preg_match_all("/\[\[Category:V:" . $product->getShortName() . ':' . $targetVersion->getVersionName() . "\]\]/", $content, $matches);
 		foreach($matches[0] as $match) {
 			$oldContent = str_replace($match, "", $oldContent);
 		}
