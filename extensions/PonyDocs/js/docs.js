@@ -167,7 +167,7 @@ SplunkBranchInherit = function() {
 
 					}
 					else {
-						html += '<p>A Table Of Contents does not exist for this manual.  Choose creation behavior: <select class="manualtocaction"><option value="default">Default</option><option value="forceinherit">Force Inherit</option><option value="forcebranch">Force Branch</option></select></p>';
+						html += '<p>A Table Of Contents does not exist for this manual.  Choose creation behavior: <select class="manualtocaction"><option value="forceinherit">Force Inherit</option><option value="forcebranch">Force Branch</option></select></p>';
 					}
 					for(section in topicData[manual].sections) {
 						html += '<div class="section"><h3>' + section + '</h3>Set Action For All Topics In This Section: <select class="sectiondefault">';

@@ -289,11 +289,12 @@ class PonyDocsBranchInheritEngine {
 
 	/**
 	 * Creates new TOC page with a given manual and target version
-	 * 
+	 *
 	 * @param $manual PonyDocsManual The manual we're going to create a TOC for.
 	 * @param $version PonyDocsVersion the version we're going to create a TOC
 	 * FIXME $addData is not used!!!
-	 * for.
+	 * FIXME this method never gets run and it is unclear what it needs to do; @see SpecialBranchInherit.php
+	 *
 	 */
 	static function createTOC($product, $manual, $version, $addData) {
 		global $wgTitle;

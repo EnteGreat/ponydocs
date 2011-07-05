@@ -237,6 +237,7 @@ class SpecialBranchInherit extends SpecialPage
 						print("<div class=\"normal\">Complete</div>");
 					}
 				}
+				/// WARNING FIXME action "default" has been removed from UI; this else block will never get run
 				else {
 					if($manualData['tocInherit']) {
 						// We need to get the TOC for source version/manual and add 
