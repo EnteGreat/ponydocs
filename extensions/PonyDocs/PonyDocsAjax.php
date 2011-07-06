@@ -85,8 +85,13 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
 	}
-	else {
+	else if( preg_match( '/Documentation:(.*):(Manuals|Versions)/i', $title, $match ))
+	{
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
+		$response->addText( str_replace( '$1', 'Documentation:' . $product . ':' . $match[2], $wgArticlePath ));
+	}
+	else {
+		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 4");}
 		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
 	}
 
@@ -147,7 +152,7 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		}
 	}
-	else if( preg_match( '/Documentation:(.*):(.*)/i', $title, $match ))
+	else if( preg_match( '/Documentation:(.*):(Manuals|Versions)/i', $title, $match ))
 	{
 		// this is a manuals or versions page
 		$add_text = str_replace( '$1', 'Documentation:' . $product . ':' . $match[2], $wgArticlePath);
