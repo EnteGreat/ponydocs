@@ -7,8 +7,6 @@ define('PONYDOCS_BASE_AUTHOR_GROUP', 'docteam');
 define('PONYDOCS_BASE_PREVIEW_GROUP', 'preview');
 define('PONYDOCS_CRAWLER_AGENT_REGEX', '/gsa/');
 
-
-define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . str_replace("$1", "", $wgArticlePath) . 'extensions/PonyDocs/images/pony.png');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_NAME', 'Documentation');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_ID', 100);
 
@@ -33,10 +31,6 @@ define('PONYDOCS_PRODUCTMANUAL_SUFFIX', ':Manuals' );
 define('PONYDOCS_PRODUCTMANUAL_LEGALCHARS', 'A-Za-z0-9_,.-' );
 define('PONYDOCS_PRODUCTMANUAL_REGEX', '/([' . PONYDOCS_PRODUCTMANUAL_LEGALCHARS . ']+)/' );
 define('PONYDOCS_PRODUCTMANUAL_TITLE_REGEX', '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '([' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)' . PONYDOCS_PRODUCTMANUAL_SUFFIX . '/' );
-
-define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Example Copyright Message');
-
-define('PONYDOCS_DEFAULT_PRODUCT', 'Splunk');
 
 // category cache expiration in seconds
 define('CATEGORY_CACHE_TTL', 300);
