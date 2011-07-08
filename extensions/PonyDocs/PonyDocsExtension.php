@@ -608,7 +608,7 @@ function efSearchParserFunction_Render( $input, $args, $parser )
 
 $wgHooks['BeforePageDisplay'][] = 'PonyDocsExtension::onBeforePageDisplay';
 $wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave';
-$wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_CheckTOC';
+$wgHooks['ArticleSaveComplete'][] = 'PonyDocsExtension::onArticleSave_CheckTOC';
 $wgHooks['ArticleSave'][] = 'PonyDocsExtension::onArticleSave_AutoLinks';
 $wgHooks['AlternateEdit'][] = 'PonyDocsExtension::onEdit_TOCPage';
 $wgHooks['UnknownAction'][] = 'PonyDocsExtension::onUnknownAction';
