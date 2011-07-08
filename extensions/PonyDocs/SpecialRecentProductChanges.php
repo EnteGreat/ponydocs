@@ -69,7 +69,10 @@ class SpecialRecentProductChanges extends SpecialRecentChanges {
 	{
 		global $wgOut, $wgContLang;
 		
-		$wgOut->addHTML('<h2>' . (isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct()) . '</h2>');
+		$short_name = (isset($_GET['product']) ? $_GET['product'] : PonyDocsProduct::GetSelectedProduct());
+		$product    = PonyDocsProduct::GetProductByShortName($short_name);
+		
+		$wgOut->addHTML('<h2>' . $product->getLongName() . '</h2>');
 	}
 
 	/**
