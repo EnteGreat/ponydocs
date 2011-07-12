@@ -206,7 +206,7 @@ class PonyDocsProductVersion
 		if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
 			self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
 		}
-		else if(in_array($authProductGroup, $groups)) {
+		else if(in_array($authProductGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
 
 			if(isset(self::$sVersionListUnreleased[$productName]) && count(self::$sVersionListUnreleased[$productName])) {
 				self::SetSelectedVersion($productName, self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName());
