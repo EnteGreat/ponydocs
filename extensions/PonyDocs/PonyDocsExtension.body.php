@@ -1930,8 +1930,9 @@ HEREDOC;
 		}
 		PonyDocsExtension::clearArticleCategoryCache($article);
 
-		// if this is product versions page, clear navigation cache
-		if ( preg_match( PONYDOCS_PRODUCTVERSION_TITLE_REGEX, $title->__toString(), $matches ) ) {
+		// if this is product versions or manuals page, clear navigation cache
+		if ( preg_match( PONYDOCS_PRODUCTVERSION_TITLE_REGEX, $title->__toString(), $matches ) ||
+			 preg_match( PONYDOCS_PRODUCTMANUAL_TITLE_REGEX, $title->__toString(), $matches )) {
 			// reload to get updated version list
 			PonyDocsProductVersion::LoadVersionsForProduct($productName, true);
 			$prodVersionList = PonyDocsProductVersion::GetVersions($productName);
