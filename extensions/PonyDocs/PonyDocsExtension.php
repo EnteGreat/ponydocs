@@ -174,12 +174,15 @@ function efPonyDocsSetup()
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . "] started session");}
 	}
 	// Set selected product from URL
-	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]?/i', $_SERVER['PATH_INFO'], $match)) {
-		PonyDocsProduct::SetSelectedProduct($match[1]);
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]?/i', $_SERVER['PATH_INFO'], $match)) {
+		PonyDocsProduct::SetSelectedProduct($match[3]);
 	}
 	// Set selected version from URL
-	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]{1}(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)[\/|:]/i', $_SERVER['PATH_INFO'], $match)) {
-		PonyDocsProductVersion::SetSelectedVersion($match[1], $match[2]);
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)\//i', $_SERVER['PATH_INFO'], $match)
+		|| preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation[\/|:]{1}(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)[\/|:]{1}['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)
+		|| preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation:(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+:[^:]+:(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)) {
+		PonyDocsProductVersion::SetSelectedVersion($match[3], $match[4]);
+		error_log("version matched - product: ".$match[3]." version: ".$match[4]);
 	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
 }
