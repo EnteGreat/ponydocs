@@ -234,7 +234,7 @@ class PonyDocsPdfBook {
 	static public function servePdf($fileName, $product, $version, $manual) {
 		if(file_exists($fileName)) {
 			header("Content-Type: application/pdf");
-			header("Content-Disposition: attachment; filename=\"PonyDocs-$product-$version-$manual.pdf\"");
+			header("Content-Disposition: attachment; filename=\"$product-$version-$manual.pdf\"");
 			readfile($fileName);
 			die();				// End processing right away.
 		}
