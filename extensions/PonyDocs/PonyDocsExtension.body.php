@@ -1560,10 +1560,10 @@ HEREDOC;
 					if(!preg_match( '/^Documentation:.*:.*:.*:.*/i', $wgTitle->__toString( )))
 						continue;
 					$version = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
-					$page = 'documentation:' . strtolower( PonyDocsProduct::GetSelectedProduct() . ':' . $pManual->getShortName( )) . ':' . strtolower( $match[2] );
+					$page = 'documentation:' . strtolower( PonyDocsProduct::GetSelectedProduct() . ':' . $pManual->getShortName( )) . ':' . strtolower( $match[1] );
 
 					$res = $dbr->select( 'categorylinks', 'cl_sortkey', 
-						array( 	"LOWER(cl_sortkey) LIKE '" .  $dbr->strencode( $page )  . ":%'",
+						array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" .  $dbr->strencode( $page )  . ":%'",
 								"cl_to = 'V:" . PonyDocsProduct::GetSelectedProduct() . ":" . $version . "'" ), __METHOD__ );
 
 					/**
