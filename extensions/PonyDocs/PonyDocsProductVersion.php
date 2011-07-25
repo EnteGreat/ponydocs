@@ -169,12 +169,12 @@ class PonyDocsProductVersion
 	 * to auto-select the proper version.  Typically if it is not set it means the user just loaded the site for the
 	 * first time this session and is thus not logged in, so its a safe bet to auto-select the most recent RELEASED
 	 * version. We're only going to use sessions to track this. 
-	 *
-	 *
+	 * @param string $productName product short name for which selected version will be retrieved
+	 * @param boolean $setDefault optional whether to attempt to set default version if none is currently set
 	 * @static
 	 * @return string Currently selected version string.
 	 */
-	static public function GetSelectedVersion( $productName )
+	static public function GetSelectedVersion( $productName, $setDefault = true )
 	{
 		global $wgUser;
 
@@ -196,20 +196,22 @@ class PonyDocsProductVersion
 			}
 		}
 
-		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
+		if ($setDefault) {
+			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
 
-		/**
-			* If we're here, we don't have a version set previously.
-			* Get latest RELEASED version and set the our active version to it..
-			*/
-		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
-		if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
-			self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
-		}
-		else if(in_array($authProductGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
+			/**
+				* If we're here, we don't have a version set previously.
+				* Get latest RELEASED version and set the our active version to it..
+				*/
+			$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
+			if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
+				self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
+			}
+			else if(in_array($authProductGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
 
-			if(isset(self::$sVersionListUnreleased[$productName]) && count(self::$sVersionListUnreleased[$productName])) {
-				self::SetSelectedVersion($productName, self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName());
+				if(isset(self::$sVersionListUnreleased[$productName]) && count(self::$sVersionListUnreleased[$productName])) {
+					self::SetSelectedVersion($productName, self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName());
+				}
 			}
 		}
 		if(isset($_SESSION['wsVersion'][$productName])) {
