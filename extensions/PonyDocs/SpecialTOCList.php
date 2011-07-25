@@ -52,10 +52,13 @@ class SpecialTOCList extends SpecialPage
 		 * page is linked to at least one version (category) and thus has an entry in the categorylinks table.  So to do this we
 		 * must run this query for each manual type, which involes getting the list of manuals defined.
 		 */
-		$out = array( );
-		$product = PonyDocsProduct::GetSelectedProduct( );
-		$manuals = PonyDocsProductManual::GetDefinedManuals( $product );
-
+		$out			  = array( );
+		$product		  = PonyDocsProduct::GetSelectedProduct( );
+		$manuals		  = PonyDocsProductManual::GetDefinedManuals( $product );
+		$allowed_versions = array();
+		
+		foreach (PonyDocsProductVersion::GetVersions($product) as $v) $allowed_versions[] = $v->getVersionName();
+		
 		foreach( $manuals as $pMan )
 		{
 			$qry = "SELECT DISTINCT(cl_sortkey) 
@@ -71,20 +74,15 @@ class SpecialTOCList extends SpecialPage
 
 				while( $subrow = $dbr->fetchObject( $subres ))
 				{
-					if( preg_match( '/^V:' . $product . ':(.*)/i', $subrow->cl_to, $vmatch ))
-						$versions[] = $vmatch[1];
+					if (preg_match( '/^V:' . $product . ':(.*)/i', $subrow->cl_to, $vmatch) && in_array($vmatch[1], $allowed_versions)) $versions[] = $vmatch[1];
 				}
 
-				$wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $row->cl_sortkey . '</a> - Versions: ' );
-				if( sizeof( $versions ))
-					$wgOut->addHTML( implode( ' | ', $versions ) . '<br>' );
-				else
-					$wgOut->addHTML( 'None<br>' );
+				if (sizeof($versions)) $wgOut->addHTML( '<a href="' . str_replace( '$1', $row->cl_sortkey, $wgArticlePath ) . '">' . $row->cl_sortkey . '</a> - Versions: ' . implode( ' | ', $versions ) . '<br />' );
 			}
 		}
 
 		$html = '<h2>Other Useful Management Pages</h2>' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br/>' .
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br />' .
 				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
 
 		$wgOut->addHTML( $html );
