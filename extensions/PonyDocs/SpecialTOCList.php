@@ -42,8 +42,6 @@ class SpecialTOCList extends SpecialPage
 		$dbr = wfGetDB( DB_SLAVE );
 
 		$this->setHeaders( );
-		$wgOut->setPagetitle( 'Table of Contents Management' );
-		$wgOut->addHTML( '<h2>Table of Contents Management Pages</h2>' );
 
 		/**
 		 * We need to select ALL pages of the form:
@@ -56,6 +54,10 @@ class SpecialTOCList extends SpecialPage
 		$product		  = PonyDocsProduct::GetSelectedProduct( );
 		$manuals		  = PonyDocsProductManual::GetDefinedManuals( $product );
 		$allowed_versions = array();
+
+		$p = PonyDocsProduct::GetProductByShortName($product);
+		$wgOut->setPagetitle( 'Table of Contents Management' );
+		$wgOut->addHTML( '<h2>Table of Contents Management Pages for ' . $p->getLongName() . '</h2>' );
 		
 		foreach (PonyDocsProductVersion::GetVersions($product) as $v) $allowed_versions[] = $v->getVersionName();
 		
