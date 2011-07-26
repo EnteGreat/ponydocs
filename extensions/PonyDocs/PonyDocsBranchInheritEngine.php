@@ -27,7 +27,7 @@ class PonyDocsBranchInheritEngine {
 		// Clear any hooks so no weirdness gets called after we create the 
 		// branch
 		$wgHooks['ArticleSave'] = array();
-		if(!preg_match('/^Documentation:([^:]*):([^:]*):(.*):([^:]*)$/', $topicTitle, $match)) {
+		if(!preg_match('/^' . PONYDOCS_DOCUMENTATION_PREFIX . '([^:]*):([^:]*):(.*):([^:]*)$/', $topicTitle, $match)) {
 			throw new Exception("Invalid Title to Branch From");
 		}
 
@@ -77,7 +77,7 @@ class PonyDocsBranchInheritEngine {
 			// No such title exists in the system
 			throw new Exception("Invalid Title to Branch From.  Target Article does not exist:" . $topicTitle);
 		}
-		$title = "Documentation:" . $product->getShortName() . ':' . $manual->getShortName() . ":" . $title . ":" . $version->getVersionName();
+		$title = PONYDOCS_DOCUMENTATION_PREFIX . $product->getShortName() . ':' . $manual->getShortName() . ":" . $title . ":" . $version->getVersionName();
 
 		$newTitle = Title::newFromText($title);
 		$wgTitle = $newTitle;
@@ -159,7 +159,7 @@ class PonyDocsBranchInheritEngine {
 		// Clear any hooks so no weirdness gets called after we save the 
 		// inherit
 		$wgHooks['ArticleSave'] = array();
-		if(!preg_match('/^Documentation:([^:]*):([^:]*):(.*):([^:]*)$/', $topicTitle, $match)) {
+		if(!preg_match('/^' . PONYDOCS_DOCUMENTATION_PREFIX . '([^:]*):([^:]*):(.*):([^:]*)$/', $topicTitle, $match)) {
 			throw new Exception("Invalid Title to Inherit From: " . $topicTitle);
 		}
 
@@ -271,7 +271,7 @@ class PonyDocsBranchInheritEngine {
 		if(self::TOCExists($product, $manual, $targetVersion)) {
 			throw new Exception("TOC Already exists for " . $manual->getShortName() . " with version: " . $targetVersion->getVersionName());
 		}
-		$title = "Documentation:" . $product->getShortName() . ':' . $manual->getShortName() . "TOC" . $targetVersion->getVersionName();
+		$title = PONYDOCS_DOCUMENTATION_PREFIX . $product->getShortName() . ':' . $manual->getShortName() . "TOC" . $targetVersion->getVersionName();
 		$newTitle = Title::newFromText($title);
 		$wgTitle = $newTitle;
 
@@ -301,7 +301,7 @@ class PonyDocsBranchInheritEngine {
 		if(self::TOCExists($product, $manual, $version)) {
 			throw new Exception("TOC Already exists for " . $manual->getShortName() . " with version: " . $version->getVersionName());
 		}
-		$title = "Documentation:" . $product->getShortName() . ":" . $manual->getShortName() . "TOC" . $version->getVersionName();
+		$title = PONYDOCS_DOCUMENTATION_PREFIX . $product->getShortName() . ":" . $manual->getShortName() . "TOC" . $version->getVersionName();
 
 		$newTitle = Title::newFromText($title);
 		$wgTitle = $newTitle;
@@ -530,14 +530,14 @@ class PonyDocsBranchInheritEngine {
 	 * Determine if there is an existing topic that may interfere with a target 
 	 * topic and version.  If conflict(s) exist, return the topic names.
 	 *
-	 * @param $topicTitle string The Topic name in Documentation:.*:.*:.*:.* format
+	 * @param $topicTitle string The Topic name in PONYDOCS_DOCUMENTATION_PREFIX.*:.*:.*:.* format
 	 * @param $targetVersion PonyDocsVersion the version to search for
 	 * @return Array of conflicting topic names, otherwise false if no conflict 
 	 * exists.
 	 */
 	static function getConflicts($product, $topicTitle, $targetVersion) {
 		$dbr = wfGetDB(DB_SLAVE);
-		if(!preg_match('/Documentation:(.*):(.*):(.*):(.*)/', $topicTitle, $match)) {
+		if(!preg_match('/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/', $topicTitle, $match)) {
 			throw new Exception("Invalid Title to Branch From");
 		}
 		$productName = $match[1];
@@ -564,7 +564,7 @@ class PonyDocsBranchInheritEngine {
 		$res = $dbr->query($query, __METHOD__);
 		if($res->numRows()) {
 			$row = $dbr->fetchObject($res);
-			return array('Documentation:' . $row->page_title);
+			return array(PONYDOCS_DOCUMENTATION_PREFIX . $row->page_title);
 		}
 
 		return false;

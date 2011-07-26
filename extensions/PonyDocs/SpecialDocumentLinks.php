@@ -67,7 +67,7 @@ class SpecialDocumentLinks extends SpecialPage {
 
 		<?php
 			// Let's grab the mediawiki name of the topic.
-			$humanReadableTitle = preg_replace("/Documentation:([^:]+):([^:]+):([^:]+):([^:]+)$/i", "Documentation/" . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $mediaWikiTitle);
+			$humanReadableTitle = preg_replace("/" . PONYDOCS_DOCUMENTATION_PREFIX . "([^:]+):([^:]+):([^:]+):([^:]+)$/i", PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . "/" . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $mediaWikiTitle);
 			// $humanReadableTitle now contains human readable title.
 
 			// Get our records.

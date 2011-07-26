@@ -65,7 +65,7 @@ class SpecialDocListing extends SpecialPage
 					PonyDocsProductVersion::SetSelectedVersion($version->getProductName(), $version->getVersionName());
 					$navData = PonyDocsExtension::fetchNavdataForVersion($version->getProductName(), $version->getVersionName());
 					foreach($navData as $nav) {
-						$url = str_replace("Documentation/" . $version->getProductName() . "/latest/", "Documentation/" . $version->getProductName() . "/" . $version->getVersionName() . "/", $nav['firstUrl']);
+						$url = str_replace(PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $version->getProductName() . '/latest/', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $version->getProductName() . '/' . $version->getVersionName() . '/', $nav['firstUrl']);
 						?>
 						<li><a href="<?php echo $url;?>"><?php echo $nav['longName'];?></a></li>
 						<?php
