@@ -181,7 +181,7 @@ function efPonyDocsSetup()
 	// - every time from /-separated title URLs
 	// - only when no selected version already set from :-separated title
 	$currentVersion =  PonyDocsProductVersion::GetSelectedVersion(PonyDocsProduct::GetSelectedProduct(), false);
-	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)\//i', $_SERVER['PATH_INFO'], $match)
+	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)
 		|| preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)
 		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation:(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))
 		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation:(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+:[^:]+:(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))) {
