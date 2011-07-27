@@ -1056,7 +1056,7 @@ HEREDOC;
 							 */
 							$sqlMatch = 'Documentation:' . $product . ':' . $manual . ':' . $topic;
 							$res = $dbr->select( 	'categorylinks', 'cl_sortkey', array(
-													"LOWER(cl_sortkey) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
+													"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
 													"cl_to = 'V:" . $dbr->strencode( $product ) . ':' . $dbr->strencode( $version ) . "'" ), __METHOD__ );
 
 							if( !$res->numRows( )) 
