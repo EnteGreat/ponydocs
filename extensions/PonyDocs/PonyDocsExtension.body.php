@@ -1801,7 +1801,11 @@ HEREDOC;
 
 		// The following regex is better understood with a bottle of whiskey.
 		// Or you can look at WEB-3862 if you want to be a party pooper.
-		if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
+		//if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
+		// That regex sucks! How do you know if "Beta" is a version or a manual? What if both exist with same name?
+		// additionally it catches versions with dots like 1.1 but not without like 1
+		// it should only catch the full manual URL - product/version/manual - we cannot support WEB-3862
+		if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/Documentation\/([' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)\/(([' . PONYDOCS_PRODUCTVERSION_LEGALCHARS . ']+)\/)(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
 			$targetProduct = $match[1];
 			$targetManual = $match[4];
 			$targetVersion = $match[3];
