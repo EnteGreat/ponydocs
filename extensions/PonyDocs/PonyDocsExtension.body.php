@@ -1555,9 +1555,8 @@ HEREDOC;
 				}
 				else
 				{
-					// Check if our title is in Documentation, if not, don't 
-					// modify the match. 
-					if(!preg_match( '/^Documentation:.*:.*:.*:.*/i', $wgTitle->__toString( )))
+					// Check if our title is in Documentation and manual is set, if not, don't modify the match.
+					if(!preg_match( '/^Documentation:.*:.*:.*:.*/i', $wgTitle->__toString( )) || !isset($pManual))
 						continue;
 					$version = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
 					$page = 'documentation:' . strtolower( PonyDocsProduct::GetSelectedProduct() . ':' . $pManual->getShortName( )) . ':' . strtolower( $match[1] );
