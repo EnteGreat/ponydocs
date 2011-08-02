@@ -1028,9 +1028,6 @@ HEREDOC;
 						 * [[Documentation:User:HowToFoo]] as an explicit link to a page.
 						 * [[Documentation:Product:Manual:Topic|Some Alternate Text]]
 						 */
-						
-						error_log('Pieces: ' . count($pieces));
-						
 						if( sizeof( $pieces ) == 3 || sizeof( $pieces ) == 4 )
 						{
 							if ( sizeof($pieces) == 3) {
@@ -1060,9 +1057,6 @@ HEREDOC;
 							 * If nothing is found, we create a new article.
 							 */
 							$sqlMatch = PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $manual . ':' . $topic;
-							
-							error_log('SQL MATCH: ' . $sqlMatch);
-							
 							$res = $dbr->select( 	'categorylinks', 'cl_sortkey', array(
 													"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
 													"cl_to = 'V:" . $dbr->strencode( $product ) . ':' . $dbr->strencode( $version ) . "'" ), __METHOD__ );
@@ -1812,7 +1806,6 @@ HEREDOC;
 		// The following regex is better understood with a bottle of whiskey.
 		// Or you can look at WEB-3862 if you want to be a party pooper.
 		if (preg_match('/^' . str_replace('/', '\/', $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/([' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)\/([' . PONYDOCS_PRODUCTVERSION_LEGALCHARS . ']+)?\/(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
-			error_log('MATCH: ' . var_export($match, TRUE));
 			$targetProduct = $match[1];
 			$targetManual = $match[3];
 			$targetVersion = $match[2];
