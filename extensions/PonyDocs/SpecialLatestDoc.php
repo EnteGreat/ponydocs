@@ -51,7 +51,7 @@ class SpecialLatestDoc extends SpecialPage {
 		 * $matches[3] = manual
 		 * $matches[4] = topic
 		 */
-		if( !preg_match( '/^Documentation\/(.*)\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
+		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
 			?>
 			<p>
 			Sorry, but <?php echo $title;?> is not a valid Documentation url.
@@ -106,8 +106,8 @@ class SpecialLatestDoc extends SpecialPage {
 					 * What happened here is we requested a topic that does not exist or is not linked to any version.
 					 * Perhaps setup a default redirect, Main_Page or something?
 					 */
-					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/Documentation [" . __FILE__ . ":" . __LINE__ . "]");}
-					header( "Location: " . $wgScriptPath . "/Documentation" );
+					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/" . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . " [" . __FILE__ . ":" . __LINE__ . "]");}
+					header( "Location: " . $wgScriptPath . '/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME );
 					exit( 0 );
 				}
 
@@ -133,8 +133,8 @@ class SpecialLatestDoc extends SpecialPage {
 					// doesn't have access to any of the versions this topic is 
 					// linked to.  In this situation, our default behavior is to 
 					// redirect to our base homepage.
-					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/Documentation [" . __FILE__ . ":" . __LINE__ . "]");}
-					header("Location: " . $wgScriptPath . "/Documentation");
+					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/" . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . " [" . __FILE__ . ":" . __LINE__ . "]");}
+					header("Location: " . $wgScriptPath . '/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME);
 					exit(0);
 				}
 				usort( $existingVersions, "PonyDocs_ProductVersionCmp" );
@@ -163,7 +163,7 @@ class SpecialLatestDoc extends SpecialPage {
 				<p>
 				<ul>
 					<li>To search the latest version of the documentation, click <a href="<?php echo $wgScriptPath;;?>/Special:Search?search=<?php echo $matches[4];?>">Search</a></li>
-					<li>To look at this topic anyway, click <a href="/base/Documentation/<?php echo $existingVersions[0]->getProductName();?>/<?php echo $existingVersions[0]->getVersionName();?>/<?php echo $matches[3];?>/<?php echo $matches[4];?>">here</a>.</li>
+					<li>To look at this topic anyway, click <a href="/<?php echo PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $existingVersions[0]->getProductName();?>/<?php echo $existingVersions[0]->getVersionName();?>/<?php echo $matches[3];?>/<?php echo $matches[4];?>">here</a>.</li>
 				</ul>
 				</p>
 				<?php

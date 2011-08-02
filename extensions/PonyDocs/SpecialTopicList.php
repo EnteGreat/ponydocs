@@ -13,7 +13,7 @@ require_once( $IP . '/includes/SpecialPage.php' );
 $wgSpecialPages['TopicList'] = 'SpecialTopicList';
 
 /**
- * This page should be passed a title which contains 'Documentation:<product>:<manual>:<topic>' only OR, if w/o params, shows all.
+ * This page should be passed a title which contains PONYDOCS_DOCUMENTATION_PREFIX . '<product>:<manual>:<topic>' only OR, if w/o params, shows all.
  * It is intended to show all topics of the given name.
  */
 class SpecialTopicList extends SpecialPage
@@ -57,7 +57,7 @@ class SpecialTopicList extends SpecialPage
 			return;
 		}
 
-		if( !preg_match( '/Documentation:(.*):(.*):(.*)/i', $topic, $match ))
+		if( !preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*)/i', $topic, $match ))
 			return;
 
 		$dbr = wfGetDB( DB_SLAVE );

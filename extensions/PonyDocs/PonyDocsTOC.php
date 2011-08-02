@@ -292,7 +292,7 @@ class PonyDocsTOC
 					}
 
 					$baseTopic = $matches[1];
-					$title = 'Documentation:' . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
+					$title = PONYDOCS_DOCUMENTATION_PREFIX . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
 					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $this->pProduct->getShortName( ) );
 
 					/**
@@ -321,11 +321,11 @@ class PonyDocsTOC
 
 					if( $wgPonyDocs->getURLMode( ) == PonyDocsExtension::URLMODE_ALIASED )
 					{
-						$href = str_replace( '$1', 'Documentation/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName() . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
+						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName() . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
 					}
 					else
 					{
-						$href = str_replace( '$1', 'Documentation/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
+						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
 						//$href = str_replace( '$1', $newTitle, $wgArticlePath );
 					}
 					$toc[$idx] = array( 	'level' => 1,

@@ -119,7 +119,7 @@ class SpecialDocTopics extends SpecialPage
 			{
 
 				$outputData[$baseTopic]['topics'][$row->page_title] = array( );
-				$versionRes = $dbr->select( 'categorylinks', 'cl_to', "cl_sortkey = 'Documentation:" . $dbr->strencode( $row->page_title ) . "'", __METHOD__ );
+				$versionRes = $dbr->select( 'categorylinks', 'cl_to', "cl_sortkey = '" . PONYDOCS_DOCUMENTATION_PREFIX . $dbr->strencode( $row->page_title ) . "'", __METHOD__ );
 				if( $versionRes->numRows( ))
 				{
 					while( $versionRow = $dbr->fetchObject( $versionRes ))
@@ -147,7 +147,7 @@ class SpecialDocTopics extends SpecialPage
 			 * converting them to title names THEN find any instance of baseTopic in that list.
 			 */
 
-			$toc = 'Documentation:' . $product . ':' . $manual . 'TOC';
+			$toc = PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $manual . 'TOC';
 
 			$res = $dbr->select( 'categorylinks', 'cl_sortkey',
 				array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $toc )) . "%'",
@@ -200,7 +200,7 @@ class SpecialDocTopics extends SpecialPage
 
 			foreach( $data['topics'] as $title => $versionList )
 			{
-				$html .=	"<a href=\"" . str_replace( '$1', "Documentation:$title", $wgArticlePath ) . "\">$title</a> ";
+				$html .=	"<a href=\"" . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $title, $wgArticlePath ) . "\">$title</a> ";
 				if( sizeof( $versionList ))
 				{
 					$html .= ' - [Version(s): ';
