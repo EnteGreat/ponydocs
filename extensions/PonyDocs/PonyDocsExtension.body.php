@@ -999,6 +999,7 @@ HEREDOC;
 		if( preg_match_all( "/\[\[([" . Title::legalChars( ) . "]*)([|]?([^\]]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		//if( preg_match_all( "/\[\[([A-Za-z0-9,:._ -]*)([|]?([A-Za-z0-9,:._?#!@$+= -]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		{
+			error_log('Matches: ' . var_export($matches, TRUE));
 			/**
 			 * $match[1] = Wiki Link
 			 * $match[3] = Alternate Text
@@ -1040,13 +1041,17 @@ HEREDOC;
 
 							// if link is to current product, get currect selected version, otherwise we have to guess
 							// and get the latest released version of the linked product
-							if ($product == PonyDocsProduct::GetSelectedProduct()) {
+							if ($product == PonyDocsProduct::GetSelectedProduct())
+							{
 								$version = PonyDocsProductVersion::GetSelectedVersion( $product );
 							} else {
 								if (PonyDocsProduct::IsProduct($product))
 								{
-									$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion( $product );
-									$version = $pVersion->getVersionName();
+									// Need to load the product versions if this topic is for a different product
+									PonyDocsProductVersion::LoadVersionsForProduct($product);
+									
+									$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion($product);
+									$version  = $pVersion->getVersionName();
 								}
 							}
 
