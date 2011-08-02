@@ -997,8 +997,6 @@ HEREDOC;
 		$dbr = wfGetDB( DB_SLAVE );
 
 		if( preg_match_all( "/\[\[([" . Title::legalChars( ) . "]*)([|]?([^\]]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
-		error_log('Text: ' . $text);
-		error_log('Matches: ' . var_export($matches, TRUE));
 		//if( preg_match_all( "/\[\[([A-Za-z0-9,:._ -]*)([|]?([A-Za-z0-9,:._?#!@$+= -]*))\]\]/", $text, $matches, PREG_SET_ORDER ))
 		{
 			/**
