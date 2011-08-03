@@ -166,7 +166,7 @@ class PonyDocsProductManual
 	 * @param string $shortName
 	 * @return PonyDocsManual&
 	 */
-	static public function GetManualByShortName( $productName, $shortName )
+	static public function & GetManualByShortName( $productName, $shortName )
 	{
 		$convertedName = preg_replace( '/([^' . PONYDOCS_PRODUCTMANUAL_LEGALCHARS . ']+)/', '', $shortName );
 		if( self::IsManual( $productName, $convertedName ))

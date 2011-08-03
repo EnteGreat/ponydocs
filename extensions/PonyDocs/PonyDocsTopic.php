@@ -63,7 +63,7 @@ class PonyDocsTopic
 		//$this->pArticle->loadContent( );
 		//echo '<pre>' . $article->getContent( ) . '</pre>';
 		$this->pTitle = $article->getTitle( );
-		if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '.*:.*:.*:.*/i', $this->pTitle->__toString( )))
+		if( preg_match( '/Documentation:.*:.*:.*:.*/i', $this->pTitle->__toString( )))
 			$this->mIsDocumentationTopic = true;
 	}
 
@@ -353,7 +353,7 @@ class PonyDocsTopic
 	 */
 	public function getVersionClass( )
 	{
-		if( !preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $matches))
+		if( !preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $matches))
 			// This is not a documentation title.
 			return "unknown";
 		$productName = $matches[1];
@@ -404,9 +404,9 @@ class PonyDocsTopic
 	 */
 	public function getBaseTopicName( )
 	{
-		if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $match ))
+		if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $this->pTitle->__toString( ), $match ))
 		{
-			return sprintf( PONYDOCS_DOCUMENTATION_PREFIX . "%s:%s:%s", $match[1], $match[2], $match[3] );
+			return sprintf( "Documentation:%s:%s:%s", $match[1], $match[2], $match[3] );
 		}
 
 		return '';
