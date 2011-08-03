@@ -1051,6 +1051,10 @@ HEREDOC;
 									PonyDocsProductVersion::LoadVersionsForProduct($product);
 									
 									$pVersion = PonyDocsProductVersion::GetLatestReleasedVersion($product);
+									
+									// If there is no available latest released version go to the next match
+									if (!$pVersion) continue;
+									
 									$version  = $pVersion->getVersionName();
 								}
 							}
