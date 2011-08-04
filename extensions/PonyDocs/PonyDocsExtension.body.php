@@ -631,7 +631,7 @@ class PonyDocsExtension
 		 */
 		$matches = array( );
 
-		if( preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $title->__toString( ), $match ))
+		if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '([' . PONYDOCS_PRODUCT_LEGALCHARS . ']*):([' . PONYDOCS_PRODUCTMANUAL_LEGALCHARS . ']*)TOC([' . PONYDOCS_PRODUCTVERSION_LEGALCHARS . ']*)/i', $title->__toString( ), $match ))
 		{
 			$dbr = wfGetDB( DB_MASTER );
 			$topics = array( );
