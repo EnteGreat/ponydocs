@@ -407,7 +407,7 @@ class PonyDocsExtension
 		 * $matches[3] = manual
 		 * $matches[4] = topic
 		 */
-		if( !preg_match( '/^Documentation\/(.*)\/(.*)\/(.*)\/(.*)$/i', $title->__toString( ), $matches ))
+		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/([' . PONYDOCS_PRODUCT_LEGALCHARS . ']*)\/(.*)\/(.*)\/(.*)$/i', $title->__toString( ), $matches ))
 			return false;
 
 		$defaultRedirect = str_replace( '$1', 'Documentation', $wgArticlePath );
@@ -436,7 +436,12 @@ class PonyDocsExtension
 			 * This will be a DESCENDING mapping of version name to PonyDocsVersion object and will ONLY contain the
 			 * versions available to the current user (i.e. LoadVersions() only loads the ones permitted).
 			 */
-			$versionList = array_reverse( PonyDocsProductVersion::GetReleasedVersions( $productName, true ));
+			$releasedVersions = PonyDocsProductVersion::GetReleasedVersions($productName, true);
+			
+			if (empty($releasedVersions)) return false;
+			
+			$versionList = array_reverse( $releasedVersions );
+			
 			$versionNameList = array( );
 			foreach( $versionList as $pV )
 				$versionNameList[] = $pV->getVersionName( );
