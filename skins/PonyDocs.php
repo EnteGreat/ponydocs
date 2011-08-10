@@ -110,7 +110,7 @@ class PonyDocsTemplate extends QuickTemplate {
 			$idx = 0;
 
 		$inDocumentation = false;
-		if($this->data['nscanonical'] == 'Documentation' || $wgTitle->__toString() == 'Documentation' || preg_match('/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/', $wgTitle->__toString())) {
+		if($this->data['nscanonical'] == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME || $wgTitle->__toString() == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME || preg_match('/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/', $wgTitle->__toString())) {
 			$inDocumentation = true;
 			$this->prepareDocumentation();
 		}

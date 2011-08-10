@@ -56,7 +56,7 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		return $response;
 	}
 
-	$defaultTitle = "Documentation";
+	$defaultTitle = PONYDOCS_DOCUMENTATION_NAMESPACE_NAME;
 	if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
 	{
 		/*
@@ -72,18 +72,18 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		else
 		{*/
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 1");}
-			$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
+			$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product, $wgArticlePath ));
 		//}
 	}
-	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
+	else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
 	{
 		/**
 		 * Just swap out the source product tag ($match[1]) with the selected product in the output URL.
 		 */
-		//$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
+		//$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
 		// just redirect to that product's main page, we can't carry over version and manual across products
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
-		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
+		$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product, $wgArticlePath ));
 	}
 	else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(Manuals|Versions)/i', $title, $match ))
 	{
@@ -92,7 +92,7 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 	}
 	else {
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 4");}
-		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
+		$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product, $wgArticlePath ));
 	}
 
 	if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect result " . print_r($response, true));}
@@ -129,7 +129,7 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 		return $response;
 	}
 
-	$defaultTitle = "Documentation";
+	$defaultTitle = PONYDOCS_DOCUMENTATION_NAMESPACE_NAME;
 
 	//if( preg_match( '/^base\/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
 	if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
@@ -142,13 +142,13 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 		{
 			$row = $dbr->fetchObject( $res );
 			//$response->addText( str_replace( '$1', $row->cl_sortkey, $wgArticlePath ));
-			$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version . '/' . $match[2] . '/' . $match[3], $wgArticlePath ));
+			$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product . '/' . $version . '/' . $match[2] . '/' . $match[3], $wgArticlePath ));
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 1");}
 		}
 		else
 		{
 			// same manual/topic doesn't exist for newly selected version, redirect to default
-			$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version, $wgArticlePath ));
+			$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product . '/' . $version, $wgArticlePath ));
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		}
 	}
@@ -160,12 +160,12 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 		$response->addText( $add_text );
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
 	}
-	else if( preg_match( '/Documentation\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
+	else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)\/(.*)\/(.*)\/(.*)/i', $title, $match ))
 	{
 		/**
 		 * Just swap out the source version tag ($match[2]) with the selected version in the output URL.
 		 */
-		$response->addText( str_replace( '$1', 'Documentation/' . $product . '/' . $version . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
+		$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $product . '/' . $version . '/' . $match[3] . '/' . $match[4], $wgArticlePath ));
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 4");}
 	}
 	else {
@@ -291,7 +291,7 @@ function efPonyDocsAjaxCloneExternalTopic( $topic, $destTitle )
 	$response->setCacheDuration( false );
 
 	$pieces = split( ':', $destTitle );
-	if(( sizeof( $pieces ) < 4 || ( strcasecmp( $pieces[0], 'Documentation' ) != 0 )))
+	if(( sizeof( $pieces ) < 4 || ( strcasecmp( $pieces[0], PONYDOCS_DOCUMENTATION_NAMESPACE_NAME ) != 0 )))
 	{  
 		$response->addText( 'Destination title is not valid.' );
 		return $response;
