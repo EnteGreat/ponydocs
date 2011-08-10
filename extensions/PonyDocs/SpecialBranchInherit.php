@@ -384,7 +384,7 @@ class SpecialBranchInherit extends SpecialPage
 
 		// if title is set we have our product and manual, else take selected product
 		if(isset($_GET['titleName'])) {
-			if(!preg_match('/Documentation:(.*):(.*):(.*):(.*)/', $_GET['titleName'], $match)) {
+			if(!preg_match('/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/', $_GET['titleName'], $match)) {
 				throw new Exception("Invalid Title to Branch From");
 			}
 			$forceProduct = $match[1];

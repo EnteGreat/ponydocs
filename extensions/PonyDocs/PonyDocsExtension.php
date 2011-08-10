@@ -183,8 +183,8 @@ function efPonyDocsSetup()
 	$currentVersion =  PonyDocsProductVersion::GetSelectedVersion(PonyDocsProduct::GetSelectedProduct(), false);
 	if (preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)
 		|| preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation\/(['.PONYDOCS_PRODUCT_LEGALCHARS.']+)\/['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match)
-		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation:(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))
-		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)Documentation:(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+:[^:]+:(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))) {
+		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)' . PONYDOCS_DOCUMENTATION_PREFIX . '(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+TOC(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))
+		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)' . PONYDOCS_DOCUMENTATION_PREFIX . '(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+:[^:]+:(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))) {
 		PonyDocsProductVersion::SetSelectedVersion($match[3], $match[4]);
 	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
@@ -240,7 +240,7 @@ function efManualParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 		/**
 		 * Link to create new TOC page -- should link to current version TOC and then add message to explain.
 		 */
-		$output = 	'<p><a href="' . str_replace( '$1', 'Documentation:' . $productName . ':' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
+		$output = 	'<p><a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $productName . ':' . $manualName . 'TOC' . $version, $wgArticlePath ) . '" style="font-size: 1.3em;">' . $param2 . "</a></p>
 					<span style=\"padding-left: 20px;\">Click manual to create TOC for current version (" . $version . ").</span>\n";
 	}
 	else
@@ -371,7 +371,7 @@ function efGetTitleFromMarkup($markup = '' )
 	/**
 	 * We ignore this parser function if not in a TOC management page.
 	 */
-	if( !preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches ))
+	if( !preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches ))
 		return false;
 
 	$manualShortName = $matches[2];
@@ -409,7 +409,7 @@ function efGetTitleFromMarkup($markup = '' )
 	 */
 	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
 	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
-	$wikiPath = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
+	$wikiPath = PONYDOCS_DOCUMENTATION_PREFIX . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
 
 	$dbr = wfGetDB( DB_SLAVE );
 
@@ -441,7 +441,7 @@ function efGetTitleFromMarkup($markup = '' )
 		/**
 		 * No match -- so this is a "new" topic.  Set name.
 		 */
-		$topicName = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
+		$topicName = PONYDOCS_DOCUMENTATION_PREFIX . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
 	}
 	else
 	{
@@ -471,7 +471,7 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	/**
 	 * We ignore this parser function if not in a TOC management page.
 	 */
-	if( !preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches )) {
+	if( !preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $matches )) {
 		return false;
 	}
 
@@ -512,7 +512,7 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 	 */
 	//$wikiTopic = preg_replace( '/([ \'#?=\\/])/', '', $param1 );
 	$wikiTopic = preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $param1 );
-	$wikiPath = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
+	$wikiPath = PONYDOCS_DOCUMENTATION_PREFIX . $productShortName . ':' . $manualShortName . ':' . $wikiTopic;
 
 	$dbr = wfGetDB( DB_SLAVE );
 
@@ -544,7 +544,7 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 		/**
 		 * No match -- so this is a "new" topic.  Set name.
 		 */
-		$topicName = 'Documentation:' . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
+		$topicName = PONYDOCS_DOCUMENTATION_PREFIX . $productShortName . ':' . $manualShortName . ':' . $wikiTopic . ':' . $earliestVersion->getVersionName( );
 	}
 	else
 	{

@@ -292,7 +292,7 @@ class PonyDocsTOC
 					}
 
 					$baseTopic = $matches[1];
-					$title = 'Documentation:' . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
+					$title = PONYDOCS_DOCUMENTATION_PREFIX . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
 					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $this->pProduct->getShortName( ) );
 
 					/**

@@ -57,11 +57,11 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 	}
 
 	$defaultTitle = "Documentation";
-	if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
+	if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
 	{
 		/*
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 
-			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
+			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
 			"cl_to LIKE 'V:" . $product . "%'" ), __METHOD__ );
 
 		if( $res->numRows( ))
@@ -85,10 +85,10 @@ function efPonyDocsAjaxChangeProduct( $product, $title, $force = false )
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		$response->addText( str_replace( '$1', 'Documentation/' . $product, $wgArticlePath ));
 	}
-	else if( preg_match( '/Documentation:(.*):(Manuals|Versions)/i', $title, $match ))
+	else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(Manuals|Versions)/i', $title, $match ))
 	{
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
-		$response->addText( str_replace( '$1', 'Documentation:' . $product . ':' . $match[2], $wgArticlePath ));
+		$response->addText( str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $match[2], $wgArticlePath ));
 	}
 	else {
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 4");}
@@ -131,11 +131,11 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 
 	$defaultTitle = "Documentation";
 
-	//if( preg_match( '/^base\/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
-	if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $title, $match ))
+	//if( preg_match( '/^base\/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
+	if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $title, $match ))
 	{
 		$res = $dbr->select( 'categorylinks', 'cl_sortkey', array( 
-			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( 'Documentation:' . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
+			"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $match[2] . ':' . $match[3] )) . ":%'",
 			"cl_to = 'V:" . $dbr->strencode($product . ":" . $version) . "'" ), __METHOD__ );
 
 		if( $res->numRows( ))
@@ -152,10 +152,10 @@ function efPonyDocsAjaxChangeVersion( $product, $version, $title, $force = false
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 2");}
 		}
 	}
-	else if( preg_match( '/Documentation:(.*):(Manuals|Versions)/i', $title, $match ))
+	else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(Manuals|Versions)/i', $title, $match ))
 	{
 		// this is a manuals or versions page
-		$add_text = str_replace( '$1', 'Documentation:' . $product . ':' . $match[2], $wgArticlePath);
+		$add_text = str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $match[2], $wgArticlePath);
 		/// FIXME we probably need to clear objectcache for this [product]:Manuals page, or even better, do not cache it(?)
 		$response->addText( $add_text );
 		if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] ajax redirect rule 3");}
@@ -271,7 +271,7 @@ function efPonyDocsAjaxTopicClone( $topic, $product, $version )
 /**
  * This is used when an author wants to CLONE a title from outside the Documentation namespace into a
  * title within it.  We must be passed the title of the original/source topic and then the destination
- * title which should be a full form 'Documentation:<manual>:<topicName>:<version>' which it will then
+ * title which should be a full form PONYDOCS_DOCUMENTATION_PREFIX . '<manual>:<topicName>:<version>' which it will then
  * tag with the supplied version and strip out any other Category tags (since they are invalid in the
  * Documentation namespace unless a DEFINED version).
  *

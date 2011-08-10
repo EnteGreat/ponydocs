@@ -110,7 +110,7 @@ class PonyDocsTemplate extends QuickTemplate {
 			$idx = 0;
 
 		$inDocumentation = false;
-		if($this->data['nscanonical'] == 'Documentation' || $wgTitle->__toString() == 'Documentation' || preg_match("/^Documentation:/", $wgTitle->__toString())) {
+		if($this->data['nscanonical'] == 'Documentation' || $wgTitle->__toString() == 'Documentation' || preg_match('/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/', $wgTitle->__toString())) {
 			$inDocumentation = true;
 			$this->prepareDocumentation();
 		}
@@ -711,8 +711,8 @@ if($this->data['copyrightico']) { ?>
 		//echo '<pre>' ;print_r( $wgArticle ); die();
 		$topic = new PonyDocsTopic( $wgArticle );
 
-		if( preg_match( '/^Documentation:(.*):(.*):(.*):(.*)/', $wgTitle->__toString( )) ||
-			preg_match( '/^Documentation:.*:.*TOC.*/', $wgTitle->__toString( )))
+		if( preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/', $wgTitle->__toString( )) ||
+			preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '.*:.*TOC.*/', $wgTitle->__toString( )))
 		{
 			$this->data['topicversions'] = PonyDocsWiki::getVersionsForTopic( $topic );
 			$this->data['inlinetoc'] = $topic->getSubContents( );
@@ -759,7 +759,7 @@ if($this->data['copyrightico']) { ?>
 		{
 			$this->data['basetopiclink'] = '<a href="' . $wgScriptPath . '/index.php?title=Special:TopicList&topic=' . $this->data['basetopicname'] . '">View All</a>';
 		}
-		$temp = PonyDocsTopic::FindH1ForTitle("Documentation:" . $topic->getTitle()->getText());
+		$temp = PonyDocsTopic::FindH1ForTitle(PONYDOCS_DOCUMENTATION_PREFIX . $topic->getTitle()->getText());
 		if($temp !== false) {
 			// We got an H1!
 			$this->data['pagetitle'] = $temp;
@@ -774,12 +774,12 @@ if($this->data['copyrightico']) { ?>
 		$groups = $wgUser->getGroups( );
 		$authProductGroup = PonyDocsExtension::getDerivedGroup();
 
-		if( preg_match( '/Documentation:(.*):(.*):(.*):(.*)/i', $wgTitle->__toString( ), $match ))
+		if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/i', $wgTitle->__toString( ), $match ))
 		{
 			if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || in_array( $authProductGroup, $groups ))
 			{
 				array_pop( $match );  array_shift( $match );
-				$title = 'Documentation:' . implode( ':', $match );
+				$title = PONYDOCS_DOCUMENTATION_PREFIX . implode( ':', $match );
 
 				$this->data['content_actions']['viewall'] = array(
 					'class' => '',
@@ -796,7 +796,7 @@ if($this->data['copyrightico']) { ?>
 				);
 			}
 		}
-		else if( preg_match( '/Documentation:(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $match ))
+		else if( preg_match( '/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*)TOC(.*)/i', $wgTitle->__toString( ), $match ))
 		{
 			if( $wgUser->isAllowed( 'branchmanual' ))
 			{
@@ -830,7 +830,7 @@ if($this->data['copyrightico']) { ?>
 				'text' => 'TOC Management' );
 
 			$this->data['nav_urls']['documentation_manuals'] = array(
-				'href' => str_replace( '$1', 'Documentation:Manuals', $wgArticlePath ),
+				'href' => str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . 'Manuals', $wgArticlePath ),
 				'text' => 'Manuals' );
 
 			$this->data['nav_urls']['document_links'] = array(
