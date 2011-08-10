@@ -28,7 +28,7 @@ class PonyDocsCache
 				$expires = time() + 3600;
 			}
 			$data = mysql_real_escape_string(serialize($data));
-			$query = "INSERT INTO ponydocs_cache VALUES('$key', '$expires',  '$data')";
+			$query = "INSERT IGNORE INTO ponydocs_cache VALUES('$key', '$expires',  '$data')";
 			try {
 				$this->dbr->query($query);
 			} catch (Exception $ex){
