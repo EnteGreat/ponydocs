@@ -98,7 +98,7 @@ class SpecialLatestDoc extends SpecialPage {
 				 */
 				
 				$res = $dbr->select( 'categorylinks', 'cl_to', 
-									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . PONYDOCS_DOCUMENTATION_PREFIX . $dbr->strencode( strtolower( $matches[1] . ':' . $matches[3] . ':' . $matches[4] )) . ":%'",
+									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( PONYDOCS_DOCUMENTATION_PREFIX . $matches[1] . ':' . $matches[3] . ':' . $matches[4] )) . ":%'",
 									 __METHOD__ );
 
 				if( !$res->numRows( ))

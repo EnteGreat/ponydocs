@@ -455,7 +455,7 @@ class PonyDocsExtension
 			 */
 
 			$res = $dbr->select( 'categorylinks', 'cl_to',
-								 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . PONYDOCS_DOCUMENTATION_PREFIX . $dbr->strencode( strtolower( $productName . ':' . $manualName . ':' . $topicName )) . ":%'",
+								 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( PONYDOCS_DOCUMENTATION_PREFIX . $productName . ':' . $manualName . ':' . $topicName )) . ":%'",
 								 __METHOD__ );
 
 			if( !$res->numRows( ))
