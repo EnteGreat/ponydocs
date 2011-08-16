@@ -455,7 +455,7 @@ class PonyDocsExtension
 			 */
 
 			$res = $dbr->select( 'categorylinks', 'cl_to',
-								 "LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $productName . ':' . $manualName . ':' . $topicName )) . ":%'",
+								 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . PONYDOCS_DOCUMENTATION_PREFIX . $dbr->strencode( strtolower( $productName . ':' . $manualName . ':' . $topicName )) . ":%'",
 								 __METHOD__ );
 
 			if( !$res->numRows( ))
@@ -503,7 +503,7 @@ class PonyDocsExtension
 			}
 			if(!$found) {
 				if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] redirecting to $wgScriptPath/Special:PonyDocsLatestDoc?t=$title");}
-				header("Location: " . $wgScriptPath . "/Special:PonyDocsLatestDoc?t=$title", true, 301);
+				header("Location: " . $wgScriptPath . "/Special:SpecialLatestDoc?t=$title", true, 301);
 				exit(0);
 			}
 

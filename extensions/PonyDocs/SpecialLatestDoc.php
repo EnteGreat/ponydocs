@@ -2,7 +2,7 @@
 if( !defined( 'MEDIAWIKI' ))
 	die( "PonyDocs MediaWiki Extension" );
 
-$wgSpecialPages['LatestDoc'] = 'SpecialLatestDoc';
+$wgSpecialPages['SpecialLatestDoc'] = 'SpecialLatestDoc';
 
 
 /**
@@ -51,7 +51,7 @@ class SpecialLatestDoc extends SpecialPage {
 		 * $matches[3] = manual
 		 * $matches[4] = topic
 		 */
-		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
+		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/([' . PONYDOCS_PRODUCT_LEGALCHARS. ']*)\/(.*)\/(.*)\/(.*)$/i', $title, $matches )) {
 			?>
 			<p>
 			Sorry, but <?php echo $title;?> is not a valid Documentation url.
@@ -63,14 +63,14 @@ class SpecialLatestDoc extends SpecialPage {
 			 * At this point $matches contains:
 			 * 	0= Full title.
 			 *  1= Product name (short name).
-			 *  2= Manual name (short name).
-			 *  3= Version OR 'latest' as a string.
+			 *  2= Version OR 'latest' as a string.
+			 *  3= Manual name (short name).
 			 *  4= Wiki topic name.
 			 */
-			PonyDocsProductVersion::LoadVersions();		// Load versions from DB
 			$productName = $matches[1];
 			$versionName = $matches[2];
 			$version = '';
+			PonyDocsProductVersion::LoadVersionsForProduct($productName);		// Load versions from DB
 			if(strcasecmp('latest', $versionName)) {
 				?>
 				<p>
@@ -88,7 +88,7 @@ class SpecialLatestDoc extends SpecialPage {
 				$versionNameList = array( );
 				foreach( $versionList as $pV )
 					$versionNameList[] = $pV->getVersionName( );
-
+				
 				/**
 				 * Now get a list of version names to which the current topic is mapped in DESCENDING order as well
 				 * from the 'categorylinks' table.
@@ -96,8 +96,9 @@ class SpecialLatestDoc extends SpecialPage {
 				 * DB can't do descending order here, it depends on the order defined in versions page!  So we have to
 				 * do some magic sorting below.
 				 */
+				
 				$res = $dbr->select( 'categorylinks', 'cl_to', 
-									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode( strtolower( $matches[1] . ':' . $matches[2] . ':' . $matches[3] )) . ":%'",
+									 "LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . PONYDOCS_DOCUMENTATION_PREFIX . $dbr->strencode( strtolower( $matches[1] . ':' . $matches[3] . ':' . $matches[4] )) . ":%'",
 									 __METHOD__ );
 
 				if( !$res->numRows( ))
@@ -139,12 +140,15 @@ class SpecialLatestDoc extends SpecialPage {
 				}
 				usort( $existingVersions, "PonyDocs_ProductVersionCmp" );
 				$existingVersions = array_reverse( $existingVersions );
-
+				
+				// Make it so we can use in_array below
+				foreach($existingVersions as $index => $object) $existingVersions[$index] = $object->getVersionName();
 				// $existingVersions[0] points to the latest version this document 
 				// is in
 				// If this document is in the latest version, then let's go 
 				// ahead and redirect over to it.
-				if(count($existingVersions) && $existingVersions[0]->getVersionName() == $versionNameList[0]) {
+				
+				if(count($existingVersions) && in_array($versionNameList[0], $existingVersions)) {
 					if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __CLASS__ . "::" . __METHOD__ . "] redirecting to $wgScriptPath/$title [" . __FILE__ . ":" . __LINE__ . "]");}
 					header("Location: " . $wgScriptPath . "/" . $title);
 					exit(0);
@@ -163,7 +167,7 @@ class SpecialLatestDoc extends SpecialPage {
 				<p>
 				<ul>
 					<li>To search the latest version of the documentation, click <a href="<?php echo $wgScriptPath;;?>/Special:Search?search=<?php echo $matches[4];?>">Search</a></li>
-					<li>To look at this topic anyway, click <a href="/<?php echo PONYDOCS_DOCUMENTATION_NAMESPACE_NAME;?>/<?php echo $existingVersions[0]->getProductName();?>/<?php echo $existingVersions[0]->getVersionName();?>/<?php echo $matches[3];?>/<?php echo $matches[4];?>">here</a>.</li>
+					<li>To look at this topic anyway, click <a href="/<?php echo PONYDOCS_DOCUMENTATION_NAMESPACE_NAME;?>/<?php echo $productName;?>/<?php echo $versionName;?>/<?php echo $matches[3];?>/<?php echo $matches[4];?>">here</a>.</li>
 				</ul>
 				</p>
 				<?php
