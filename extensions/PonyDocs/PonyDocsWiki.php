@@ -74,7 +74,12 @@ class PonyDocsWiki
 			 *	NOTE skip for now.
 			 */
 			//if( in_array( 'V:' . $p->getShortName( ), $validProducts ))
+
+			// Only add product to list if it has versions visible to this user
+			$versions = PonyDocsProductVersion::LoadVersionsForProduct($p->getShortName());
+			if (!empty($versions)) {
 				$out[] = array( 'name' => $p->getShortName( ), 'label' => $p->getLongName( ));
+			}
 		}
 
 		return $out;
