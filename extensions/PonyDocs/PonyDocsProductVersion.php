@@ -204,13 +204,22 @@ class PonyDocsProductVersion
 				* Get latest RELEASED version and set the our active version to it..
 				*/
 			$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
+			$authPreviewGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_VERSION, $productName);
 			if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
 				self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));}
 			}
 			else if(in_array($authProductGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
 
 				if(isset(self::$sVersionListUnreleased[$productName]) && count(self::$sVersionListUnreleased[$productName])) {
 					self::SetSelectedVersion($productName, self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName());
+					if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName( ));}
+				}
+			}
+			else if(in_array($authPreviewGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
+				if(isset(self::$sVersionListPreview[$productName]) && count(self::$sVersionListPreview[$productName])) {
+					self::SetSelectedVersion($productName, self::$sVersionListPreview[$productName][count(self::$sVersionListPreview[$productName])-1]->getVersionName());
+					if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListPreview[$productName][count(self::$sVersionListPreview[$productName])-1]->getVersionName( ));}
 				}
 			}
 		}
