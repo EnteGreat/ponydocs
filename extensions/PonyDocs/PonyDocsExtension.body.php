@@ -1091,7 +1091,7 @@ HEREDOC;
 
 									$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
-									$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+									$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
 									if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 								}
 							}
@@ -1123,7 +1123,7 @@ HEREDOC;
 
 								$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
-								$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+								$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
 								if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 							} 
 						}
@@ -1135,10 +1135,10 @@ HEREDOC;
 					 */
 					else
 					{
-						$tempArticle = new Article( Title::newFromText( $match[1] ));
+						$topicTitle = $match[1];
+						$tempArticle = new Article( Title::newFromText( $topicTitle ));
 						if( !$tempArticle->exists( ))
 						{
-							//echo "- Adding new article with title {$match[1]}.<br>";
 							/**
 							 * Create the new article in the system;  if we have alternate text then set our H1 to this.
 							 */
@@ -1148,8 +1148,8 @@ HEREDOC;
 							else
 								$content = '= ' . $match[1] . " =\n";
 
-							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
-							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created " . $match[1] . " using link " . $match[1] . " in " . $title->__toString( ));}
+							$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
+							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created " . $topicTitle . " using link " . $match[1] . " in " . $title->__toString( ));}
 						}
 					}
 
@@ -1175,7 +1175,7 @@ HEREDOC;
 					 */
 					$sqlMatch = PONYDOCS_DOCUMENTATION_PREFIX . $product . ':' . $pManual->getShortName( ) . ':' . $match[1];
 					$res = $dbr->select( 	'categorylinks', 'cl_sortkey', array(
-											"LOWER(cl_sortkey) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
+											"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( $sqlMatch )) . ":%'",
 											"cl_to = 'V:" . $dbr->strencode( $product ) . ':' . $dbr->strencode( $version ) . "'" ), __METHOD__ );
 
 					if( !$res->numRows( ))
@@ -1196,7 +1196,7 @@ HEREDOC;
 
 							$content .= "\n[[Category:V:" . $product . ':' . $version . "]]";
 
-							$tempArticle->doEdit( $content, 'Auto-creation of topic via reference from another topic.', EDIT_NEW );
+							$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
 							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicTitle using link " . $match[1] . " in " . $title->__toString( ));}
 						}
 					}
