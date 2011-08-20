@@ -689,7 +689,7 @@ class PonyDocsExtension
 					$versionIn[] = $pProduct->getShortName() . ':' . $pV->getVersionName( );
 
 				$res = $dbr->select( 'categorylinks', 'cl_sortkey',
-					array( 	"LOWER(cl_sortkey) LIKE 'documentation:" . $dbr->strencode( strtolower( $match[1] . ':' . $match[2] . ":" . $wikiTopic )) . ":%'",
+					array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode( strtolower( PONYDOCS_DOCUMENTATION_PREFIX . $match[1] . ':' . $match[2] . ":" . $wikiTopic )) . ":%'",
 							"cl_to IN ('V:" . implode( "','V:", $versionIn ) . "')" ), __METHOD__ );
 
 				$topicName = '';
@@ -708,7 +708,8 @@ class PonyDocsExtension
 						foreach( $manVersionList as $pVersion )
 							$content .= '[[Category:V:' . $pProduct->getShortName() . ':' . $pVersion->getVersionName( ) . ']]';
 
-						$topicArticle->doEdit( $content, '', EDIT_NEW );
+						$topicArticle->doEdit( $content, 'Auto-creation of topic ' . $topicName . ' via TOC ' . $title->__toString( ), EDIT_NEW );
+						if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created $topicName from TOC " . $title->__toString( ));}
 					}
 				}
 			}
