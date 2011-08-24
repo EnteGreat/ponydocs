@@ -218,7 +218,7 @@ class PonyDocsTopic
 	 */
 	static public function FindH1ForTitle( $title )
 	{
-		$article = new Article( Title::newFromText( $title ));
+		$article = new Article( Title::newFromText( $title ), 0);
 		$content = $article->loadContent( );
 
 		//$content = preg_replace( '/\<nowiki\>(.*)\<\/nowiki\>/i', '', $article->getContent( ));		

@@ -167,7 +167,7 @@ class PonyDocsTOC
 		 * Now load the contents of our TOC article itself and store internally.
 		 *
 		 */
-		$this->pTOCArticle = new Article( Title::newFromText( $mTOCPageTitle ));
+		$this->pTOCArticle = new Article( Title::newFromText( $mTOCPageTitle ), 0);
 		$this->pTOCArticle->getContent( );
 
 		return true;

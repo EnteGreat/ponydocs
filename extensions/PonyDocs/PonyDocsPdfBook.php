@@ -147,7 +147,7 @@ class PonyDocsPdfBook {
 						$html .= '<h1>' . $section . '</h1>';
 						$currentSection = $section;
 					}		
-					$article = new Article($title);
+					$article = new Article($title, 0);
 					$text	= $article->fetchContent();
 					$text	= preg_replace('/<!--([^@]+?)-->/s', '@@'.'@@$1@@'.'@@', $text); # preserve HTML comments
 						$text   .= '__NOTOC__';
