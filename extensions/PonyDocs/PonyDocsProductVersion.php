@@ -180,7 +180,7 @@ class PonyDocsProductVersion
 
 		$groups = $wgUser->getGroups();
 
-		/**
+/**
 		 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
 		if( isset( $_SESSION['wsVersion'][$productName] ) && strlen( $_SESSION['wsVersion'][$productName] ) &&
@@ -196,32 +196,23 @@ class PonyDocsProductVersion
 			}
 		}
 
-		if ($setDefault) {
+		if ($setDefault && is_array(self::$sVersionList[$productName]) && sizeof(self::$sVersionList[$productName]) > 0) {
 			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
-
+			
 			/**
-				* If we're here, we don't have a version set previously.
-				* Get latest RELEASED version and set the our active version to it..
-				*/
-			$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
-			$authPreviewGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_VERSION, $productName);
+			* If we're here, we don't have a version set previously.
+			* Get latest version the current user can see (released, unreleased or preview)
+			* and set the our active version to it. Check for released
+			* first.
+			*/
 			if( isset(self::$sVersionListReleased[$productName]) && sizeof( self::$sVersionListReleased[$productName] )) {
 				self::SetSelectedVersion( $productName, self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));
 				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListReleased[$productName][count(self::$sVersionListReleased[$productName])-1]->getVersionName( ));}
+			} else {
+				self::SetSelectedVersion( $productName, self::$sVersionList[$productName][count(self::$sVersionList[$productName])-1]->getVersionName( ));
+				if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionList[$productName][count(self::$sVersionList[$productName])-1]->getVersionName( ));}
 			}
-			else if(in_array($authProductGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
-
-				if(isset(self::$sVersionListUnreleased[$productName]) && count(self::$sVersionListUnreleased[$productName])) {
-					self::SetSelectedVersion($productName, self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName());
-					if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListUnreleased[$productName][count(self::$sVersionListUnreleased[$productName])-1]->getVersionName( ));}
-				}
-			}
-			else if(in_array($authPreviewGroup, $groups)|| in_array(PONYDOCS_EMPLOYEE_GROUP, $groups)) {
-				if(isset(self::$sVersionListPreview[$productName]) && count(self::$sVersionListPreview[$productName])) {
-					self::SetSelectedVersion($productName, self::$sVersionListPreview[$productName][count(self::$sVersionListPreview[$productName])-1]->getVersionName());
-					if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/".self::$sVersionListPreview[$productName][count(self::$sVersionListPreview[$productName])-1]->getVersionName( ));}
-				}
-			}
+			
 		}
 		if(isset($_SESSION['wsVersion'][$productName])) {
 			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] getting selected version $productName/" . $_SESSION['wsVersion'][$productName]);}
