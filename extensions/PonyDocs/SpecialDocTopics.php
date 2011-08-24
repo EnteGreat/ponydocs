@@ -40,6 +40,16 @@ class SpecialDocTopics extends SpecialPage
 		global $wgOut, $wgArticlePath;
 		global $wgUser;
 
+		// disable this special page for now per WEB-5698
+		$wgOut->addHTML( "<h1>Page Disabled</h1><p>This page has been disabled.</p>" );
+		return false;
+
+
+
+
+
+
+
 		$dbr = wfGetDB( DB_SLAVE );
 
 		$this->setHeaders( );
