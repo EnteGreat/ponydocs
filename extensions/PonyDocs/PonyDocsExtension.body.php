@@ -565,7 +565,7 @@ class PonyDocsExtension
 			$version = PonyDocsProductVersion::GetVersionByName( $productName, $versionName );
 			if( !$version )
 			{
-				if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] redirecting to $defaultRedirect");}
+				if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] unable to retrieve version ($versionName) for product ($productName); redirecting to $defaultRedirect");}
 				header( "Location: " . $defaultRedirect );
 				exit( 0 );
 			}

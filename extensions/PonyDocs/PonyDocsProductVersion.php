@@ -176,11 +176,7 @@ class PonyDocsProductVersion
 	 */
 	static public function GetSelectedVersion( $productName, $setDefault = true )
 	{
-		global $wgUser;
-
-		$groups = $wgUser->getGroups();
-
-/**
+		/**
 		 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
 		if( isset( $_SESSION['wsVersion'][$productName] ) && strlen( $_SESSION['wsVersion'][$productName] ) &&
@@ -196,7 +192,7 @@ class PonyDocsProductVersion
 			}
 		}
 
-		if ($setDefault && is_array(self::$sVersionList[$productName]) && sizeof(self::$sVersionList[$productName]) > 0) {
+		if ($setDefault && isset(self::$sVersionList[$productName]) && is_array(self::$sVersionList[$productName]) && sizeof(self::$sVersionList[$productName]) > 0) {
 			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
 			
 			/**

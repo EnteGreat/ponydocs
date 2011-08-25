@@ -187,7 +187,6 @@ function efPonyDocsSetup()
 		|| (!isset($currentVersion) && preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/((index.php\?title=)|)' . PONYDOCS_DOCUMENTATION_PREFIX . '(['.PONYDOCS_PRODUCT_LEGALCHARS.']+):['.PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']+:[^:]+:(['.PONYDOCS_PRODUCTVERSION_LEGALCHARS.']+)/i', $_SERVER['PATH_INFO'], $match))) {
 		PonyDocsProductVersion::SetSelectedVersion($match[3], $match[4]);
 	}
-	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
 }
 
 /**
