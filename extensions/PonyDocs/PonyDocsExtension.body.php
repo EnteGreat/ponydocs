@@ -1759,7 +1759,9 @@ HEREDOC;
 			$oldVersion = PonyDocsProductVersion::GetSelectedVersion($product);
 			PonyDocsProductVersion::SetSelectedVersion($product, $version);
 			$ver = PonyDocsProductVersion::GetVersionByName($product, PonyDocsProductVersion::GetSelectedVersion($product));
-
+			if (!is_object($ver)) {
+				return array();
+			}
 			$pr = PonyDocsProduct::GetProductByShortName($product);
 			$manuals = PonyDocsProductManual::LoadManualsForProduct($product, true);
 
