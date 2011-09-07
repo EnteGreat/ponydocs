@@ -1,14 +1,14 @@
 
 ---------------------------------------------
-PonyDocs 1.0 Alpha 3 - May 24, 2011
+PonyDocs 1.0 Beta 1 - September 6, 2011
 ---------------------------------------------
 
 Open Source documentation based on MediaWiki
 
 For any assistance:
 
-	Taylor Dondich
-	tdondich@splunk.com
+	Ashley Jones
+	ashley@splunk.com
 
 Splunk > Open Source FTW!
 
@@ -17,15 +17,16 @@ Splunk > Open Source FTW!
 Requirements & Assumptions
 ---------------------------------------------
 1. You're a sysadmin
-2. You have a MediaWiki system at the ready
+2. You have a MediaWiki system at the ready. Beta 1 only tested with MW 1.16.4
+  (http://download.wikimedia.org/mediawiki/1.16/mediawiki-1.16.4.tar.gz)
 3. You can update apache's conf files for the media wiki ghost
 4. You can run SQL commands on the MediaWiki DB
-5. You know this is Alpha ;)
+5. You know this is Beta ;)
 6. You promise to read AND follow all these steps IN ORDER
 7. You've made a backup of your mediawiki DB in case you didn't meet the
    previous requirement
 
-It is further assumed that have 4 classes of users:
+It is further assumed that have 4 classes of users of your wiki:
 
 * Anonymous and guests who are logged in - these are folks who fall into the *
   (default) or "user" group.  They can *only* read and can not edit any pages.
@@ -34,7 +35,7 @@ It is further assumed that have 4 classes of users:
   Branching or inheriting
 * Editors - folks who can do it all, short of editing user perms and are in the
   "PRODUCT-docteam" group. There is a per product docteam group so if you had a
-  product called "Foo", the editor would need to be in the "Foo-Docteam" group
+  product called "Foo", the editor would need to be in the "Foo-docteam" group
 * Admins - folks who can add and remove Employees and Editors to the different
   product docteam groups
 
@@ -54,52 +55,38 @@ configuration, if mediawiki was installed at the base of your html directory.
 If your mediawiki instance resides in a sub-directory, modify the configuration
 accordingly.
 
-	==== START SAMPLE APACHE CONFIGURATION ====
+	#################  START SAMPLE APACHE CONFIGURATION #################
 	RewriteEngine On
 	# Main passthrus
-	RewriteRule ^/api.php$ 		/api.php 	[L,QSA]
-	RewriteRule ^/config/(.*)$ 	/config/$1 	[L,QSA]
-	RewriteRule ^/skins/(.*)$	/skins/$1 	[L,QSA]
-	RewriteRule ^/extensions/(.*)$ 	/extensions/$1	[L,QSA]
+	RewriteRule ^/api.php$	  /api.php	[L,QSA]
+	RewriteRule ^/images/(.*)$	  /images/$1  [L,QSA]
+	RewriteRule ^/config/(.*)$	  /config/$1  [L,QSA]
+	RewriteRule ^/skins/(.*)$	   /skins/$1   [L,QSA]
+	RewriteRule ^/extensions/(.*)$  /extensions/$1  [L,QSA]
+
+	# Rewrite /Documentation/ to /Documentation
+	RewriteRule ^/Documentation/$   /Documentation  [L,R=301]
 
 	# Rewrite rule to handle passing ugly doc urls to pretty urls
-	RewriteRule ^/Documentation:(.*):(.*):(.*):(.*) /Documentation/$1/$4/$2/$3 [L,QSA,R=301]
-	RewriteRule ^/Documentation:(.*):(.*):(.*) /Documentation/$1/latest/$2/$3 [L,QSA,R=301]
+	RewriteRule ^/Documentation:(.*):(.*):(.*):(.*) /Documentation/$1/$4/$2/$3  [L,QSA,R=301]
+	RewriteRule ^/Documentation:(.*):(.*):(.*)	  /Documentation/$1/latest/$2/$3  [L,QSA,R=301]
 
-	# get home page requests to Main_Page
-	RewriteRule ^/(\/*)$ /index.php?title=Main_Page [PT]
+	# get home page requests to Documentation
+	RewriteRule ^/$ /Documentation [R]
+
 	# all other requests go to specific page
 	RewriteRule ^/(\/*)(.*)$ /index.php?title=$3 [PT,QSA]
-	==== END SAMPLE APACHE CONFIGURATION ====
+	################# END SAMPLE APACHE CONFIGURATION #################
 
 Restart Apache at this time so Rewrite Rules will take affect.
 
-------- 2) Modify LocalSettings.php ------- 
-
-Modify your LocalSettings.php file to have an additional namespace of
-Documentation.  
-
-Alpha Note: Currently, the namespace for PonyDocs is Documentation.  We will be
-writing in support to change this Namespace name, but for now, keep it
-Documentation.  You can change the index (100) of the Documentation namespace,
-as that customization is currently supported.
-
-Example:
-
-	$wgExtraNamespaces[100] = "Documentation";
+------- 2) Modify LocalSettings.php -------
 
 There are additional user permission flags that are defined.  These are
 branchtopic, branchmanual, inherit, viewall.  Modify your $wgGroupPermissions to
 add these permissions to your existing groups.  You can also create new groups
 for your permissions.  Review http://www.mediawiki.org/wiki/Manual:User_rights
 for more information.  
-
-An example in your LocalSettings.php file would be:
-
-	$wgGroupPermissions['docteam']['branchtopic']	 = true; // Custom permission to branch a single topic.
-	$wgGroupPermissions['docteam']['branchmanual']	 = true; // Custom permission to branch an entire manual.
-	$wgGroupPermissions['docteam']['inherit']	 = true; // Custom permission to inherit a topic.
-	$wgGroupPermissions['docteam']['viewall']	 = true; // Custom permission to handle View All link for topics.
 
 Some mediawiki instances do not have $wgArticlePath property defined.  Please
 make sure this is defined in your LocalSettings.php.  Refer to:
@@ -109,20 +96,89 @@ Example, if mediawiki was installed at the root of your html directory:
 
 	$wgArticlePath = '/$1';
 
+You'll also need to include the extension itself:
+
+	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
+
+You should update all the constants here (PONYDOCS_*) to be specific to your 
+install.
+
+An example in your LocalSettings.php file, with the two samples above, would be:
+
+	################# PONYDOCS START #################
+	// Implicit group for all visitors, removing
+	// access beyond reading
+	$wgGroupPermissions['*']['createaccount']   = false;
+	$wgGroupPermissions['*']['edit']			= false;
+	$wgGroupPermissions['*']['createpage']		= false;
+	$wgGroupPermissions['*']['upload']			= false;
+	$wgGroupPermissions['*']['reupload']		= false;
+	$wgGroupPermissions['*']['reupload-shared']	= false;
+	$wgGroupPermissions['*']['writeapi']		= false;
+	$wgGroupPermissions['*']['createtalk']		= false;
+	$wgGroupPermissions['*']['read']			= true;
+
+	// User is a logged.  ensuring they still can't edit.
+	$wgGroupPermissions['user']['read']			= true;
+	$wgGroupPermissions['user']['createtalk']	= false;
+	$wgGroupPermissions['user']['upload']		= false;
+	$wgGroupPermissions['user']['reupload']		= false;
+	$wgGroupPermissions['user']['reupload-shared'] = false;
+	$wgGroupPermissions['user']['edit']			= false;
+	$wgGroupPermissions['user']['move']			= false;
+	$wgGroupPermissions['user']['minoredit']	= false;
+	$wgGroupPermissions['user']['createpage']	= false;
+	$wgGroupPermissions['user']['writeapi']		= false;
+	$wgGroupPermissions['user']['move-subpages']= false;
+	$wgGroupPermissions['user']['move-rootuserpages']= false;
+	$wgGroupPermissions['user']['purge']		= false;
+	$wgGroupPermissions['user']['sendemail']	= false;
+	$wgGroupPermissions['user']['writeapi']		= false;
+
+	// And our "in charge" group.
+	$wgGroupPermissions['bureaucrat']['userrights'] = true;
+	 // Custom permission to branch ALL topics for a version.
+	$wgGroupPermissions['bureaucrat']['branchall']  = true;
+
+	// Implicit group for accounts that pass $wgAutoConfirmAge
+	$wgGroupPermissions['autoconfirmed']['autoconfirmed'] = true;
+
+	// Implicit group for accounts with confirmed email addresses
+	// This has little use when email address confirmation is off
+	$wgGroupPermissions['emailconfirmed']['emailconfirmed'] = true;
+
+	// Users with bot privilege can have their edits hidden
+	// from various log pages by default
+	$wgGroupPermissions['bot'  ]['bot']			 = true;
+	$wgGroupPermissions['bot'  ]['autoconfirmed']   = true;
+	$wgGroupPermissions['bot'  ]['nominornewtalk']  = true;
+	$wgGroupPermissions['bot'  ]['autopatrol']	  = true;
+
+	$wgArticlePath = '/$1';
+
+	// Ponydocs environment configuration.  update to your
+	// specific install
+	define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . str_replace("$1", "", $wgArticlePath) . '/skins/splunk/images/logo_splunkServer_white_rgb.gif');
+	define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Copyright Splunk, Inc. All Rights Reserved');
+	define('PONYDOCS_DEFAULT_PRODUCT', 'Foo');
+	define('PONYDOCS_ENABLE_BRANCHINHERIT_EMAIL', true);
+
+	// NOTE: this *must* match what is in Documentation:Products.
+	// This will be fixed in later versions
+	$ponyDocsProductsList = array(
+			);
+
+	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
+	#################  PONYDOCS END ################# 
+
+
 -------  3) Install PonyDocs extension and Configure Mediawiki to Load it. -------
 
 Move the extensions/PonyDocs directory into your Mediawiki's extensions directory.
 
-Modify the PonyDocs.config.php file in the PonyDocs extension directory to fit
-your environment.
-
 Update your mediawiki database schema by running the schema.sql file in the sql
-directory of the PonyDocs extension directory.
-
-Finally, update your LocalSettings.php to load the extension. Add the following
-line to the bottom of your LocalSettings.php in your Mediawiki root directory.
-
-	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
+directory of the PonyDocs extension directory. Remove this sql as it's no longer
+needed as is publicly reachable via your ponydocs site.
 
 There is a PonyDocs skin that is provided in this archive.  In order to see
 additional Documentation features, you should use this skin by moving the
@@ -132,10 +188,18 @@ the skin, update the wgDefaultSkin value in LocalSettings.php:
 
 	$wgDefaultSkin = 'ponydocs';
 
--------  4) Define your products in the code. -------
+-------  4) Have a looksee PonyDocsConfig.php -------
 
-Update your LocalSettings.php to include a list of products. This list will be
-used to determine user groups. There needs to be at least one defined.  If you
+Take a look at the PonyDocs.config.php file  in the Ponydocs extension. It will
+define a bunch of constants, most of which you shouldn't need to touch.  As of
+this writing, changing these values have not been tested.
+
+-------  5) Define your products in the code. -------
+
+Edit your LocalSettings.php to include a list of products. There is an empty array
+already in place called $ponyDocsProductsList. This array *must* be defined before
+the PonyDocsExtension is included.  The order in step 2 is correct. This list will
+be used to determine user groups. There needs to be at least one defined.  If you
 don't define one, PonyDocs will default to a "Splunk" product.  Here is one
 product defined (Foo):
 
@@ -155,13 +219,18 @@ And here is three:
 			'Bash',
 		);
 
-------- 5) Add your administrator user to appropriate user groups. -------
+As well, set your default product to be one of the above, also in LocalSettings.php:
+
+	define('PONYDOCS_DEFAULT_PRODUCT', 'Foo');
+
+------- 6) Add your administrator user to appropriate user groups. -------
 
 Visit your Mediawiki's Special:UserRights page and modify your administrator
 user to be added to the *-docteam group based on which products you want to
-edit, e.g. Foo-docteam
+edit, e.g. Foo-docteam.  Be sure the admin is in the *-docteam for the
+PONYDOCS_DEFAULT_PRODUCT as defined in step 5.
 
-------- 6) Create your products on the front-end. -------
+------- 7) Create your products on the front-end. -------
 
 Log in as your administrator user and visit the Documentation:Products page.  If
 Mediawiki was installed at the base of your documentation root, then simply go
@@ -171,17 +240,22 @@ to edit the page and add new products.
 The Documentation:Products page contains a listing of all your products. Each
 line defines a single product.  A product definition uses this format:
 
-    {{#products:productShortName|displayName}}
+	{{#product:productShortName|displayName}}
 
 productShortName can be any alphanumeric string (no spaces allowed).
-displayName is the human readable name of the product you are documenting.
+displayName is the human readable name of the product you are documenting. Here's
+an example of a page with the three products above:
+
+	{{#product:Foo|Foo for fooing}}
+	{{#product:Bar|Bar for the bar}}
+	{{#product:Bash|Bash is not Quux}}
 
 Once the page is saved, you'll be able to move to the next step, defining your
 versions. As you add more products, add more lines to the Documentation:Products
 page. Don't forget to add corresponding elements to the array in
-LocalSettings.php, as mentioned in Step 4 above.
+LocalSettings.php, as mentioned in Step 5 above.
 
-------- 7) Create your first product version. -------
+------- 8) Create your first product version. -------
 
 Logged in as your administrator user, visit the
 Documentation:productShortName:Versions page.  (productShortName is the name of
@@ -201,8 +275,8 @@ following syntax to define a version:
 	{{#version:versionName|status}}
 
 versionName can be any alphanumeric string (no spaces allowed).  It should match
-your software's version.  status is either "released" or "unreleased".  For
-example, to initialize version 1.0 of your product, have the following line
+your software's version.  status is either "released", "unreleased" or "preview".
+For example, to initialize version 1.0 of your product, have the following line
 in your Documentation:productShortName:Versions page:
 
 	{{#version:1.0|unreleased}}
@@ -212,7 +286,7 @@ to move to the next step, defining your first manual. As you add more versions
 of your product, add more lines to the Documentation:productShortName:Versions
 page.
 
--------  8) Create your first manual. -------
+-------  9) Create your first manual. -------
 
 Now head to /Documentation:productShortName:Manuals .  Click on the "Create" tab
 at the top of the page to edit the page and add new versions.
@@ -224,11 +298,11 @@ version in the next step.  For now, you'll need to define the first manual.
 Each line in Documentation:productShortName:Manuals must use the following
 syntax to define a manual:
 
-    {{#manual:manualShortName|displayName}}
+	{{#manual:manualShortName|displayName}}
 
 manualShortName can be any alphanumeric string (no spaces allowed). For example,
-"Admin". displayName is the human readable name of the manual. It can have
-spaces and is the full name of the Manual. For example, "Administration".
+"Installation". displayName is the human readable name of the manual. It can have
+spaces and is the full name of the Manual. For example, "Installation Manual".
 
 The following lines create two manuals called Installation and FAQ:
 
@@ -238,12 +312,9 @@ The following lines create two manuals called Installation and FAQ:
 Once saved, you will see the listing of your manuals.  Each manual name will be
 a link to create the Table of Contents for your current version (in this case,
 the first version you created in Documentation:productShortName:Versions).  By
-clicking on the Manual name, you'll proceed to the next step. (ALPHA BUG: You
-may have to edit and save the Document:productShortName:Manuals page in order to
-make the "Click manual to create TOC..." note go away after you've created the
-TOC.)
+clicking on the Manual name, you'll proceed to the next step. 
 
-------- 9) Create your first Table of Contents (TOC) and auto-generating your first Documentation topic. -------
+------- 10) Your 1st Table of Contents (TOC) and auto-gen your first topic -------
 
 Clicking on the Installation Manual link in
 Documentation:productShortName:Manuals will have the system direct you to
@@ -254,8 +325,8 @@ and the topics which reside under those sections.  Click on the "Create" tab at
 the top of the TOC page to edit the TOC page. Use the following syntax to create
 the TOC for this manual:
 
-    Section Header
-    * {{#topic:Topic Title}}
+	Section Header
+	* {{#topic:Topic Title}}
 
 For example:
 
@@ -274,9 +345,8 @@ version 1.0.  You must have this category tag present in order for the TOC to
 properly render for that version.
 
 When you save the edit to your first TOC page, links to your new topics will
-automatically be created. (ALPHA BUG: You may have to save your edits to the TOC
-page twice.)  Clicking on the topic in the TOC page will take you to the new
-topic, which you'll be able to edit with your new content.
+automatically be created.  Clicking on the topic in the TOC page will take you 
+to the new topic, which you'll be able to edit with your new content.
 
 Should get you started!  Have fun!
 
@@ -288,7 +358,7 @@ Q. Why do I get an error "Table 'ponydocs_doclinks' doesn't exist"?
 A. You likely missed running the schema.sql file in step 3.
 
 Q. Why can't I edit or create any docs pages?
-A. Go back to step 4 and make sure your user in the in the docs group
+A. Go back to step 6 and make sure your user in the in the docs group
 
 Q. I've created all the pages, but the drop down for "product version" or
    "select manual" is empty.  Why?
@@ -296,11 +366,8 @@ A. Reset to the backup you made before starting and try again.  Though there are
    some corners you can paint yourself into, this system has been tested and
    should work if you follow the steps in order.
 
-Q. I created my first TOC, but it is either empty or the there aren't links to
-   click like step 7 says there will be.  What gives?
-A. Edit and re-save the page and your content should be there and the links
-   should be clickable. This is a known Alpha bug.
-
-Q. I've created the TOC pages, so why do I still see the "Click manual to create
-   TOC..." notice on the Document:Manuals page?
-A. Save and edit this page and those should go away.  This is an known Alpha bug.
+---------------------------------------------
+HISTORY
+---------------------------------------------
+ - PonyDocs 1.0 Beta 1 - September 6, 2011
+ - PonyDocs 1.0 Alpha 3 - May 24, 2011

@@ -10,8 +10,8 @@ define('PONYDOCS_CRAWLER_AGENT_REGEX', '/gsa-crawler/');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_NAME', 'Documentation');
 define('PONYDOCS_DOCUMENTATION_NAMESPACE_ID', 100);
 
-define('PONYDOCS_CACHE_ENABLED', true);
-define('PONYDOCS_CACHE_DEBUG', true);
+define('PONYDOCS_CACHE_ENABLED', false);
+define('PONYDOCS_CACHE_DEBUG', false);
 define('PONYDOCS_REDIRECT_DEBUG', false);
 define('PONYDOCS_SESSION_DEBUG', false);
 define('PONYDOCS_AUTOCREATE_DEBUG', false);
