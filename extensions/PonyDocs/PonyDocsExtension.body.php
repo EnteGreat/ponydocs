@@ -1496,7 +1496,9 @@ HEREDOC;
 			 * For each, find the topic in categorylinks which is tagged with currently selected version then produce
 			 * link and replace in output ($text).  Simple!
 			 */
-			$pManual = PonyDocsProductManual::GetCurrentManual( PonyDocsProduct::GetSelectedProduct() );
+			$selectedProduct = PonyDocsProduct::GetSelectedProduct();
+			$selectedVersion = PonyDocsProductVersion::GetSelectedVersion( $selectedProduct );
+			$pManual = PonyDocsProductManual::GetCurrentManual( $selectedProduct );
 			// No longer bail on $pManual not being set.  We should only need it 
 			// for [[Namespace:Topic]]
 
@@ -1513,10 +1515,9 @@ HEREDOC;
 					 */
 					if( 3 == sizeof( $pieces ))
 					{
-						$version = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
 						$res = $dbr->select( 'categorylinks', 'cl_sortkey', 
 							array( 	"LOWER(cl_sortkey) LIKE '" . $dbr->strencode( strtolower( $match[1] )) . ":%'",
-									"cl_to = 'V:" . PonyDocsProduct::GetSelectedProduct() . ":" . $version . "'" ), __METHOD__ );
+									"cl_to = 'V:" . $selectedProduct . ":" . $selectedVersion . "'" ), __METHOD__ );
 
 						if( $res->numRows( ))
 						{
@@ -1535,10 +1536,10 @@ HEREDOC;
 							}
 							// Okay, let's determine if the VERSION that the user is in is latest, 
 							// if so, we should set latest to true.
-							if(PonyDocsProductVersion::GetSelectedVersion() == PonyDocsProductVersion::GetLatestReleasedVersion(PonyDocsProduct::GetSelectedProduct())) {
+							if($selectedVersion == PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct)) {
 								$latest = true;
 							}
-							$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . PonyDocsProduct::GetSelectedProduct() . '/' . ($latest ? "latest" : PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() )) . '/' . $pieces[2] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[3] ), $wgArticlePath );
+							$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . ($latest ? "latest" : $selectedVersion) . '/' . $pieces[2] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[3] ), $wgArticlePath );
 							$href .= $match[2];
 							if(isset($_SERVER['SERVER_NAME'])) {
 								$text = str_replace( $match[0], '[http://' . $_SERVER['SERVER_NAME'] . $href . ' ' . ( strlen( $match[4] ) ? $match[4] : $match[1] ) . ']', $text );
@@ -1547,11 +1548,17 @@ HEREDOC;
 					}
 
 					/**
-					 * [[Documentation:Product:Manual:Topic]] => Documentation/Product/<whatversion>/Manual/Topic
+					 * [[Documentation:Product:Manual:Topic]] => Documentation/Product/<latest_or_selected>/Manual/Topic
+					 * If linking within same product, stay on selected version; otherwise use "latest" for cross-product link
 					 */
 					else if( 4 == sizeof( $pieces ))
 					{
-						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $pieces[1] . '/' . PonyDocsProductVersion::GetSelectedVersion($pieces[1]) . '/' . $pieces[2] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[3] ), $wgArticlePath );
+						if ( !strcmp($selectedProduct, $pieces[1]) ) {
+							$version = $selectedVersion;
+						} else {
+							$version = 'latest';
+						}
+						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $pieces[1] . '/' . $version . '/' . $pieces[2] . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $pieces[3] ), $wgArticlePath );
 						$href .= $match[2];
 						$text = str_replace( $match[0], '[http://' . $_SERVER['SERVER_NAME'] . $href . ' ' . ( strlen( $match[4] ) ? $match[4] : $match[1] ) . ']', $text );
 					}
@@ -1572,12 +1579,11 @@ HEREDOC;
 					// Check if our title is in Documentation and manual is set, if not, don't modify the match.
 					if(!preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '.*:.*:.*:.*/i', $wgTitle->__toString( )) || !isset($pManual))
 						continue;
-					$version = PonyDocsProductVersion::GetSelectedVersion( PonyDocsProduct::GetSelectedProduct() );
-					$page = 'documentation:' . strtolower( PonyDocsProduct::GetSelectedProduct() . ':' . $pManual->getShortName( )) . ':' . strtolower( $match[1] );
+					$page = 'documentation:' . strtolower( $selectedProduct . ':' . $pManual->getShortName( )) . ':' . strtolower( $match[1] );
 
 					$res = $dbr->select( 'categorylinks', 'cl_sortkey', 
 						array( 	"LOWER(cast(cl_sortkey AS CHAR)) LIKE '" .  $dbr->strencode( $page )  . ":%'",
-								"cl_to = 'V:" . PonyDocsProduct::GetSelectedProduct() . ":" . $version . "'" ), __METHOD__ );
+								"cl_to = 'V:" . $selectedProduct . ":" . $selectedVersion . "'" ), __METHOD__ );
 
 					/**
 					 * We might need to make it a "non-link" at this point instead of skipping it.
@@ -1590,7 +1596,7 @@ HEREDOC;
 					 */
 					$row = $dbr->fetchObject( $res );
 
-					$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . PonyDocsProduct::GetSelectedProduct() . '/' . $version . '/' . $pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $match[1] ), $wgArticlePath );
+					$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $match[1] ), $wgArticlePath );
 					$href .= $match[2];
 
 					$text = str_replace( $match[0], '[http://' . $_SERVER['SERVER_NAME'] . $href . ' ' . ( strlen( $match[4] ) ? $match[4] : $match[1] ) . ']', $text );
