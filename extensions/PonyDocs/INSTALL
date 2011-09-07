@@ -19,7 +19,7 @@ Requirements & Assumptions
 1. You're a sysadmin
 2. You have a MediaWiki system at the ready. Beta 1 only tested with MW 1.16.4
   (http://download.wikimedia.org/mediawiki/1.16/mediawiki-1.16.4.tar.gz)
-3. You can update apache's conf files for the media wiki ghost
+3. You can update apache's conf files for the media wiki vhost
 4. You can run SQL commands on the MediaWiki DB
 5. You know this is Beta ;)
 6. You promise to read AND follow all these steps IN ORDER
