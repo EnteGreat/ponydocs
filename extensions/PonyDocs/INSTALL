@@ -364,7 +364,7 @@ to work, you'll need to install HTMLDOC:
 
 	http://www.htmldoc.org/
 
-Additionally, you'll need to make sure youre MEDIAWIKIBASE/images directory is
+Additionally, you'll need to make sure your MEDIAWIKIBASE/images directory is
 writable by your web server user.
 
 ---------------------------------------------
