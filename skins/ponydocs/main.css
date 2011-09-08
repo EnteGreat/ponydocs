@@ -665,6 +665,8 @@ table.rimage {
 	background-repeat: no-repeat;
 	background-position: 35% 50% !important;
 	text-decoration: none;
+	background-size: 150px 150px;
+	
 }
 
 /*

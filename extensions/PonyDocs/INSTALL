@@ -106,6 +106,9 @@ install.
 An example in your LocalSettings.php file, with the two samples above, would be:
 
 	################# PONYDOCS START #################
+	// first things first, set logo
+	$wgLogo = "/extensions/PonyDocs/images/pony.png";
+
 	// Implicit group for all visitors, removing
 	// access beyond reading
 	$wgGroupPermissions['*']['createaccount']   = false;
@@ -158,7 +161,7 @@ An example in your LocalSettings.php file, with the two samples above, would be:
 
 	// Ponydocs environment configuration.  update to your
 	// specific install
-	define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . str_replace("$1", "", $wgArticlePath) . '/skins/splunk/images/logo_splunkServer_white_rgb.gif');
+	define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . '/extensions/PonyDocs/images/pony.png');
 	define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Copyright Splunk, Inc. All Rights Reserved');
 	define('PONYDOCS_DEFAULT_PRODUCT', 'Foo');
 	define('PONYDOCS_ENABLE_BRANCHINHERIT_EMAIL', true);
@@ -354,6 +357,16 @@ each new topic page is also auto-populated with a category tag (or tags).
 
 This should get you started! Have fun!
 
+------- 11) Optional: Install HTMLDOC -------
+
+In the Ponydocs skin, there is a link to "PDF Version".  If you would like this
+to work, you'll need to install HTMLDOC:
+
+	http://www.htmldoc.org/
+
+Additionally, you'll need to make sure you're WIKIHOME/images directory is
+writable by your web server user.
+
 ---------------------------------------------
 F.A.Q.
 ---------------------------------------------
@@ -370,6 +383,11 @@ Q. I've created all the pages, but the drop down for "product version" or
 A. Reset to the backup you made before starting and try again. Though there are
    some corners you can paint yourself into, this system has been tested and
    should work if you follow the steps in order.
+
+Q. When I click "View PDF" I get an error, "Failed to create PDF. Our team is 
+looking into it."
+A. Follow step 11 to install HTMLDOC.  Check that the web user can write to the
+images directory in your MediaWiki install.
 
 ---------------------------------------------
 HISTORY
