@@ -364,7 +364,7 @@ to work, you'll need to install HTMLDOC:
 
 	http://www.htmldoc.org/
 
-Additionally, you'll need to make sure you're WIKIHOME/images directory is
+Additionally, you'll need to make sure youre MEDIAWIKIBASE/images directory is
 writable by your web server user.
 
 ---------------------------------------------
@@ -385,9 +385,9 @@ A. Reset to the backup you made before starting and try again. Though there are
    should work if you follow the steps in order.
 
 Q. When I click "View PDF" I get an error, "Failed to create PDF. Our team is 
-looking into it."
+   looking into it."
 A. Follow step 11 to install HTMLDOC.  Check that the web user can write to the
-images directory in your MediaWiki install.
+   images directory in your MediaWiki install.
 
 ---------------------------------------------
 HISTORY
