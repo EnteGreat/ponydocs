@@ -191,6 +191,7 @@ function efPonyDocsSetup()
 			$defaultRedirect = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME, $wgArticlePath );
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] redirecting to $defaultRedirect");}
 			header( "Location: " . $defaultRedirect );
+			exit;
 		}
 	}
 	PonyDocsWiki::getInstance( PonyDocsProduct::GetSelectedProduct() );
