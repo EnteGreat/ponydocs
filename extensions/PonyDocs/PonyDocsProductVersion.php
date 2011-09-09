@@ -176,6 +176,9 @@ class PonyDocsProductVersion
 	 */
 	static public function GetSelectedVersion( $productName, $setDefault = true )
 	{
+
+		self::LoadVersionsForProduct($productName);
+		
 		/**
 		 * Do we have the session var and is it non-zero length?  Could also check if valid here.
 		 */
@@ -194,7 +197,7 @@ class PonyDocsProductVersion
 
 		if ($setDefault && isset(self::$sVersionList[$productName]) && is_array(self::$sVersionList[$productName]) && sizeof(self::$sVersionList[$productName]) > 0) {
 			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] no selected version for $productName; will attempt to set default.");}
-			
+
 			/**
 			* If we're here, we don't have a version set previously.
 			* Get latest version the current user can see (released, unreleased or preview)
@@ -226,11 +229,19 @@ class PonyDocsProductVersion
 	 * @param string $v Version name to set.
 	 * @return string Version which was set.
 	 */
-	static public function SetSelectedVersion( $productName, $v )
-	{
-		$_SESSION['wsVersion'][$productName] = $v;
-		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/$v");}
-		return $v;
+	static public function SetSelectedVersion( $productName, $v ) {
+
+		self::LoadVersionsForProduct($productName);
+
+		if (isset(self::$sVersionMap[$productName][$v]) || $v == "latest") {
+			$_SESSION['wsVersion'][$productName] = $v;
+			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/$v");}
+			return $v;
+		} else {
+			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] not setting selected version; returning null. $productName/$v\n".var_export(self::$sVersionMap,true));}
+			return null;
+		}
+		
 	}
 
 	/**
@@ -262,7 +273,7 @@ class PonyDocsProductVersion
 		/**
 		 * If we have content in our list, just return that unless $reload is true.
 		 */
-		if( isset(self::$sVersionList[$productName]) && sizeof( self::$sVersionList[$productName] ) && !$reload )
+		if( isset(self::$sVersionList[$productName]) && !$reload )
 			return self::$sVersionList[$productName];
 
 		$groups = $wgUser->getGroups( );
@@ -353,7 +364,7 @@ class PonyDocsProductVersion
 	static public function & GetVersionByName( $productName, $name )
 	{
 		if( preg_match( '/^v:(.*)/i', $name, $match ))
-			$name = $match[1];	
+			$name = $match[1];
 		if( isset( self::$sVersionMap[$productName][$name] ))
 			return self::$sVersionMap[$productName][$name] ;
 
