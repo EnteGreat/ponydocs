@@ -79,7 +79,10 @@ class PonyDocsPdfBook {
 		$articles = array();
 		$pieces = explode(":", $wgTitle->__toString());
 
-		if (count($pieces) != 5) {
+		// Try and get rid of the TOC portion of the title
+		if(strpos($pieces[2], "TOC")) {
+			$pieces[2] = substr($pieces[2], 0, strpos($pieces[2], "TOC"));
+		} else if (count($pieces) != 5) {
 			// something is wrong, let's get out of here
 			$defaultRedirect = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME, $wgArticlePath );
 			if (PONYDOCS_REDIRECT_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] redirecting to $defaultRedirect");}
