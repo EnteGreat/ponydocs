@@ -67,6 +67,7 @@ class SpecialBranchInherit extends SpecialPage
 	/**
 	 * AJAX method to fetch topics for a specified version and manuals
 	 *
+	 * @param $productName string product short name
 	 * @param $sourceVersion string String representation of the source version
 	 * @param $targetVersion string String representation of the target version
 	 * @param $manuals string Comma seperated list of manuals to retrieve from
@@ -113,6 +114,7 @@ class SpecialBranchInherit extends SpecialPage
 					if($forcedTitle == null || $tocItem['title'] == $forcedTitle) {
 						$tempEntry = array('title' => $tocItem['title'],
 									'text' => $tocItem['text'],
+									'toctitle' => $tocItem['toctitle'],
 									'conflicts' => PonyDocsBranchInheritEngine::getConflicts($product, $tocItem['title'], $targetVersion) );
 						/**
 						 * We want to set to empty, so the UI javascript doesn't 
@@ -167,6 +169,7 @@ class SpecialBranchInherit extends SpecialPage
 	 * Processes a branch/inherit job request.
 	 *
 	 * @param $jobID The unique id for this job (see ajaxFetchJobID)
+	 * @param $productName string product short name
 	 * @param $sourceVersion string String representation of the source version
 	 * @param $targetVersion string String representaiton of the target version
 	 * @param $topicActions string JSON array representation of all topics and 
@@ -207,11 +210,9 @@ class SpecialBranchInherit extends SpecialPage
 				// the JSON comes along with null values for the first element.  
 				// IT's just an additional element, so we can drop it.
 				if(empty($topics[0]['text'])) {
-					$numOfTopics += count($topics) - 1;
+					array_shift($topicActions[$manualIndex]['sections'][$sectionName]);
 				}
-				else {
-					$numOfTopics += count($topics);
-				}
+				$numOfTopics += count($topicActions[$manualIndex]['sections'][$sectionName]);
 			}
 		}
 
@@ -257,7 +258,7 @@ class SpecialBranchInherit extends SpecialPage
 							foreach($manualData['sections'] as $sectionName => $topics) {
 								$addData[$sectionName] = array();
 								foreach($topics as $topic) {
-									$addData[$sectionName][] = $topic['text'];
+									$addData[$sectionName][] = $topic['toctitle'];
 								}
 							}
 							PonyDocsBranchInheritEngine::createTOC($product, $manual, $targetVersion, $addData);
@@ -276,7 +277,7 @@ class SpecialBranchInherit extends SpecialPage
 							$addData[$sectionName] = array();
 							foreach($topics as $topic) {
 								if(!isset($topic['action']) || (isset($topic['action']) && $topic['action'] != 'ignore')) {
-									$addData[$sectionName][] = $topic['text'];
+									$addData[$sectionName][] = $topic['toctitle'];
 								}
 							}
 						}

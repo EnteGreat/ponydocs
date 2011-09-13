@@ -233,7 +233,7 @@ class PonyDocsTOC
 
 		$selectedProduct = $this->pProduct->getShortName();
 		$selectedVersion = $this->pInitialVersion->getVersionName();
-
+		$selectedManual = $this->pManual->getShortName();
 
 		// Okay, let's determine if the VERSION that the user is in is latest, 
 		// if so, we should set latest to true.
@@ -244,12 +244,12 @@ class PonyDocsTOC
 		}
 
 		$cache = PonyDocsCache::getInstance();
-		$key = "TOCCACHE-" . $selectedProduct . "-" . $this->pManual->getShortName() . "-" . $selectedVersion;
+		$key = "TOCCACHE-" . $selectedProduct . "-" . $selectedManual . "-" . $selectedVersion;
 		$toc = $cache->get($key);
 		if($toc === null) {
 			// Cache did not exist, let's load our content is build up our cache 
 			// entry.
-			$toc = array( ); 		// Toc is an array.
+			$toc = array( );
 			$idx = 0; 				// The current index of the element in $toc we will work on
 			$section = -1;
 			$lines = explode( "\n", $this->pTOCArticle->mContent );
@@ -292,8 +292,8 @@ class PonyDocsTOC
 					}
 
 					$baseTopic = $matches[1];
-					$title = PONYDOCS_DOCUMENTATION_PREFIX . $this->pProduct->getShortName( ) . ':' . $this->pManual->getShortName( ) . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $matches[1] );
-					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $this->pProduct->getShortName( ) );
+					$title = PONYDOCS_DOCUMENTATION_PREFIX . $selectedProduct . ':' . $selectedManual . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic );
+					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $selectedProduct );
 
 					/**
 					* Hide topics which have no content (i.e. have not been created yet) from the user viewing.  Authors must go to the
@@ -314,23 +314,12 @@ class PonyDocsTOC
 					if( $h1 === false )
 						$h1 = $newTitle;
 
-					/**
-					* If we are in ALIAS mode we need to adjust the HREF for each item properly.
-					*/
-					$href = ''; 
+					$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $selectedManual . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
 
-					if( $wgPonyDocs->getURLMode( ) == PonyDocsExtension::URLMODE_ALIASED )
-					{
-						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName() . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
-					}
-					else
-					{
-						$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $this->pManual->getShortName( ) . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
-						//$href = str_replace( '$1', $newTitle, $wgArticlePath );
-					}
 					$toc[$idx] = array( 	'level' => 1,
 											'page_id' => $t->getArticleID(),
 											'link' => $href,
+											'toctitle' => $baseTopic,
 											'text' => $h1,
 											'section' => $toc[$section]['text'],
 											'title' => $newTitle,

@@ -132,6 +132,7 @@ SplunkBranchInherit = function() {
 									var topic = {};
 									topic.title = $(this).find('.topicname em').html();
 									topic.text = $(this).find('.topicname strong').html();
+									topic.toctitle = $(this).find('.action input').val();
 									topic.action = $(this).find('.action select').val();
 									topicActions[manualName].sections[sectionName][topicActions[manualName].sections[sectionName].length] = topic;
 								});
@@ -236,7 +237,7 @@ SplunkBranchInherit = function() {
 									html += '<option value="inheritpurge">Inherit - Purge Existing</option>';
 								}
 							}
-							html += '</select></td></tr>';
+							html += '</select><input type="hidden" name="toctitle" value="' + el['toctitle'] + '" /></td></tr>';
 						}
 						html += '</table></div>';
 					}
