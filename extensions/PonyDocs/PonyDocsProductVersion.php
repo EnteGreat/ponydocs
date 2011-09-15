@@ -233,12 +233,19 @@ class PonyDocsProductVersion
 
 		self::LoadVersionsForProduct($productName);
 
-		if (isset(self::$sVersionMap[$productName][$v]) || $v == "latest") {
+		if ($v == "latest") {
+			$latest = self::GetLatestReleasedVersion($productName);
+			if ($latest != null) {
+				$v = $latest->vName;
+			}
+		}
+
+		if (isset(self::$sVersionMap[$productName][$v])) {
 			$_SESSION['wsVersion'][$productName] = $v;
 			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected version to $productName/$v");}
 			return $v;
 		} else {
-			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] not setting selected version; returning null. $productName/$v\n".var_export(self::$sVersionMap,true));}
+			if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] not setting selected version; returning null. $productName/$v");}
 			return null;
 		}
 		
