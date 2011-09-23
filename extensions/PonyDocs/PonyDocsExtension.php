@@ -587,11 +587,7 @@ function efSearchParserFunction_Render( $input, $args, $parser )
 	$text = $input;
 	
 	$output =	'<div class="inlineQuery">' .
-				'<code>' . htmlentities($text) . '</code>' .
-				'<a title="Run this search on your PonyDocs server" href="javascript:alert(\'Use the �share this event� link in your PonyDocs Server to activate this button\');">' .
-				'<img width="31" height="24" border="0" align="absmiddle" alt="Search" src="' .
-				$ponydocsMediaWiki['DotComHost'] . '/images/base/query_button.png"/>' .
-				'</a><br/></div>';
+				'<code>' . htmlentities($text) . '</code><br/></div>';
 
 	return $output;
 }
