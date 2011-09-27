@@ -1137,20 +1137,24 @@ HEREDOC;
 					else
 					{
 						$topicTitle = $match[1];
-						$tempArticle = new Article( Title::newFromText( $topicTitle ));
-						if( !$tempArticle->exists( ))
+						$tempTitleForArticle = Title::newFromText( $topicTitle );
+						if (is_object($tempTitleForArticle))
 						{
-							/**
-							 * Create the new article in the system;  if we have alternate text then set our H1 to this.
-							 */
-							$content = '';
-							if( strlen( $match[3] ))
-								$content = '= ' . $match[3] . " =\n";
-							else
-								$content = '= ' . $match[1] . " =\n";
+							$tempArticle = new Article($tempTitleForArticle);
+							if( !$tempArticle->exists( ))
+							{
+								/**
+								 * Create the new article in the system;  if we have alternate text then set our H1 to this.
+								 */
+								$content = '';
+								if( strlen( $match[3] ))
+									$content = '= ' . $match[3] . " =\n";
+								else
+									$content = '= ' . $match[1] . " =\n";
 
-							$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
-							if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created " . $topicTitle . " using link " . $match[1] . " in " . $title->__toString( ));}
+								$tempArticle->doEdit( $content, 'Auto-creation of topic ' . $topicTitle . ' via reference from ' . $title->__toString() . '.', EDIT_NEW );
+								if (PONYDOCS_AUTOCREATE_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] Auto-created " . $topicTitle . " using link " . $match[1] . " in " . $title->__toString( ));}
+							}
 						}
 					}
 
