@@ -1778,13 +1778,14 @@ HEREDOC;
 			$cacheEntry = array();
 			foreach($manuals as $manual) {
 				$toc = new PonyDocsTOC($manual, $ver, $pr);
-				list($toc, $prev, $next, $start) = $toc->loadContent();
+				list($items, $prev, $next, $start) = $toc->loadContent();
 
-				foreach($toc as $entry) {
+				foreach($items as $entry) {
 					if(isset($entry['link']) && $entry['link'] != '') {
 						// Found first article.
 						$cacheEntry[] = array('shortName' => $manual->getShortName(),
 											  'longName' => $manual->getLongName(),
+											  'description' => $toc->getManualDescription(),
 											  'firstTitle' => $entry['title'],
 											  'firstUrl' => $entry['link']);
 						break;

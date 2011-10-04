@@ -74,12 +74,20 @@ class PonyDocsTOC
 	 * the page directly out of the full TOC shown in the left sidebar.
 	 */
 	protected $mCurrentTopicIndex = -1;
+	
+	/**
+	 * The description of the manual as it should appear on the products page (where manuals are listed)
+	 * 
+	 * @var string
+	 */
+	protected $mManualDescription;
 
 	/**
 	 * Construct with a PonyDocsManual and initial version.  Stores and performs load (should we load here?)
 	 *
 	 * @param PonyDocsManual $pManual Manual to find TOC for.
 	 * @param PonyDocsVersion $initialVersion Initial version (find manual tagged for this version?).
+	 * @param PonyDocsProduct $product The product all of this is for.
 	 */
 	public function __construct( PonyDocsProductManual& $pManual, PonyDocsProductVersion& $initialVersion, PonyDocsProduct& $product )
 	{
@@ -160,8 +168,6 @@ class PonyDocsTOC
 					$this->addVersion( $addV );
 			}
 		}
-
-		//print_r( $this->pVersionList ); die();
 
 		/**
 		 * Now load the contents of our TOC article itself and store internally.
@@ -409,8 +415,19 @@ class PonyDocsTOC
 		$obj->next = $next;
 		$obj->start = $start;
 		$cache->addKey( $tocKey, $obj );*/
+		
+		// Last but not least, get the manual description if there is one.
+		if (preg_match('/{{#manualDescription:([^}]*)}}/', $this->pTOCArticle->mContent, $matches))
+		{
+			$this->mManualDescription = $matches[1];
+		}
 
 		return array( $toc, $prev, $next, $start );
+	}
+
+	public function getManualDescription()
+	{
+		return isset($this->mManualDescription) ? $this->mManualDescription : NULL;
 	}
 
 	/**

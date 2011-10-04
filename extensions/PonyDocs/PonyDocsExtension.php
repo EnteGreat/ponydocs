@@ -146,6 +146,7 @@ $wgExtensionFunctions[] = 'efManualParserFunction_Setup';
 $wgExtensionFunctions[] = 'efVersionParserFunction_Setup';
 $wgExtensionFunctions[] = 'efProductParserFunction_Setup';
 $wgExtensionFunctions[] = 'efTopicParserFunction_Setup';
+$wgExtensionFunctions[] = 'efManualDescriptionParserFunction_Setup';
 $wgExtensionFunctions[] = 'efSearchParserFunction_Setup';
 
 /**
@@ -155,6 +156,7 @@ $wgHooks['LanguageGetMagic'][] = 'efManualParserFunction_Magic';
 $wgHooks['LanguageGetMagic'][] = 'efVersionParserFunction_Magic';
 $wgHooks['LanguageGetMagic'][] = 'efProductParserFunction_Magic';
 $wgHooks['LanguageGetMagic'][] = 'efTopicParserFunction_Magic';
+$wgHooks['LanguageGetMagic'][] = 'efManualDescriptionParserFunction_Magic';
 
 /**
  * Create a single global instance of our extension.
@@ -365,9 +367,21 @@ function efTopicParserFunction_Setup()
 	$wgParser->setFunctionHook( 'topic', 'efTopicParserFunction_Render' );
 }
 
+function efManualDescriptionParserFunction_Setup()
+{
+	global $wgParser;
+	$wgParser->setFunctionHook( 'manualDescription', 'efManualDescriptionParserFunction_Render' );
+}
+
 function efTopicParserFunction_Magic( &$magicWords, $langCode )
 {
 	$magicWords['topic'] = array( 0, 'topic' );
+	return true;
+}
+
+function efManualDescriptionParserFunction_Magic( &$magicWords, $langCode )
+{
+	$magicWords['manualDescription'] = array( 0, 'manualDescription' );
 	return true;
 }
 
@@ -561,6 +575,31 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
 
 	$output = '<a href="' . wfUrlencode(str_replace( '$1', $topicName, $wgArticlePath )) . '">' . $param1  . '</a>'; 
 	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+/**
+ * This expects to find:
+ * 	{{#manualDescription:Text Description}}
+ *
+ * @param Parser $parser
+ * @param string $param1 Full text of manual description, must be converted to blank text.
+ * @return array
+ */
+function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
+{
+	global $wgTitle;
+
+	if (PonyDocsExtension::isSpeedProcessingEnabled()) return TRUE;
+
+	/**
+	 * We ignore this parser function if not in a TOC management page.
+	 */
+	if (!preg_match('/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*)TOC(.*)/i', $wgTitle->__toString(), $matches))
+	{
+		return FALSE;
+	}
+	
+	return ''; // Don't show the manual description on the TOC page
 }
 
 function efSearchParserFunction_Setup( )
