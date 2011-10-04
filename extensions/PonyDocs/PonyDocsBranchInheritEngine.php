@@ -1,5 +1,7 @@
 <?php
 
+require_once('PonyDocsArticleFactory.php');
+
 /**
  * Engine to perform inheritance and branch functions for PonyDocs Documentation 
  * System.
@@ -70,19 +72,14 @@ class PonyDocsBranchInheritEngine {
 
 		}
 		// Load existing article to branch from
-		$existingTitle = Title::newFromText($topicTitle); 
-		$wgTitle = $existingTitle;
-		$existingArticle = new Article($existingTitle);
+		$existingArticle = PonyDocsArticleFactory::getArticleByTitle($topicTitle);
 		if(!$existingArticle->exists()) {
 			// No such title exists in the system
 			throw new Exception("Invalid Title to Branch From.  Target Article does not exist:" . $topicTitle);
 		}
 		$title = PONYDOCS_DOCUMENTATION_PREFIX . $product->getShortName() . ':' . $manual->getShortName() . ':' . $title . ':' . $version->getVersionName();
 
-		$newTitle = Title::newFromText($title);
-		$wgTitle = $newTitle;
-
-		$newArticle = new Article($newTitle);
+		$newArticle = PonyDocsArticleFactory::getArticleByTitle($title);
 		if($newArticle->exists()) {
 			throw new Exception("Article already exists:" . $title);
 		}
@@ -543,7 +540,7 @@ class PonyDocsBranchInheritEngine {
 		$productName = $match[1];
 		$manual = $match[2];
 		$title = $match[3];
-		$query = "SELECT cl_sortkey FROM categorylinks WHERE cl_to = 'V:" . $dbr->strencode($product->getShortName() . ':' . $targetVersion->getVersionName()) . "' AND LOWER(cast(cl_sortkey AS CHAR)) LIKE 'documentation:" . $dbr->strencode(strtolower($productName) . ":" . strtolower($manual) . ":" . strtolower($title)) . ":%'";
+		$query = "SELECT cl_sortkey FROM categorylinks WHERE cl_to = 'V:" . $dbr->strencode($product->getShortName() . ':' . $targetVersion->getVersionName()) . "' AND LOWER(cast(cl_sortkey AS CHAR)) LIKE '" . $dbr->strencode(strtolower(PONYDOCS_DOCUMENTATION_PREFIX . $productName . ":" . $manual . ":" . $title)) . ":%'";
 		$res = $dbr->query($query, __METHOD__);
 
 		if($res->numRows()) {
@@ -558,13 +555,12 @@ class PonyDocsBranchInheritEngine {
 			}
 			return $conflicts;
 		}
-		// One last ditch effort.  Determine if any page exists that doesn't 
-		// have a category link association.
-		$query = "SELECT page_title FROM page WHERE LOWER(page_title) LIKE '" . $dbr->strencode(strtolower($productName) . ":" . strtolower($manual) . ":" . strtolower($title) . ":" . $targetVersion->getVersionName()) . "'";
-		$res = $dbr->query($query, __METHOD__);
-		if($res->numRows()) {
-			$row = $dbr->fetchObject($res);
-			return array(PONYDOCS_DOCUMENTATION_PREFIX . $row->page_title);
+		// One last ditch effort.  Determine if any page exists that doesn't have a category link association
+		// Or when its base version is not in its categories.
+		$destinationTitle = PONYDOCS_DOCUMENTATION_PREFIX . $productName . ':' . $manual . ':' . $title . ':' . $targetVersion->getVersionName();
+		$destinationArticle = PonyDocsArticleFactory::getArticleByTitle($destinationTitle);
+		if ($destinationArticle->exists()) {
+			return array($destinationArticle->metadata['title']);
 		}
 
 		return false;

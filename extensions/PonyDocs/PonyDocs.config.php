@@ -15,6 +15,7 @@ define('PONYDOCS_CACHE_DEBUG', false);
 define('PONYDOCS_REDIRECT_DEBUG', false);
 define('PONYDOCS_SESSION_DEBUG', false);
 define('PONYDOCS_AUTOCREATE_DEBUG', false);
+define('PONYDOCS_CASE_INSENSITIVE_DEBUG', false);
 
 define('PONYDOCS_DOCUMENTATION_PREFIX', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . ':' );
 
@@ -35,5 +36,8 @@ define('PONYDOCS_PRODUCTMANUAL_TITLE_REGEX', '/^' . PONYDOCS_DOCUMENTATION_PREFI
 // category cache expiration in seconds
 define('CATEGORY_CACHE_TTL', 300);
 define('PONYDOCS_TEMP_DIR', '/tmp/');
+
+// capitalization settings
+define('PONYDOCS_CASE_SENSITIVE_TITLES', false);
 
 ?>
