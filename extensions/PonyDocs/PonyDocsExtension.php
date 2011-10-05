@@ -583,7 +583,7 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
  *
  * @param Parser $parser
  * @param string $param1 Full text of manual description, must be converted to rendered format.
- * @return string
+ * @return mixed This returns TRUE if PonyDocsExtension::isSpeedProcessingEnabled() is TRUE, FALSE if we are not on a TOC page and returns a formated string if we are.
  */
 function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
 {
@@ -599,7 +599,7 @@ function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
 		return FALSE;
 	}
 	
-	return '<h3>Manual Description: </h3><h4>' . $param1 . '</h4>'; // Don't show the manual description on the TOC page
+	return '<h3>Manual Description: </h3><h4>' . $param1 . '</h4>'; // Return formated output
 }
 
 function efSearchParserFunction_Setup( )
