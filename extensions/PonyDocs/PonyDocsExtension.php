@@ -582,8 +582,8 @@ function efTopicParserFunction_Render( &$parser, $param1 = '' )
  * 	{{#manualDescription:Text Description}}
  *
  * @param Parser $parser
- * @param string $param1 Full text of manual description, must be converted to blank text.
- * @return array
+ * @param string $param1 Full text of manual description, must be converted to rendered format.
+ * @return string
  */
 function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
 {
