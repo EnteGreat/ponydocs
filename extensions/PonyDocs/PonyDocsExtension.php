@@ -594,12 +594,12 @@ function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
 	/**
 	 * We ignore this parser function if not in a TOC management page.
 	 */
-	if (!preg_match('/' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*)TOC(.*)/i', $wgTitle->__toString(), $matches))
+	if (!preg_match('/' . PONYDOCS_DOCUMENTATION_PREFIX . '([' . PONYDOCS_PRODUCT_LEGALCHARS.']*):([' . PONYDOCS_PRODUCTMANUAL_LEGALCHARS.']*)TOC([' . PONYDOCS_PRODUCTVERSION_LEGALCHARS.']*)/i', $wgTitle->__toString(), $matches))
 	{
 		return FALSE;
 	}
 	
-	return ''; // Don't show the manual description on the TOC page
+	return '<h3>Manual Description: </h3><h4>' . $param1 . '</h4>'; // Don't show the manual description on the TOC page
 }
 
 function efSearchParserFunction_Setup( )
