@@ -39,7 +39,7 @@ class PonyDocsPdfBook {
 	 */
 	function onUnknownAction($action, $article) {
 		global $wgOut, $wgUser, $wgTitle, $wgParser, $wgRequest;
-		global $wgServer, $wgArticlePath, $wgScriptPath, $wgUploadPath, $wgUploadDirectory, $wgScript;
+		global $wgServer, $wgArticlePath, $wgScriptPath, $wgUploadPath, $wgUploadDirectory, $wgScript, $wgStylePath;
 
 		// We don't do any processing unless it's pdfbook
 		if($action != 'pdfbook') {
@@ -62,11 +62,9 @@ class PonyDocsPdfBook {
 		$log->addEntry('book', $wgTitle, $msg);
 
 		# Initialise PDF variables
-		$layout  = '--firstpage toc';
-		$left	= '1cm';
-		$right   = '1cm';
-		$top	 = '1cm';
-		$bottom  = '1cm';
+		$layout      = '--firstpage toc';
+		$x_margin = '1cm';
+		$y_margin = '1cm';
 		$font	= 'Arial';
 		$size	= '12';
 		$linkcol = '4d9bb3';
@@ -147,7 +145,7 @@ class PonyDocsPdfBook {
 		foreach ($articles as $section => $subarticles) {
 			foreach($subarticles as $article) {
 				$title = $article['title'];
-				$h2 = "<h2>" . $article['text'] . "</h2>";
+				// $h2 = "<h2>" . $article['text'] . "</h2>";
 				$ttext = $title->getPrefixedText();
 				if (!in_array($ttext, $exclude)) {
 					if($currentSection != $section) {
@@ -159,25 +157,50 @@ class PonyDocsPdfBook {
 					$text	= preg_replace('/<!--([^@]+?)-->/s', '@@'.'@@$1@@'.'@@', $text); # preserve HTML comments
 						$text   .= '__NOTOC__';
 					$opt->setEditSection(false);	# remove section-edit links
-						$wgOut->setHTMLTitle($ttext);   # use this so DISPLAYTITLE magic works
-						$out	 = $wgParser->parse($text, $title, $opt, true, true);
+					$wgOut->setHTMLTitle($ttext);   # use this so DISPLAYTITLE magic works
+					
+					$out	 = $wgParser->parse($text, $title, $opt, true, true);
 					$ttext   = $wgOut->getHTMLTitle();
-					$text	= $out->getText();
-					$text = preg_replace('|<h1>|', "<h2>", $text);
-					$text = preg_replace('|<h2>|', "<h3>", $text);
-					$text = preg_replace('|<h3>|', "<h4>", $text);
-					$text = preg_replace('|<h4>|', "<h5>", $text);
-					$text = preg_replace('|<h5>|', "<h6>", $text);
+					$text	 = $out->getText();
+					
+					// String search and replace
+					$str_search  = array('<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<h1>', '</h1>');
+					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>');
+					$text    	 = str_replace($str_search, $str_replace, $text);
 
 					// Link removal
-					$text = preg_replace('|<a[^\<]*>|', '', $text);
-					$text = preg_replace('|</a>|', '', $text);
-
-					$text	= preg_replace('|(<img[^>]+?src=")(/.+?>)|', "$1$wgServer$2", $text); 
-					$text	= preg_replace('|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', '', $text); # non-printable areas
-					$text	= preg_replace('|@{4}([^@]+?)@{4}|s', '<!--$1-->', $text);				  # HTML comments hack
-					$ttext   = basename($ttext);
-					$html   .= utf8_decode("$h2$text\n");
+					$regex_search = array
+					(
+						'|<a[^\<]*>|', // Link Removal
+						'|</a>|', // Link Removal
+						'|(<img[^>]+?src=")(/.*>)|', // Image absolute urls,
+						'|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', // Non printable areas
+						'|@{4}([^@]+?)@{4}|s', // HTML Comments hack
+						'/(<table[^>]*)/', // Cell padding
+						'/(<th[^>]*)/', // TH bgcolor
+						'/(<td[^>]*)>([^<]*)/' // TD valign and align and font size
+					);
+					
+					// Table vars
+					$table_extra = ' cellpadding="6"';
+					$th_extra	 = ' bgcolor="#C0C0C0;"';
+					$td_extra	 = ' valign="center" align="left"';
+					
+					$regex_replace = array
+					(
+						'', // Link Removal
+						'', // Link Removal
+						"$1$wgServer$2", // Image absolute urls,
+						'', // Non printable areas
+						'<!--$1-->', // HTML Comments hack
+						"$1$table_extra", // Cell padding
+						"$1$th_extra", // TH bgcolor
+						"$1$td_extra><font size=\"2.75\">$2</font>" // TD valign and align and font size
+					);
+					
+					$text  = preg_replace($regex_search, $regex_replace, $text);
+					$ttext = basename($ttext);
+					$html .= utf8_decode("$text\n");
 				}
 			}
 		}
@@ -191,8 +214,12 @@ class PonyDocsPdfBook {
 		// Okay, create the title page
 		$titlepagefile = "$wgUploadDirectory/" .uniqid('ponydocs-pdf-book-title');
 		$fh = fopen($titlepagefile, 'w+');
-
-		$titleText = "<br><br><br><br><center><img src=\"" . PONYDOCS_PRODUCT_LOGO_URL .  "\"><br /><h2>" . $productLongName . " " . $book . "</h2><h3>Version: " . $versionText . "</h3><h4>Generated: " . date('n/d/Y h:i a', time()) . "<br /> " . PONYDOCS_PDF_COPYRIGHT_MESSAGE . "</h4>";
+		
+		$image_path	= $wgServer . $wgStylePath . '/splunk/images/CVR-datastream-101-header-image.jpg';
+		$titleText	= '<center><img src="' . $image_path .  '" width="1024"></center>'
+					. '<h1>' . $productLongName . ' ' . $versionText . '</h1>'
+					. '<h2>' . $book . '</h2>'
+					. 'Generated: ' . date('n/d/Y g:i a', time());
 
 		fwrite($fh, $titleText);
 		fclose($fh);
@@ -203,10 +230,10 @@ class PonyDocsPdfBook {
 
 		# Send the file to the client via htmldoc converter
 		$wgOut->disable();
-		$cmd  = "--left $left --right $right --top $top --bottom $bottom";
-		$cmd .= " --header ... --footer $footer --bodyfont Helvetica --quiet --jpeg --color";
-		$cmd .= " --bodyfont $font --fontsize $size --linkstyle underline --linkcolor $linkcol";
-		$cmd .= "$toc --format pdf14 $layout $width --titlefile $titlepagefile";
+		$cmd  = "--left $x_margin --right $x_margin --top $y_margin --bottom $y_margin";
+		$cmd .= " --header ... --footer $footer --tocfooter .i. --quiet --jpeg --color";
+		$cmd .= " --bodyfont $font --fontsize $size --linkstyle plain --linkcolor $linkcol";
+		$cmd .= "$toc --format pdf14 $layout $width --titlefile $titlepagefile --size letter";
 		$cmd  = "htmldoc -t pdf --book --charset iso-8859-1 --no-numbered $cmd $file > $pdfFileName";
 		putenv("HTMLDOC_NOCGI=1");
 		$output = array();
