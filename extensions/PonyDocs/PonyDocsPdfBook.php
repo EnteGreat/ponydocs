@@ -165,7 +165,7 @@ class PonyDocsPdfBook {
 					
 					// String search and replace
 					$str_search  = array('<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<h1>', '</h1>');
-					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>');
+					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4><font size="3"><b><i>', '</i></b></font></h4>', '<h3>', '</h3>', '<h2>', '</h2>');
 					$text    	 = str_replace($str_search, $str_replace, $text);
 
 					// Link removal
