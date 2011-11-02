@@ -216,10 +216,14 @@ class PonyDocsPdfBook {
 		$fh = fopen($titlepagefile, 'w+');
 		
 		$image_path	= $wgServer . $wgStylePath . '/splunk/images/CVR-datastream-101-header-image.jpg';
-		$titleText	= '<center><img src="' . $image_path .  '" width="1024"></center>'
+		$titleText	= '<table height="100%" width="100%"><tr><td valign="top" height="50%">'
+					. '<center><img src="' . $image_path .  '" width="1024"></center>'
 					. '<h1>' . $productLongName . ' ' . $versionText . '</h1>'
 					. '<h2>' . $book . '</h2>'
-					. 'Generated: ' . date('n/d/Y g:i a', time());
+					. 'Generated: ' . date('n/d/Y g:i a', time())
+					. '</td></tr><tr><td height="50%" width="100%" align="left" valign="bottom"><font size="2">'
+					. 'Copyright &copy; ' . date('Y') . ' Splunk Inc. All rights reserved.'
+					. '</td></tr></table>';
 
 		fwrite($fh, $titleText);
 		fclose($fh);
