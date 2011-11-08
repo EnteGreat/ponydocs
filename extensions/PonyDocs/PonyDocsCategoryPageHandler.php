@@ -20,7 +20,7 @@ class PonyDocsCategoryPageHandler extends CategoryViewer {
 	 * @return boolean We return false to make mediawiki stop processing the 
 	 * normal flow.
 	 */
-	static function onCategoryPageView($categoryArticle) {
+	static function onCategoryPageView(&$categoryArticle) {
 		global $wgOut, $wgRequest;
 		$from = $wgRequest->getVal('from');
 		$until = $wgRequest->getVal('until');

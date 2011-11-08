@@ -618,7 +618,7 @@ class PonyDocsExtension
 	 * @param unknown_type $sectionanchor
 	 * @param unknown_type $flags
 	 */
-	static public function onArticleSave_CheckTOC( &$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags )
+	static public function onArticleSave_CheckTOC( &$article, &$user, $text, $summary, $minor, $watch, $sectionanchor, &$flags )
 	{
 
 		// Dangerous.  Only set the flag if you know that you should be skipping 
@@ -1221,7 +1221,7 @@ HEREDOC;
 	 * @param EditPage $editpage
 	 * @return mixed 
 	 */
-	static public function onEdit_TOCPage( &$editpage )
+	static public function onEdit_TOCPage( $editpage )
 	{
 		global $wgTitle, $wgOut;
 		
@@ -1255,7 +1255,7 @@ HEREDOC;
 	 * @param EditPage $editpage Our EditPage object used/created when editing.
 	 * @return boolean
 	 */
-	static public function onEdit( &$editpage )
+	static public function onEdit( $editpage )
 	{
 		global $wgOut, $wgArticle, $wgTitle;
 
@@ -1623,7 +1623,7 @@ HEREDOC;
 	 * @param boolean $result The result, which we store in;  true=allow, false=do not.
 	 * @return boolean Return true to continue checking, false to stop checking, null to not care.
 	 */
-	static public function onUserCan( $title, $user, $action, &$result )
+	static public function onUserCan( &$title, &$user, $action, &$result )
 	{
 		global $wgExtraNamespaces;
 		$authProductGroup = PonyDocsExtension::getDerivedGroup();
@@ -1667,7 +1667,7 @@ HEREDOC;
 	 * Returns the pretty url of a document if it's in the Documentation 
 	 * namespace and is a topic in a manual.
 	 */
-	static public function onGetFullURL($title, $url, $query) {
+	static public function onGetFullURL(&$title, &$url, $query) {
 		global $wgScriptPath;
 		// Check to see if we're in the Documentation namespace when viewing
 		if( preg_match( '/^' . str_replace("/", "\/", $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)$/i', $_SERVER['PATH_INFO'])) {
@@ -1808,7 +1808,7 @@ HEREDOC;
 	 * the first article in a manual for the user's version.  If so, try and 
 	 * find the first article and redirect.
 	 */
-	public function onArticleFromTitleQuickLookup($title, $article) {
+	public function onArticleFromTitleQuickLookup(&$title, &$article) {
 		global $wgScriptPath;
 		if(preg_match('/&action=edit/', $_SERVER['PATH_INFO'])) {
 			// Check referrer and see if we're coming from a doc page.
@@ -1903,7 +1903,7 @@ HEREDOC;
 	 * Called when an article is deleted, we want to purge any doclinks entries 
 	 * that refer to that article if it's in the documentation namespace.
 	 */
-	static public function onArticleDelete(&$article, &$user, &$user, &$error) {
+	static public function onArticleDelete(&$article, &$user, &$user, $error) {
 		$title = $article->getTitle();
 		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/i', $title->__toString( ), $matches )) {
 			return true;
@@ -1921,7 +1921,7 @@ HEREDOC;
 	 * namepsace, however.
 	 *
 	 */
-	static public function onArticleSaveComplete(&$article, &$user, $text, $summary, &$minoredit, $watchthis,
+	static public function onArticleSaveComplete(&$article, &$user, $text, $summary, $minoredit, $watchthis,
 												 $sectionanchor, &$flags, $revision, &$status, $baseRevId) {
 
 		$title = $article->getTitle();
@@ -2090,7 +2090,7 @@ HEREDOC;
 		return true;
 	}
 
-	static public function onBeforePageDisplay($out, $sk) {
+	static public function onBeforePageDisplay(&$out, &$sk) {
 		global $wgScriptPath;
 		// Add our js files
 		$out->addScriptFile($wgScriptPath . "/extensions/PonyDocs/js/jquery-1.4.2.min.js");
