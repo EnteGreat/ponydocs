@@ -1667,7 +1667,7 @@ HEREDOC;
 	 * Returns the pretty url of a document if it's in the Documentation 
 	 * namespace and is a topic in a manual.
 	 */
-	static public function onGetFullURL(&$title, &$url, $query) {
+	static public function onGetFullURL($title, $url, $query) {
 		global $wgScriptPath;
 		// Check to see if we're in the Documentation namespace when viewing
 		if( preg_match( '/^' . str_replace("/", "\/", $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(.*)$/i', $_SERVER['PATH_INFO'])) {
