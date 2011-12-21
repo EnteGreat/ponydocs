@@ -622,10 +622,29 @@ function efSearchParserFunction_Render( $input, $args, $parser )
 {
 	global $ponydocsMediaWiki;
 	
+	$product     = PonyDocsProduct::GetSelectedProduct();
+	$extra_class = '';
+	
+	// Using switch instead of if/else so we have more flexibility ein the future
+	switch (strtolower($product))
+	{
+		case 'splunk':
+			
+			$version = (float) PonyDocsProductVersion::GetSelectedVersion($product);
+			
+			// For Splunk >= 4.3 we show a different icon
+			if ($version >= 4.3)
+			{
+				$extra_class = ' splunk_search_4_3';
+			}
+			
+			break;
+	}
+	
 	//$text = $parser->recursiveTagParse( $input );
 	$text = $input;
 	
-	$output =	'<div class="inlineQuery">' .
+	$output =	'<div class="inlineQuery' . $extra_class . '">' .
 				'<code>' . htmlentities($text) . '</code><br/></div>';
 
 	return $output;
