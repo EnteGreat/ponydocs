@@ -147,7 +147,6 @@ $wgExtensionFunctions[] = 'efVersionParserFunction_Setup';
 $wgExtensionFunctions[] = 'efProductParserFunction_Setup';
 $wgExtensionFunctions[] = 'efTopicParserFunction_Setup';
 $wgExtensionFunctions[] = 'efManualDescriptionParserFunction_Setup';
-$wgExtensionFunctions[] = 'efSearchParserFunction_Setup';
 
 /**
  * Our magic words for our custom parser functions.
@@ -600,54 +599,6 @@ function efManualDescriptionParserFunction_Render( &$parser, $param1 = '' )
 	}
 	
 	return '<h3>Manual Description: </h3><h4>' . $param1 . '</h4>'; // Return formated output
-}
-
-function efSearchParserFunction_Setup( )
-{
-	global $wgParser;
-	$wgParser->setHook( 'search', 'efSearchParserFunction_Render' );
-	return true;
-}
-
-/**
- * This parser hook handles rendering data found in <search></search> blocks using special DIV and CSS/images.  The
- * input (data between the two tags) is simply placed inside the DIV (inlineQuery) and inside a code tag.
- *
- * @param unknown_type $input
- * @param unknown_type $args
- * @param unknown_type $parser
- * @return unknown
- */
-function efSearchParserFunction_Render( $input, $args, $parser )
-{
-	global $ponydocsMediaWiki;
-	
-	$product     = PonyDocsProduct::GetSelectedProduct();
-	$extra_class = '';
-	
-	// Using switch instead of if/else so we have more flexibility ein the future
-	switch (strtolower($product))
-	{
-		case 'splunk':
-			
-			$version = (float) PonyDocsProductVersion::GetSelectedVersion($product);
-			
-			// For Splunk >= 4.3 we show a different icon
-			if ($version >= 4.3)
-			{
-				$extra_class = ' splunk_search_4_3';
-			}
-			
-			break;
-	}
-	
-	//$text = $parser->recursiveTagParse( $input );
-	$text = $input;
-	
-	$output =	'<div class="inlineQuery' . $extra_class . '">' .
-				'<code>' . htmlentities($text) . '</code><br/></div>';
-
-	return $output;
 }
 
 /**
