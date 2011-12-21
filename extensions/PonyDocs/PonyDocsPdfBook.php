@@ -62,7 +62,7 @@ class PonyDocsPdfBook {
 		$log->addEntry('book', $wgTitle, $msg);
 
 		# Initialise PDF variables
-		$layout      = '--firstpage toc';
+		$layout      = '--firstpage p1';
 		$x_margin = '1cm';
 		$y_margin = '1cm';
 		$font	= 'Arial';
