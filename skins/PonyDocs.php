@@ -282,7 +282,7 @@ class PonyDocsTemplate extends QuickTemplate {
 						if(!count($manuals)) {
 							?>
 								<p>
-								No product manuals defined.
+								The product manual you requested is not defined, you are not logged in, or you do not have the correct permissions to view this content.
 								</p>
 							<?php
 						}
