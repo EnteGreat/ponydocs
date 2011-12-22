@@ -330,7 +330,7 @@ class PonyDocsTopic
 		//$re = "/(=+)([\() A-Za-z0-9?._+%$#@!/&*~`'\\\"{}|,.<>-]+)(\\1)/";
 		// We don't need such a long regex.  Simply encapsulating everything in 
 		// header element.
-		$re = "/(=+)(.*)\n/";
+		$re = "/(=+)([^=]*)(=+)\n/";
 		if( preg_match_all( $re, $content, $matches, PREG_SET_ORDER )) {
 			foreach($matches as &$match) {
 				$match[2] = trim(str_replace("=", "", $match[2]));
