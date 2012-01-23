@@ -162,10 +162,32 @@ class PonyDocsPdfBook {
 					$out	 = $wgParser->parse($text, $title, $opt, true, true);
 					$ttext   = $wgOut->getHTMLTitle();
 					$text	 = $out->getText();
-					
+
+					// prepare for replacing pre tags with code tags WEB-5926
+					// derived from http://stackoverflow.com/questions/1517102/replace-newlines-with-br-tags-but-only-inside-pre-tags
+					// only inside pre tag:
+					//   replace space with &nbsp; only when positive lookbehind is a whitespace character
+					//   replace \n -> <br/>
+					//   replace \t -> 8 * &nbsp;
+					/* split on <pre ... /pre>, basically.  probably good enough */
+					$str = " " . $text;  // guarantee split will be in even positions
+					$parts = preg_split("/(< \s* pre .* \/ \s* pre \s* >)/Umsxu", $str, -1, PREG_SPLIT_DELIM_CAPTURE);
+					foreach ($parts as $idx => $part) {
+						if ($idx % 2) {
+							$parts[$idx] = preg_replace(
+								array("/(?<=\s) /", "/\n/", "/\t/"),
+								array("&nbsp;", "<br/>", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"),
+								$part
+							);
+						}
+					}
+					$str = implode('', $parts);
+					/* chop off the first space, that we had added */
+					$text = substr($str, 1);
+
 					// String search and replace
-					$str_search  = array('<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<h1>', '</h1>');
-					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4><font size="3"><b><i>', '</i></b></font></h4>', '<h3>', '</h3>', '<h2>', '</h2>');
+					$str_search  = array('<h5>', '</h5>', '<h4>', '</h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<h1>', '</h1>', '<code>', '</code>', '<pre>', '</pre>');
+					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4><font size="3"><b><i>', '</i></b></font></h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<code><font size="2">', '</font></code>', '<code><font size="2">', '</font></code>');
 					$text    	 = str_replace($str_search, $str_replace, $text);
 
 					// Link removal
