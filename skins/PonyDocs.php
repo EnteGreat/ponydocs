@@ -645,7 +645,7 @@ if($this->data['copyrightico']) { ?>
 			else if ( !strcmp( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Products Management';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:productShortName|displayName}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:productShortName|displayName|parent}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in /extensions/PonyDocs/PonyDocs.config.php $ponyDocsProductsList.</i></span>');
 			}
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))

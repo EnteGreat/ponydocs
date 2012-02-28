@@ -52,11 +52,11 @@ class PonyDocsWiki
 	 *
 	 * @return array
 	 */
-	public function getProductsForTemplate( )
-	{
-		$dbr = wfGetDB( DB_SLAVE );
-		$product = PonyDocsProduct::GetProducts( );
-		$validProducts = $out = array( );
+	public function getProductsForTemplate() {
+		$dbr = wfGetDB(DB_SLAVE);
+		$product = PonyDocsProduct::GetProducts();
+		$validProducts = array();
+		$out = array();
 
 		/**
 		 * This should give us one row per version which has 1 or more TOCs tagged to it.  So basically, if its not in this list
@@ -64,11 +64,11 @@ class PonyDocsWiki
 		 */
 		$res = PonyDocsCategoryLinks::getTOCCountsByProduct();
 
-		while( $row = $dbr->fetchObject( $res ))
+		while ($row = $dbr->fetchObject($res)) {
 			$validProducts[] = $row->cl_to;
+		}
 
-		foreach( $product as $p )
-		{
+		foreach ($product as $p) {
 			/**
 			 *	Only add it to our available list if its in our list of valid products.
 			 *	NOTE skip for now.
@@ -78,7 +78,11 @@ class PonyDocsWiki
 			// Only add product to list if it has versions visible to this user
 			$versions = PonyDocsProductVersion::LoadVersionsForProduct($p->getShortName());
 			if (!empty($versions)) {
-				$out[] = array( 'name' => $p->getShortName( ), 'label' => $p->getLongName( ));
+				$out[] = array(
+					'name' => $p->getShortName(),
+					'label' => $p->getLongName(),
+					'parent' => $p->getParent(),
+				);
 			}
 		}
 

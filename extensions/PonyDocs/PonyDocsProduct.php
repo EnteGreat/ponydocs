@@ -44,24 +44,27 @@ class PonyDocsProduct
 	 * Constructor is simply passed the short and long (display) name.  We convert the short name to lowercase
 	 * immediately so we don't have to deal with case sensitivity.
 	 *
-	 * @param string $shortName Short name used to refernce product in URLs.
-	 * @param string $longName Display name for product.
+	 * @param string $shortName  Short name used to refernce product in URLs.
+	 * @param string $longName   Display name for product.
+	 * @param string $status     Status for product. One of: hidden
 	 */
-	public function __construct( $shortName, $longName = '' )
-	{
+	public function __construct($shortName, $longName = '', $parent = '') {
 		//$this->mShortName = strtolower( $shortName );
 		$this->mShortName = preg_replace( '/([^' . PONYDOCS_PRODUCT_LEGALCHARS . '])/', '', $shortName );
 		$this->mLongName = strlen( $longName ) ? $longName : $shortName;
+		$this->mParent = $parent;
 	}
 
-	public function getShortName( )
-	{
+	public function getShortName() {
 		return $this->mShortName;
 	}
 
-	public function getLongName( )
-	{
+	public function getLongName() {
 		return $this->mLongName;
+	}
+
+	public function getParent() {
+		return $this->mParent;
 	}
 
 	/**
@@ -109,12 +112,12 @@ class PonyDocsProduct
 		 * NOTE product is the top entity, we need to verify better it has at least one version defined
 		 */
 
-		if( !preg_match_all( '/{{#product:\s*(.*)[|](.*)\s*}}/i', $content, $matches, PREG_SET_ORDER ))
+		if( !preg_match_all( '/{{#product:\s*([^|}{]*)\|([^|}{]*)(\|([^|}{]*))?\s*}}/i', $content, $matches, PREG_SET_ORDER )) {
 			return array( );
+		}
 
-		foreach( $matches as $m )
-		{
-			$pProduct = new PonyDocsProduct( $m[1], $m[2] );
+		foreach($matches as $m) {
+			$pProduct = new PonyDocsProduct($m[1], $m[2], $m[4]);
 			self::$sDefinedProductList[$pProduct->getShortName( )] = $pProduct;
 			self::$sProductList[$m[1]] = $pProduct;
 		}
