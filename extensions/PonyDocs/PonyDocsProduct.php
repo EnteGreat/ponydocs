@@ -102,26 +102,34 @@ class PonyDocsProduct
 
 		/**
 		 * The content of this topic should be of this form:
-		 * {{#product:shortName|longName}}
-		 * ...
+		 * {{#product:shortName|Long Product Name|parent}}{{#product:anotherProduct|...
 		 * 
 		 * There is a user defined parser hook which converts this into useful output when viewing as well.
 		 * 
 		 * Then query categorylinks to only add the product if it has a tagged TOC file with the selected version.
 		 * Otherwise, skip it!
+		 * 
 		 * NOTE product is the top entity, we need to verify better it has at least one version defined
 		 */
 
-		if( !preg_match_all( '/{{#product:\s*([^|}{]*)\|([^|}{]*)(\|([^|}{]*))?\s*}}/i', $content, $matches, PREG_SET_ORDER )) {
-			return array( );
-		}
+		$products = explode('}}', $content); // explode on the closing tag to get an array of products
+		foreach ($products as $product) {
+			// The last element of the array is empty
+			if ($product) { 
+				
+				// Remove the opening tag and prefix
+				$product = str_replace('{{#product:', '', $product);   
+				$parameters = explode('|', $product);
 
-		foreach($matches as $m) {
-			$pProduct = new PonyDocsProduct($m[1], $m[2], $m[4]);
-			self::$sDefinedProductList[$pProduct->getShortName( )] = $pProduct;
-			self::$sProductList[$m[1]] = $pProduct;
+				// Third parameter is optional
+				$parent = isset($parameters[2]) ? $parameters[2] : '';
+				
+				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parent);
+				self::$sDefinedProductList[$pProduct->getShortName( )] = $pProduct;
+				self::$sProductList[$parameters[0]] = $pProduct;
+			}
 		}
-
+		
 		return self::$sProductList;
 	}
 
