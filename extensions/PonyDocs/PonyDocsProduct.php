@@ -49,7 +49,6 @@ class PonyDocsProduct
 	 * @param string $status     Status for product. One of: hidden
 	 */
 	public function __construct($shortName, $longName = '', $parent = '') {
-		//$this->mShortName = strtolower( $shortName );
 		$this->mShortName = preg_replace( '/([^' . PONYDOCS_PRODUCT_LEGALCHARS . '])/', '', $shortName );
 		$this->mLongName = strlen( $longName ) ? $longName : $shortName;
 		$this->mParent = $parent;
@@ -75,28 +74,24 @@ class PonyDocsProduct
 	 * @return array
 	 */
 
-	static public function LoadProducts( $reload = false )
-	{
-		$dbr = wfGetDB( DB_SLAVE );
+	static public function LoadProducts($reload = false) {
+		$dbr = wfGetDB(DB_SLAVE);
 
 		/**
 		 * If we have content in our list, just return that unless $reload is true.
 		 */
-		if( sizeof( self::$sProductList ) && !$reload )
+		if(sizeof(self::$sProductList) && !$reload) {
 			return self::$sProductList;
+		}
 
-		self::$sProductList = array( );
+		self::$sProductList = array();
 
-		// Use 0 as the last parameter to enforce getting latest revision of 
-		// this article.
-		$article = new Article( Title::newFromText( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE ), 0);
-		$content = $article->getContent( );
+		// Use 0 as the last parameter to enforce getting latest revision of this article.
+		$article = new Article(Title::newFromText( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE), 0);
+		$content = $article->getContent();
 
-		if( !$article->exists( ))
-		{
-			/**
-			 * There is no products file found -- just return.
-			 */
+		if( !$article->exists()) {
+			 // There is no products file found -- just return.
 			return array( );
 		}
 
@@ -120,12 +115,13 @@ class PonyDocsProduct
 				// Remove the opening tag and prefix
 				$product = str_replace('{{#product:', '', $product);   
 				$parameters = explode('|', $product);
+				$parameters = array_map('trim', $parameters);
 
 				// Third parameter is optional
-				$parent = isset($parameters[2]) ? $parameters[2] : '';
-				
+				$parent = isset($parameters[2]) ? $parameters[2] : null;
+			
 				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parent);
-				self::$sDefinedProductList[$pProduct->getShortName( )] = $pProduct;
+				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
 				self::$sProductList[$parameters[0]] = $pProduct;
 			}
 		}

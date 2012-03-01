@@ -337,23 +337,23 @@ function efProductParserFunction_Magic( &$magicWords, $langCode )
  * @param string $param2 The long product name.
  * @return array
  */
-function efProductParserFunction_Render( &$parser, $param1 = '', $param2 = '', $param3 = '') {
+function efProductParserFunction_Render( &$parser, $param1 = '', $param2 = '', $param3 = null) {
 	global $wgUser, $wgScriptPath;
 	
 	$valid = true;
 	
-	if (!preg_match( PONYDOCS_PRODUCT_REGEX, $param1)) {
+	if (!preg_match(PONYDOCS_PRODUCT_REGEX, $param1)) {
 		$valid = false;
 	}
 	
 	$output = "$param1 ($param2)";
 	
-	if (!empty($param3)) {
+	if (isset($param3)) {
 		$output .= " - Parent: $param3";
 	}
 	
 	if (!$valid) {
-		$output .= ' - Invalid Product Name or Long Name, Please Fix';
+		$output .= ' - Invalid Product Name, Please Fix';
 	}
 	
 	$output .= "\n";
