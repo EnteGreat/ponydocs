@@ -258,14 +258,7 @@ class PonyDocsTemplate extends QuickTemplate {
 					<div class="product">
 						<label for='docsProductSelect'  class="navlabels">Product:&nbsp;</label><br />
 						<select id="docsProductSelect" name="selectedProduct" onChange="AjaxChangeProduct();">
-						<?php
-							foreach( $this->data['products'] as $idx => $data ) {
-								echo '<option value="' . $data['name'] . '" ';
-								if( !strcmp( $data['name'], $this->data['selectedProduct'] ))
-									echo 'selected';
-								echo '>' . $data['label'] . '</option>';
-							}
-						?>
+							<?php $this->hierarchicalProductSelect(); ?>
 						</select>
 					</div>
 			<?php
@@ -840,9 +833,27 @@ if($this->data['copyrightico']) { ?>
 		}
 	}
 
-
-
-} // end of class
-
-
-?>
+	/**
+	 * Output select options respecting a single-level parent/child product hierarchy
+	 * 
+	 * TODO: Handle multiple levels of parent/child relationships
+	 * 
+	 * @param string $parent  Short name of parent whose children we want to output
+	 */
+	private function hierarchicalProductSelect($parent = NULL) {
+		foreach ($this->data['products'] as $idx => $data) {
+			// We're at the top-level, output all top-level Products
+			if ($parent == NULL && !isset($data['parent'])) {
+				$selected = !strcmp( $data['name'], $this->data['selectedProduct']) ? 'selected' : '';
+				echo '<option value="' . $data['name'] .'" ' . $selected . '>';
+				echo $data['label'];
+				echo "</option>\n";
+				echo $this->hierarchicalProductSelect($data['name']);
+			} else if ($parent != NULL && isset($data['parent']) && $data['parent'] == $parent) {
+				echo '<option class="child" value="' . $data['name'] .'" ' . $selected . '>';
+				echo '-- ' . $data['label'];
+				echo "</option>\n";
+			}
+		}
+	}
+}

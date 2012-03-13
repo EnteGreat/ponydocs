@@ -245,15 +245,18 @@ to edit the page and add new products.
 The Documentation:Products page contains a listing of all your products. Each
 line defines a single product.  A product definition uses this format:
 
-	{{#product:productShortName|displayName}}
+	{{#product:productShortName|displayName|parent}}
 
 productShortName can be any alphanumeric string (no spaces allowed).
-displayName is the human readable name of the product you are documenting. Here's
-an example of a page with the three products above:
+displayName is the human readable name of the product you are documenting. 
+parent is the short name of a parent product. Child products will be displayed under 
+their parents in product listings.
+
+Here's an example of a page with the three products above:
 
 	{{#product:Foo|Foo for fooing}}
 	{{#product:Bar|Bar for the bar}}
-	{{#product:Bash|Bash is not Quux}}
+	{{#product:Bash|Bash is not Quux|Bar}}
 
 Once the page is saved, you'll be able to move to the next step, defining your
 versions. As you add more products, add more lines to the Documentation:Products
