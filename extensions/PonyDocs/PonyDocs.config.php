@@ -22,6 +22,7 @@ define('PONYDOCS_DOCUMENTATION_PREFIX', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . 
 define('PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE', PONYDOCS_DOCUMENTATION_PREFIX . 'Products' );
 define('PONYDOCS_PRODUCT_LEGALCHARS', 'A-Za-z0-9_,.-' );
 define('PONYDOCS_PRODUCT_REGEX', '/([' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)/' );
+define('PONYDOCS_PRODUCT_STATIC_PREFIX', '.');
 
 define('PONYDOCS_PRODUCTVERSION_SUFFIX', ':Versions' );
 define('PONYDOCS_PRODUCTVERSION_LEGALCHARS', 'A-Za-z0-9_,.-' );
@@ -35,7 +36,11 @@ define('PONYDOCS_PRODUCTMANUAL_TITLE_REGEX', '/^' . PONYDOCS_DOCUMENTATION_PREFI
 
 // category cache expiration in seconds
 define('CATEGORY_CACHE_TTL', 300);
+
+// directories
 define('PONYDOCS_TEMP_DIR', '/tmp/');
+define('PONYDOCS_STATIC_DIR', '/var/www/useruploads/docs/staticDocs/');
+define('PONYDOCS_STATIC_URI', '/DocumentationStatic/');
 
 // capitalization settings
 define('PONYDOCS_CASE_SENSITIVE_TITLES', false);

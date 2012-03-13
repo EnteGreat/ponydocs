@@ -26,6 +26,13 @@ class PonyDocsProduct
 	protected $mLongName;
 
 	/**
+	 * Stores whether product instance is defined as static
+	 *
+	 * @var boolean
+	 */
+	protected $static;
+
+	/**
 	 * Our list of products loaded from the special page, stored statically.  This only contains the products
 	 * which have a TOC defined and tagged to the currently selected version.
 	 *
@@ -64,6 +71,14 @@ class PonyDocsProduct
 
 	public function getParent() {
 		return $this->mParent;
+	}
+
+	public function setStatic($static) {
+		$this->static = $static;
+	}
+
+	public function isStatic() {
+		return $this->static;
 	}
 
 	/**
@@ -119,8 +134,16 @@ class PonyDocsProduct
 
 				// Third parameter is optional
 				$parent = isset($parameters[2]) ? $parameters[2] : null;
-			
+
+				// Set static flag if defined as static
+				$static = false;
+				if (strpos($parameters[0], PONYDOCS_PRODUCT_STATIC_PREFIX) === 0) {
+					$parameters[0] = substr($parameters[0], strlen(PONYDOCS_PRODUCT_STATIC_PREFIX));
+					$static = true;
+				}
+
 				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parent);
+				$pProduct->setStatic($static);
 				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
 				self::$sProductList[$parameters[0]] = $pProduct;
 			}

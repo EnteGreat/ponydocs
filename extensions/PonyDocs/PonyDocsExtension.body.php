@@ -55,8 +55,6 @@ class PonyDocsExtension
 		 * 		Documentation/<product>/<latest|version>/<manual>/<topic>
 		 * Then we need to register a hook to do the translation of this to a real topic name.
 		 */
-		//if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
-		//if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
 		if(preg_match('/^' . str_replace("/", "\/", $wgScriptPath) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/(\w+)\/((latest|[\w\.]*)\/)?(\w+)\/?$/i', $_SERVER['PATH_INFO'], $match)) {
 			$this->mURLMode = PonyDocsExtension::URLMODE_ALIASED;
 		}
@@ -394,7 +392,7 @@ class PonyDocsExtension
 	}
 
 	static public function onArticleFromTitle_New( &$title, &$article )
-	{ 
+	{
 		global $wgScriptPath;
 		global $wgArticlePath, $wgTitle, $wgArticle, $wgOut, $wgHooks;
 
@@ -425,6 +423,11 @@ class PonyDocsExtension
 		$manualName = $matches[3];
 		$topicName = $matches[4];
 
+		// If this is a static product return because that should be handled by another function
+		$product = PonyDocsProduct::GetProductByShortName($productName);
+		if ($product->isStatic()) {
+			return true;
+		}
 		$versionSelectedName = PonyDocsProductVersion::GetSelectedVersion($productName);
 
 		$version = '';
@@ -1884,6 +1887,31 @@ HEREDOC;
 				}
 			}
 			die();
+		}
+		return true;
+	}
+
+	/**
+	 * Hook function to retrieve data for static article
+	 * @param Title $title Mediawiki title object passed from core
+	 * @param Article $article Mediawiki article object passed from core
+	 * @return boolean
+	 */
+	static public function onArticleFromTitleStatic(&$title, &$article) {
+		global $wgScriptPath;
+		// Check for static URI
+		if (!preg_match( '/^' . str_replace("/", "\/", PONYDOCS_STATIC_URI) . '(.*)$/i', $title->__toString( ), $matches )) {
+			return false;
+		}
+		// Check if request is for a "static" product
+		$articleMeta = PonyDocsArticleFactory::getArticleMetaDataFromURL($_SERVER['PATH_INFO'], $wgScriptPath);
+		if (isset($articleMeta['product'])) {
+			$product = PonyDocsProduct::GetProductByShortName($articleMeta['product']);
+			if ($product->isStatic()) {
+				$article = PonyDocsArticleFactory::getStaticArticleByTitle($_SERVER['PATH_INFO'], $wgScriptPath);
+				$article->loadContent();
+				return false;
+			}
 		}
 		return true;
 	}

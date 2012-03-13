@@ -4,6 +4,7 @@ if( !defined( 'MEDIAWIKI' ))
 
 require_once( "$IP/includes/Title.php" );
 require_once('PonyDocsArticleTopic.php');
+require_once('PonyDocsArticleStatic.php');
 require_once('PonyDocsArticleTOC.php');
 require_once('PonyDocsDBPage.php');
 
@@ -60,6 +61,20 @@ class PonyDocsArticleFactory
 	}
 
 	/**
+	 * Parse title and return static article object
+	 * @param string $title
+	 * @param string $baseUrl base URI where Mediawiki is installed
+	 * @return PonyDocsArticleStatic object
+	 */
+	static public function getStaticArticleByTitle($title, $baseUrl) {
+		$meta = self::getArticleMetadataFromURL($title, $baseUrl);
+		$titleToLoad = $meta['namespace'] . ':' . $meta['product'] . ':' . $meta['version'] . ':' . $meta['uri'];
+		$article = new PonyDocsArticleStatic(Title::newFromText($titleToLoad), 0);
+		$article->setMetadata($meta['product'], $meta['version'], $meta['uri']);
+		return $article;
+	}
+
+	/**
 	 * Parse title and return article metadata
 	 * @param string $title
 	 * @return array article metadata (type, namespace, page_title, product, manual, topic, base_version)
@@ -88,6 +103,22 @@ class PonyDocsArticleFactory
 		} else {
 			// no match
 			$meta['type'] = self::ARTICLE_TYPE_OTHER;
+		}
+		return $meta;
+	}
+
+	/**
+	 * Parse URL and return static article metadata
+	 * @param string $url
+	 * @return array article metadata (namespace, product, version, uri)
+	 */
+	static public function getArticleMetadataFromURL($url, $baseUrl) {
+		$meta = array();
+		if(preg_match('/^' . str_replace("/", "\/", $baseUrl) . '\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/([' . PONYDOCS_PRODUCT_LEGALCHARS . ']+)(\/([' . PONYDOCS_PRODUCTVERSION_LEGALCHARS . ']+))(\/.*)?$/i', $url, $match)) {
+			$meta['namespace'] = PONYDOCS_DOCUMENTATION_NAMESPACE_NAME;
+			$meta['product'] = $match[1];
+			$meta['version'] = isset($match[3]) ? $match[3] : '';
+			$meta['uri'] = isset($match[4]) ? $match[4] : '';
 		}
 		return $meta;
 	}

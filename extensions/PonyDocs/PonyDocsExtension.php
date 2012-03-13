@@ -35,6 +35,7 @@ require_once( "$IP/extensions/PonyDocs/PonyDocsBranchInheritEngine.php");
 require_once( "$IP/extensions/PonyDocs/SpecialBranchInherit.php");
 require_once( "$IP/extensions/PonyDocs/SpecialDocListing.php");
 require_once( "$IP/extensions/PonyDocs/SpecialRecentProductChanges.php");
+require_once( "$IP/extensions/PonyDocs/SpecialStaticDocImport.php");
 
 // check for empty product list
 if (!isset ($ponyDocsProductsList) || sizeof($ponyDocsProductsList) == 0){
@@ -640,6 +641,7 @@ $wgHooks['ParserBeforeStrip'][] = 'PonyDocsExtension::onParserBeforeStrip';
 $wgHooks['AlternateEdit'][] = 'PonyDocsExtension::onEdit';
 $wgHooks['userCan'][] = 'PonyDocsExtension::onUserCan';
 $wgHooks['GetFullURL'][] = 'PonyDocsExtension::onGetFullURL';
+$wgHooks['ArticleFromTitle'][] = 'PonyDocsExtension::onArticleFromTitleStatic';
 $wgHooks['ArticleFromTitle'][] = 'PonyDocsExtension::onArticleFromTitleQuickLookup';
 $wgHooks['CategoryPageView'][] = 'PonyDocsCategoryPageHandler::onCategoryPageView';
 
