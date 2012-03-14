@@ -48,6 +48,11 @@ class PonyDocsProduct
 	static protected $sDefinedProductList = array( );
 	
 	/**
+	 * @var $sParentChildMap array  An array mapping parents to child products
+	 */
+	static protected $sParentChildMap = array();
+	
+	/**
 	 * Constructor is simply passed the short and long (display) name.  We convert the short name to lowercase
 	 * immediately so we don't have to deal with case sensitivity.
 	 *
@@ -146,6 +151,10 @@ class PonyDocsProduct
 				$pProduct->setStatic($static);
 				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
 				self::$sProductList[$parameters[0]] = $pProduct;
+				if (isset($parent)) {
+					// key is parent, value is array of children
+					self::$sParentChildMap[$parent][] = $parameters[0];
+				}
 			}
 		}
 		
@@ -270,7 +279,23 @@ class PonyDocsProduct
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . ":" . __LINE__ . "] setting selected product to $p");}
 		return $p;
 	}
-
+	
+	/**
+	 * Return an array of child products for a given product
+	 * 
+	 * @param string $product  short name of a parent product
+	 * 
+	 * @return array  An array of child product short names
+	 */
+	static public function getChildProducts($product) {
+		self::GetProducts();
+		$parentChildMap = self::$sParentChildMap;
+		if (isset($parentChildMap[$product])) {
+			return $parentChildMap[$product];
+		} else {
+			return array();
+		}
+	}
 }
 
 /**

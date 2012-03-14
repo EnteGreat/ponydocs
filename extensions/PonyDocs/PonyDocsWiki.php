@@ -45,18 +45,18 @@ class PonyDocsWiki
 	}
 
 	/**
-	 * This returns the list of available products for template output in a more useful way for templates.  It is a simple list
-	 * with each element being an associative array containing two keys:  name and status.
+	 * This returns the list of available products for template output in a more useful way for templates.  
+	 * It is a simple list with each element being an associative array containing three keys: name status, and parent
 	 * 
 	 * @FIXME:  If a product has NO defined versions it should be REMOVED from this list.
 	 *
-	 * @return array
+	 * @return array  array of product arrays, keyed by shortname
 	 */
 	public function getProductsForTemplate() {
 		$dbr = wfGetDB(DB_SLAVE);
 		$product = PonyDocsProduct::GetProducts();
 		$validProducts = array();
-		$out = array();
+		$productAry = array();
 
 		/**
 		 * This should give us one row per version which has 1 or more TOCs tagged to it.  So basically, if its not in this list
@@ -78,7 +78,7 @@ class PonyDocsWiki
 			// Only add product to list if it has versions visible to this user
 			$versions = PonyDocsProductVersion::LoadVersionsForProduct($p->getShortName());
 			if (!empty($versions)) {
-				$out[] = array(
+				$productAry[$p->getShortname()] = array(
 					'name' => $p->getShortName(),
 					'label' => $p->getLongName(),
 					'parent' => $p->getParent(),
@@ -86,7 +86,7 @@ class PonyDocsWiki
 			}
 		}
 
-		return $out;
+		return $productAry;
 	}
 
 	/**
