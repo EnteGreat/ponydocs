@@ -2225,6 +2225,9 @@ HEREDOC;
 			error_log("INFO [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Raw title: " . $title);
 		}
 
+		// Get rid of whitespace at the end of the title
+		$title = trim($title);
+		
 		// If we're missing the namespace from a title AND we're in the PonyDocs namespace, prepend PonyDocs namespace to title
 		if (strpos($title, ':') === false && $fromNamespace == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) {
 			$title = $fromNamespace . ':' . $title;
