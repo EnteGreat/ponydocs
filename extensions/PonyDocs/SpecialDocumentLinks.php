@@ -40,48 +40,143 @@ class SpecialDocumentLinks extends SpecialPage {
 
 		ob_start();
 
-		$dbh = wfGetDB(DB_SLAVE);
+		$dbr = wfGetDB(DB_SLAVE);
 
+		// Set headers and title of the page, get value of "t" from GET/POST
 		$this->setHeaders();
-		$title =  $wgRequest->getVal('t');
+		$title = $wgRequest->getVal('t');
 		if (empty($title)) {
 			$wgOut->setPagetitle("Documentation Linkage" );
 			$wgOut->addHTML('No topic specified.');
 			return;
 		}
-		$wgOut->setPagetitle("Documentation Linkage For " . $title );
-		$dbr = wfGetDB( DB_SLAVE );
-		$title = Title::newFromText($title);
-		$article = new Article($title);
-		$content = $article->getContent();
-		$topic = new PonyDocsTopic($article);
-		$versions = $topic->getProductVersions();
-		//$versions = array();
-		$mediaWikiTitle = $article->getTitle()->getFullText();
-		$mediaWikiTitle = str_replace(" ", "_", $mediaWikiTitle);
-		foreach($versions as $ver) {
+		$wgOut->setPagetitle("Documentation Linkage For " . $title);
+
+		// Parse "t" (the title we're looking for inbound links to)
+		// Find titles for all inherited versions, etc.
+		$title = Title::newFromText($title); // Create a new Title from text, such as what one would find in a link. Decodes any HTML entities in the text.
+
+		$toUrls = array();
+		$titlePieces = explode(':', $title);
+		if ($titlePieces[0] == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) { // Do PonyDocs-specific stuff (loop through all inherited versions)
+
+			// Get the versions associated with this topic
+			$article = new Article($title);
+			$topic = new PonyDocsTopic($article);
+			$versions = $topic->getProductVersions(true);
+
+			// Get the latest released version of this product
+			PonyDocsProductVersion::LoadVersionsForProduct($titlePieces[1], true);
+			$latestVersionObj = PonyDocsProductVersion::GetLatestReleasedVersion($titlePieces[1]);
+			if (is_object($latestVersionObj)) {
+				$latestVersion = $latestVersionObj->getVersionName();
+			} else {
+				error_log("WARNING [PonyDocs] [SpecialDocumentLinks] Unable to find latest released version of " . $titlePieces[1]);
+			}
+
+			// Generate a title without the version so we can dynamically generate a list of titles with all inherited versions
+			$titleNoVersion = $titlePieces[0] . ":" . $titlePieces[1] . ":" . $titlePieces[2] . ":" . $titlePieces[3];
+
+			// Search the database for matching to_links for each inherited version
+			if (is_array($versions)) {
+				foreach ($versions as $ver) {
+
+					// Add this URL to array of URLs to search db for
+					$toUrls[] = PonyDocsExtension::translateTopicTitleForDocLinks($titleNoVersion, NULL, $ver);
+
+					// Compare this version with latest version. If they're the same, add the URL with "latest" too.
+					$thisVersion = $ver->getVersionName();
+					if ($thisVersion == $latestVersion) {
+						$titleLatestVersion = $titlePieces[0] . ':' . $titlePieces[1] . ':' . $titlePieces[2] . ':' . $titlePieces[3] . ':latest';
+						$toUrls[] = PonyDocsExtension::translateTopicTitleForDocLinks($titleLatestVersion);
+					}
+				}
+			} else {
+				error_log("WARNING [PonyDocs] [SpecialDocumentLinks] Unable to find versions for " . $title);
+			}
+
+		} else { // Do generic mediawiki stuff for non-PonyDocs namespaces
+			$toUrls[] = PonyDocsExtension::translateTopicTitleForDocLinks($title);
+		}
+
+		// Query the database for the list of toUrls we've collated
+		if (!empty($toUrls)) {
+			$whereConds = implode("' OR to_link = '", $toUrls);
+			$query = "SELECT * FROM " . $wgDBprefix . "ponydocs_doclinks WHERE to_link = '" . $whereConds . "'";
+			$results = $dbr->query($query);
+		}
+
+		// Create array of links, sorted by product and version
+		$links = array();
+		// Loop through results and save into handy dandy links array
+		if (!empty($results)) {
+			foreach ($results as $result) {
+				$fromProduct = '';
+				$fromVersion = '';
+				$displayUrl = '';
+
+				if (strpos($result->from_link, PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) !== false) {
+					// If this is a PonyDocs style links, with slashes,
+					// save product, version, display URL accordingly.
+					$pieces = explode('/', $result->from_link);
+					$fromProduct = ucfirst($pieces[1]);
+					$fromVersion = ucfirst($pieces[2]);
+					$displayUrl = $result->from_link;
+				} else {
+					// If this is a generic mediawiki style link, with colons (or not),
+					// set product to the namespace, and remove namespace
+					// from the display URL. Leave version blank.
+					if (strpos($result->from_link, ':') !== false) {
+						$pieces = explode(':', $result->from_link);
+						$fromProduct = ucfirst($pieces[0]); // The "product" will be the namespace
+						$displayUrl = $pieces[1]; // So the namespace doesn't show in every URL
+					} else { // it's possible to have a link with no colons
+						$fromProduct = 'Other'; // No namespace, so the "product" will be the string "Other"
+						$displayUrl = ucfirst($result->from_link);
+					}
+					$fromVersion = 'None'; // No concept of versions outside of PonyDocs
+				}
+
+				// Put all this stuff in an array that we can use to generate HTML
+				$links[$fromProduct][$fromVersion][] = array(
+					'from_link' => $result->from_link,
+					'to_link' => $result->to_link,
+					'display_url' => $displayUrl
+				);
+			}
+		}
+
+		// Make HTML go!
 		?>
 
-			The following is in-bound links to <?php echo $title; ?> from other Documentation namespace topics.
-			<h2>Version: <?php echo $ver->getVersionName(); ?></h2>
+		<h2>Inbound links to <?php echo $title; ?> from other topics.</h2>
 
 		<?php
-			// Let's grab the mediawiki name of the topic.
-			$humanReadableTitle = preg_replace('/' . PONYDOCS_DOCUMENTATION_PREFIX . '([^:]+):([^:]+):([^:]+):([^:]+)$/i', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $mediaWikiTitle);
-			// $humanReadableTitle now contains human readable title.
-
-			// Get our records.
-			$res = $dbh->select($wgDBprefix . 'ponydocs_doclinks', '*', array('lower(to_link)' => strtolower($humanReadableTitle)));
-
-			if($res->numRows()) {
-				?><ul><?php
-					foreach($res as $result) {
-						?><li><a href="<?php echo str_replace('$1', $result->from_link, $wgArticlePath);?>"><?php echo $result->from_link;?></a></li><?php
+		// If there are no links, display a message saying as much
+		if (empty($links)) {
+		?>
+			<p>No links to <?php echo $title; ?> (and its inherited versions) from other topics.</p>
+		<?php
+		} else {
+			// Display all links, ordered by product then version
+			foreach ($links as $fromProduct => $fromVersions) {
+				?>
+				<h2><?php echo $fromProduct; ?> </h2>
+				<?php
+				foreach ($fromVersions as $fromVersion => $links) {
+					?>
+					<h3><?php if ($fromVersion != 'None') { echo $fromProduct . ' ' . $fromVersion; } ?> </h3>
+					<ul>
+					<?php
+					foreach ($links as $linkAry) {
+						?>
+						<li><a href="<?php echo str_replace('$1', $linkAry['from_link'], $wgArticlePath); ?>"><?php echo $linkAry['display_url']; ?></a></li>
+					<?php
 					}
-				?></ul><?php
-			}
-			else {
-				?>No inbound links for this version.<?php
+					?>
+					</ul>
+					<?php
+				}
 			}
 		}
 

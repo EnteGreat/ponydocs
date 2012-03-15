@@ -1933,12 +1933,15 @@ HEREDOC;
 	 */
 	static public function onArticleDelete(&$article, &$user, &$user, $error) {
 		$title = $article->getTitle();
+
+		// Delete doc links
+		PonyDocsExtension::updateOrDeleteDocLinks("delete", $article);
+
 		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/i', $title->__toString( ), $matches )) {
 			return true;
 		}
-		// Okay, article is in doc namespace, pass it over to our utility 
-		// function.
-		PonyDocsExtension::deleteDocLinks($article);
+		// Okay, article is in doc namespace
+		
 		PonyDocsExtension::clearArticleCategoryCache($article);
 		return true;
 	}
@@ -1953,12 +1956,14 @@ HEREDOC;
 												 $sectionanchor, &$flags, $revision, &$status, $baseRevId) {
 
 		$title = $article->getTitle();
+
+		// Update doc links
+		PonyDocsExtension::updateOrDeleteDocLinks("update", $article, $text);
+
 		if( !preg_match( '/^' . PONYDOCS_DOCUMENTATION_PREFIX . '/i', $title->__toString( ), $matches )) {
 			return true;
 		}
-		// Okay, article is in doc namespace, pass it over to our utility 
-		// function.
-		PonyDocsExtension::updateDocLinks($article, $text);
+		// Okay, article is in doc namespace
 
 		// Now we need to remove any pdf books for this topic.
 		// Since the person is editing the article, it's safe to say that the 
@@ -2018,80 +2023,114 @@ HEREDOC;
 	}
 
 	/**
-	 * Deletes Doc Links entries from table which refer to an article from both 
-	 * from and to entries.
+	 * Updates or deletes Doc Links for the article being passed in.
+	 * @param str $updateOrDelete possible values: "update" or "delete"
+	 * @param Article $article the article to be updated or deleted
+	 * @param str $content content of the article to be updated or deleted
 	 */
-	static public function deleteDocLinks($article) {
+	static public function updateOrDeleteDocLinks($updateOrDelete, $article, $content = NULL) {
 		$dbh = wfGetDB(DB_MASTER);
-		$topic = new PonyDocsTopic($article);
-		$ponydocsVersions = $topic->getProductVersions();
-		$versions = array();
-		foreach($ponydocsVersions as $ver) {
-			$title = $article->getTitle()->getFullText();
-			$humanReadableTitle = preg_replace('/' . PONYDOCS_DOCUMENTATION_PREFIX . '([^:]+):([^:]+):([^:]+):([^:]+)$/i', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $title);
-			// $humanReadableTitle now contains human readable title.  We're going 
-			// to store this in the "from" column of our doclinks table.
-			// But first we need to delete any instances of this from the 
-			// doclinks table.
-			$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
-			$dbh->delete('ponydocs_doclinks', array('to_link' => $humanReadableTitle));
-		}
-		return true;
-	}
 
-	/**
-	 * Updates Doc Links table for the article being passed in.
-	 * @param Article $article the article to be updated with
-	 */
-	static public function updateDocLinks($article, $content) {
-		$dbh = wfGetDB(DB_MASTER);
-		$topic = new PonyDocsTopic($article);
-		$ponydocsVersions = $topic->getProductVersions();
-		$versions = array();
-		foreach($ponydocsVersions as $ver) {
-			$title = $article->getTitle()->getFullText();
-			$humanReadableTitle = preg_replace('/' . PONYDOCS_DOCUMENTATION_PREFIX . '([^:]+):([^:]+):([^:]+):([^:]+)$/i', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $ver->getProductName() . '/' . $ver->getVersionName() . "/$2/$3", $title);
-			// $humanReadableTitle now contains human readable title.  We're going 
-			// to store this in the "from" column of our doclinks table.
-			// But first we need to delete any instances of this from the 
-			// doclinks table.
-			$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
+		if ($updateOrDelete == "update") {
+			// Match all links in the article
+			/* Breakdown of the regex below:
+			 * two left brackets
+			 * followed by zero or more misc chars ($match[1]), until
+			 * a pound followed by one or more misc chars ($match[2]) -- but this section is optional
+			 * followed by an optional |
+			 * followed by zero or more misc chars ($match[4]) ($match[3] is the misc chars plus the |)
+			 * followed by two right brackets
+			 * Things that would match:
+			 * [[TextHere:OtherTextHere#MoreText|StillMoreText]]
+			 * [[TextHere:MoreText:Text:Text|StillMoreText]]
+			 * [[TextHere:MoreText:Text:Text:Text|StillMoreText]]
+			 * [[TextHere:OtherTextHere|StillMoreText]]
+			 * [[TextHereStillMoreText]]
+			 * etc.
+			 * For PonyDocs, this maps to:
+			 * [[Topic]]
+			 * [[Documentation:Product:Manual:Topic]]
+			 * [[Documentation:Product:Manual:Topic:Version]]
+			 * [[OtherNamespace:Topic]]
+			 */
+			// TODO we really should refactor this regex; for now, leaving intact
 			$regex = "/\[\[([A-Za-z0-9,:._ -]*)(\#[A-Za-z0-9 _-]+)?([|]?([A-Za-z0-9,:.'_?!@\/\"()#$ -]*))\]\]/";
-			if(preg_match_all($regex, $content, $matches, PREG_SET_ORDER)) {
-				foreach($matches as $match) {
-					if( strpos( $match[1], ':' ) !== false ) {
-						$pieces = explode( ':', $match[1] );
+			preg_match_all($regex, $content, $matches, PREG_SET_ORDER);
+		}
+
+		// Get the title of the article
+		$title = $article->getTitle()->getFullText();
+		$titlePieces = explode(':', $title);
+		$fromNamespace = $titlePieces[0];
+		if ($fromNamespace == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) {
+			// Do PonyDocs-specific stuff (loop through all inherited versions)
+
+			// Get the versions associated with this topic
+			$topic = new PonyDocsTopic($article);
+			$ponydocsVersions = $topic->getProductVersions();
+
+			// Add a link to the database for each version
+			foreach ($ponydocsVersions as $ver) {
+				
+				// Make a pretty PonyDocs URL (with slashes) out of the mediawiki title (with colons)
+				// Put this $ver in the version spot. We want one URL per inherited version
+				$titleNoVersion = $fromNamespace . ":" . $titlePieces[1] . ":" . $titlePieces[2] . ":" . $titlePieces[3];
+				$humanReadableTitle = self::translateTopicTitleForDocLinks($titleNoVersion, $fromNamespace, $ver, $topic); // this will add the version
+
+				if ($updateOrDelete == "update") {
+					// Clear out existing identical links
+					$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
+
+					// Add links in article to database
+					foreach ($matches as $match) {
+						// Get pretty to_link
+						$toUrl = self::translateTopicTitleForDocLinks($match[1], $fromNamespace, $ver, $topic);
+
+						// Insert from_link and to_link into database
+						if($toUrl) {
+							$dbh->insert("ponydocs_doclinks", array(
+								'from_link' => $humanReadableTitle,
+								'to_link' => $toUrl
+								)
+							);
+						}
 					}
-					// We're only interested in Documentation  namespace links.  
-					// Forget everything else.
-					if($pieces[0] != PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) {
-						continue;
-					}
-					$toUrl = false;
-					// Okay, let's evaluate based on the different "forms" our 
-					// internal documentation links can take.
-					if(sizeof($pieces) == 4) {
-						// Handles example of:
-						// [[Documentation:Product:User:Topic]] -> 
-						// Documentation/product/version/User/Topic
-						$toUrl = PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $ver->getProductName() . '/' . $ver->getVersionName() . "/" . $pieces[2] . "/" . $pieces[3];
-					}
-					else if(sizeof($pieces) == 5) {
-						// Handles examples of:
-						// [[Documentation:Product:User:Topic:Version]] => 
-						// Documentation/Product/Version/User/Topic
-						if($pieces[2] == "latest")
-							$pieces[2] = $latestVersion;
-						$toUrl = PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $pieces[1] . "/" . $pieces[2] . "/" . $pieces[3] . "/" . $pieces[4];
-					}
-					// Okay...
-					if($toUrl) {
-						// We got a toUrl, let's put a record in the DB.
-						$dbh->insert("ponydocs_doclinks", array('from_link' => $humanReadableTitle,
-															  'to_link' => $toUrl));
-					}
+				} else if ($updateOrDelete == "delete") {
+					// Delete all instances of this title in the database.
+					// Keep the to_links, so we can still see what linked to a page for cleanup purposes.
+					$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
 				}
 			}
+		} else {
+			// Do generic mediawiki stuff for non-PonyDocs namespaces
+
+			if ($updateOrDelete == "update") {
+
+				// Clear out existing identical links
+				// We don't need to translate title here since we're not in the PonyDocs namespace
+				$dbh->delete('ponydocs_doclinks', array('from_link' => $title));
+
+				// Add links in article to database
+				foreach ($matches as $match) {
+					// Get pretty to_link
+					$toUrl = self::translateTopicTitleForDocLinks($match[1]);
+
+					// Insert from_link and to_link into database
+					if($toUrl) {
+						$dbh->insert("ponydocs_doclinks", array(
+							'from_link' => $title,
+							'to_link' => $toUrl
+							)
+						);
+					}
+				}
+			} else if ($updateOrDelete == "delete") {
+				// Delete all instances of this title in the database.
+				// Keep the to_links, so we can still see what linked to a page for cleanup purposes.
+				// We don't need to translate title here since we're not in the PonyDocs namespace.
+				$dbh->delete('ponydocs_doclinks', array('from_link' => $title));
+			}
+
 		}
 		return true;
 	}
@@ -2178,6 +2217,80 @@ HEREDOC;
 			throw new Exception('Temporary directory is undefined');
 		}
 		return PONYDOCS_TEMP_DIR;
+	}
+
+	static public function translateTopicTitleForDocLinks($title, $fromNamespace = NULL, $ver = NULL, $topic = NULL) {
+
+		if (PONYDOCS_DOCLINKS_DEBUG) {
+			error_log("INFO [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Raw title: " . $title);
+		}
+
+		// If we're missing the namespace from a title AND we're in the PonyDocs namespace, prepend PonyDocs namespace to title
+		if (strpos($title, ':') === false && $fromNamespace == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) {
+			$title = $fromNamespace . ':' . $title;
+		}
+
+		// Default
+		$toUrl = $title;
+
+		// Do special parsing for PonyDocs titles
+		if (strpos($toUrl, PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) !== false) {
+			$pieces = explode(':', $title);
+			// Evaluate based on the different "forms" our internal documentation links can take.
+			if (sizeof($pieces) == 2) {
+				// Handles links with no product/manual/version specified:
+				// (Namespace was prepended at the beginning of this function)
+				// [[Documentation:Topic]] ->
+				// Documenation/Product/Version/Manual/Topic
+				if ($ver === NULL || $topic === NULL) {
+					error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If no Product, Manual, and Version specified in PonyDocs title, must include version and topic objects when calling translateTopicTitleForDocLinks().");
+					return false;
+				}
+				// Get the manual
+				$toTitle = $topic->getTitle();
+				$topicMetaData = PonyDocsArticleFactory::getArticleMetadataFromTitle($toTitle);
+
+				// Put together the $toUrl
+				$toUrl = $pieces[0] . '/' . $ver->getProductName() . '/' . $ver->getVersionName() . '/' . $topicMetaData['manual'] . '/' . $pieces[1];
+
+			} else if (sizeof($pieces) == 4) {
+				// Handles links with no version specified:
+				// [[Documentation:Product:Manual:Topic]] ->
+				// Documentation/Product/Version/Manual/Topic
+				if ($ver === NULL) {
+					error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If Version is not specified in title, must include version object when calling translateTopicTitleForDocLinks().");
+					return false;
+				}
+
+				// Handle links to other products that don't specify a version
+				$fromProduct = $ver->getProductName();
+				$toProduct = $pieces[1];
+				if ($fromProduct != $toProduct) {
+					$toVersion = "latest";
+				} else {
+					$toVersion = $ver->getVersionName();
+				}
+
+				// Put together the $toUrl
+				$toUrl = $pieces[0] . '/' . $pieces[1] . '/' . $toVersion . '/' . $pieces[2] . '/' . $pieces[3];
+
+			} else if(sizeof($pieces) == 5) {
+				// Handles links with full product/version/manual specified:
+				// [[Documentation:Product:Manual:Topic:Version]] =>
+				// Documentation/Product/Version/Manual/Topic
+				$toUrl = $pieces[0] . '/' . $pieces[1] . '/' . $pieces[4] . '/' . $pieces[2] . '/' . $pieces[3];
+			} else {
+				// Not a valid number of pieces in title
+				error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Wrong number of pieces in PonyDocs title.");
+				return false;
+			}
+		}
+
+		if (PONYDOCS_DOCLINKS_DEBUG) {
+			error_log("INFO [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Final title: " . $toUrl);
+		}
+
+		return $toUrl;
 	}
 
 }
