@@ -39,8 +39,9 @@ define('CATEGORY_CACHE_TTL', 300);
 
 // directories
 define('PONYDOCS_TEMP_DIR', '/tmp/');
-define('PONYDOCS_STATIC_DIR', '/var/www/useruploads/docs/staticDocs/');
+define('PONYDOCS_STATIC_DIR', '/var/www/useruploads/docs/staticDocs');
 define('PONYDOCS_STATIC_URI', '/DocumentationStatic/');
+define('PONYDOCS_STATIC_CSS', '/skins/splunk/staticdocs.css');
 
 // capitalization settings
 define('PONYDOCS_CASE_SENSITIVE_TITLES', false);

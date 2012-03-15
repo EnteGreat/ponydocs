@@ -46,10 +46,13 @@ class SpecialStaticDocImport extends SpecialPage
 		$versions = PonyDocsProductVersion::LoadVersionsForProduct($product);
 
 		$p = PonyDocsProduct::GetProductByShortName($product);
+		$productLongName = $p->getLongName();
 		$wgOut->setPagetitle( 'Static Documentation Import Tool' );
-		$wgOut->addHTML( '<h2>Static Documentation Import for ' . $p->getLongName() . '</h2>' );
+		$wgOut->addHTML("<h2>Static Documentation Import for $productLongName</h2>");
 		if (!$p->isStatic()) {
-			$wgOut->addHTML('<h3>' . $p->getLongName() . ' is not defined as a static product.</h3>');
+			$wgOut->addHTML("<h3>$productLongName is not defined as a static product.</h3>");
+			$wgOut->addHTML("<p>In order to define it as a static product, please visit the
+				product management page from the link below and follow instructions.</p>");
 		} else {
 
 			$importer = new PonyDocsStaticDocImporter(PONYDOCS_STATIC_DIR);
@@ -72,7 +75,7 @@ class SpecialStaticDocImport extends SpecialPage
 								try {
 									$importer->importFile($_FILES['archivefile']['tmp_name'], $_POST['product'], $_POST['version']);
 									$wgOut->addHTML('Success: imported archive for ' . $_POST['product'] . ' version ' . $_POST['version']);
-								} catch (RuntimeException $e) {
+								} catch (Exception $e) {
 									$wgOut->addHTML('Error: ' . $e->getMessage());
 								}
 							}
@@ -95,19 +98,36 @@ class SpecialStaticDocImport extends SpecialPage
 					break;
 
 				default:
-				$wgOut->addHTML('<h3>Import to Version</h3>');
-					$wgOut->addHTML('<form action="/Special:StaticDocImport" method="post" enctype="multipart/form-data">
-									<label for="archivefile">File to upload:</label><input id="archivefile" name="archivefile" type="file" />
-									<input type="hidden" name="product" value="' . $product . '"/>');
-					$versionSelectHTML = '<select name="version">';
-					foreach ($versions as $version) {
-						$versionSelectHTML .= '<option value="' . $version->getVersionName() . '">' . $version->getVersionName() . '</option>';
+					$wgOut->addHTML('<h3>Import to Version</h3>');
+					// only display form if at least one version is defined
+					if (count($versions) > 0) {
+						$wgOut->addHTML('<form action="/Special:StaticDocImport" method="post" enctype="multipart/form-data">
+										<label for="archivefile">File to upload:</label><input id="archivefile" name="archivefile" type="file" />
+										<input type="hidden" name="product" value="' . $product . '"/>');
+						$versionSelectHTML = '<select name="version">';
+						foreach ($versions as $version) {
+							$versionSelectHTML .= '<option value="' . $version->getVersionName() . '">' . $version->getVersionName() . '</option>';
+						}
+						$versionSelectHTML .= '</select>';
+						$wgOut->addHTML($versionSelectHTML);
+						$wgOut->addHTML('<input type="hidden" name="action" value="add"/>
+											<input type="submit" name="submit" value="Submit"/>
+											</form>');
+						$wgOut->addHTML(
+							'<p>Notes on upload file:</p>
+							<ul>
+								<li>should be zip format</li>
+								<li>verify it does not contain unneeded files: e.g. Mac OS resource, or Windows thumbs, etc.</li>
+								<li>requires a index.html file in the root directory</li>
+								<li>links to documents within content must be relative for them to work</li>
+								<li>may or may not contain sub directories</li>
+								<li>may not be bigger than ' . ini_get('upload_max_filesize') . '</li>
+							</ul>
+						');
+					} else {
+						$wgOut->addHTML("There are currently no versions defined for $productLongName. In order to upload static documentation please
+							define at least one version and one manual from the links below.");
 					}
-					$versionSelectHTML .= '</select>';
-					$wgOut->addHTML($versionSelectHTML);
-					$wgOut->addHTML('<input type="hidden" name="action" value="add"/>
-										<input type="submit" name="submit" value="Submit"/>
-										</form>');
 			}
 
 			// display existing versions
@@ -138,7 +158,8 @@ class SpecialStaticDocImport extends SpecialPage
 		}
 		$html = '<h2>Other Useful Management Pages</h2>' .
 				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgArticlePath ) . '">Version Management</a> - Define and update available ' . $product . ' versions.<br />' .
-				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br/><br/>';
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PREFIX . $product . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgArticlePath ) . '">Manuals Management</a> - Define the list of available manuals for the Documentation namespace.<br />' .
+				'<a href="' . str_replace( '$1', PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $wgArticlePath ) . '">Products Management</a> - Define the list of available products for the Documentation namespace.<br/><br/>';
 
 		$wgOut->addHTML( $html );
 	}
