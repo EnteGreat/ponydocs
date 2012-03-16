@@ -2235,7 +2235,7 @@ HEREDOC;
 	static public function translateTopicTitleForDocLinks($title, $fromNamespace = NULL, $ver = NULL, $topic = NULL) {
 
 		if (PONYDOCS_DOCLINKS_DEBUG) {
-			error_log("INFO [PonyDocs] [" . __METHOD__ . "] Raw title: " . $title);
+			error_log("DEBUG [PonyDocs] [" . __METHOD__ . "] Raw title: " . $title);
 		}
 
 		// Get rid of whitespace at the end of the title
@@ -2307,7 +2307,7 @@ HEREDOC;
 		}
 
 		if (PONYDOCS_DOCLINKS_DEBUG) {
-			error_log("INFO [PonyDocs] [" . __METHOD__ . "] Final title: " . $toUrl);
+			error_log("DEBUG [PonyDocs] [" . __METHOD__ . "] Final title: " . $toUrl);
 		}
 
 		return $toUrl;
