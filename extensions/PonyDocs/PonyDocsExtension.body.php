@@ -2235,7 +2235,7 @@ HEREDOC;
 	static public function translateTopicTitleForDocLinks($title, $fromNamespace = NULL, $ver = NULL, $topic = NULL) {
 
 		if (PONYDOCS_DOCLINKS_DEBUG) {
-			error_log("INFO [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Raw title: " . $title);
+			error_log("INFO [PonyDocs] [" . __METHOD__ . "] Raw title: " . $title);
 		}
 
 		// Get rid of whitespace at the end of the title
@@ -2251,7 +2251,6 @@ HEREDOC;
 
 		// Do special parsing for PonyDocs titles
 		if (strpos($toUrl, PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) !== false) {
-			error_log("ping");
 			$pieces = explode(':', $title);
 			// Evaluate based on the different "forms" our internal documentation links can take.
 			if (sizeof($pieces) == 2) {
@@ -2260,7 +2259,7 @@ HEREDOC;
 				// [[Documentation:Topic]] ->
 				// Documenation/Product/Version/Manual/Topic
 				if ($ver === NULL || $topic === NULL) {
-					error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If no Product, Manual, and Version specified in PonyDocs title, must include version and topic objects when calling translateTopicTitleForDocLinks().");
+					error_log("WARNING [PonyDocs] [" . __METHOD__ . "] If no Product, Manual, and Version specified in PonyDocs title, must include version and topic objects when calling translateTopicTitleForDocLinks().");
 					return false;
 				}
 				// Get the manual
@@ -2276,7 +2275,7 @@ HEREDOC;
 				// Documentation/Product/Version/Manual/Topic
 
 				// Handle links to other products that don't specify a version
-				if ($ver !== NULL) {
+				if ($ver !== NULL) { // link is from non-Ponydocs namespace
 					$fromProduct = $ver->getProductName();
 				} else {
 					$fromProduct = '';
@@ -2286,7 +2285,7 @@ HEREDOC;
 					$toVersion = "latest";
 				} else {
 					if ($ver === NULL) {
-						error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If Version is not specified in title, must include version object when calling translateTopicTitleForDocLinks().");
+						error_log("WARNING [PonyDocs] [" . __METHOD__ . "] If Version is not specified in title, must include version object when calling translateTopicTitleForDocLinks().");
 						return false;
 					}
 					$toVersion = $ver->getVersionName();
@@ -2302,13 +2301,13 @@ HEREDOC;
 				$toUrl = $pieces[0] . '/' . $pieces[1] . '/' . $pieces[4] . '/' . $pieces[2] . '/' . $pieces[3];
 			} else {
 				// Not a valid number of pieces in title
-				error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Wrong number of pieces in PonyDocs title.");
+				error_log("WARNING [PonyDocs] [" . __METHOD__ . "] Wrong number of pieces in PonyDocs title.");
 				return false;
 			}
 		}
 
 		if (PONYDOCS_DOCLINKS_DEBUG) {
-			error_log("INFO [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] Final title: " . $toUrl);
+			error_log("INFO [PonyDocs] [" . __METHOD__ . "] Final title: " . $toUrl);
 		}
 
 		return $toUrl;
