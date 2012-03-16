@@ -2251,6 +2251,7 @@ HEREDOC;
 
 		// Do special parsing for PonyDocs titles
 		if (strpos($toUrl, PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) !== false) {
+			error_log("ping");
 			$pieces = explode(':', $title);
 			// Evaluate based on the different "forms" our internal documentation links can take.
 			if (sizeof($pieces) == 2) {
@@ -2273,17 +2274,21 @@ HEREDOC;
 				// Handles links with no version specified:
 				// [[Documentation:Product:Manual:Topic]] ->
 				// Documentation/Product/Version/Manual/Topic
-				if ($ver === NULL) {
-					error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If Version is not specified in title, must include version object when calling translateTopicTitleForDocLinks().");
-					return false;
-				}
 
 				// Handle links to other products that don't specify a version
-				$fromProduct = $ver->getProductName();
+				if ($ver !== NULL) {
+					$fromProduct = $ver->getProductName();
+				} else {
+					$fromProduct = '';
+				}
 				$toProduct = $pieces[1];
 				if ($fromProduct != $toProduct) {
 					$toVersion = "latest";
 				} else {
+					if ($ver === NULL) {
+						error_log("WARNING [PonyDocs] [PonyDocsExtension::translateTopicTitleForDocLinks] If Version is not specified in title, must include version object when calling translateTopicTitleForDocLinks().");
+						return false;
+					}
 					$toVersion = $ver->getVersionName();
 				}
 
