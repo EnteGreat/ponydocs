@@ -2024,9 +2024,9 @@ HEREDOC;
 
 	/**
 	 * Updates or deletes Doc Links for the article being passed in.
-	 * @param str $updateOrDelete possible values: "update" or "delete"
+	 * @param string $updateOrDelete possible values: "update" or "delete"
 	 * @param Article $article the article to be updated or deleted
-	 * @param str $content content of the article to be updated or deleted
+	 * @param string $content content of the article to be updated or deleted
 	 */
 	static public function updateOrDeleteDocLinks($updateOrDelete, $article, $content = NULL) {
 		$dbh = wfGetDB(DB_MASTER);
@@ -2062,6 +2062,8 @@ HEREDOC;
 		$title = $article->getTitle()->getFullText();
 		$titlePieces = explode(':', $title);
 		$fromNamespace = $titlePieces[0];
+		$toAndFromLinksToInsert = array();
+		$fromLinksToDelete = array();
 		if ($fromNamespace == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) {
 			// Do PonyDocs-specific stuff (loop through all inherited versions)
 
@@ -2076,62 +2078,73 @@ HEREDOC;
 				// Put this $ver in the version spot. We want one URL per inherited version
 				$titleNoVersion = $fromNamespace . ":" . $titlePieces[1] . ":" . $titlePieces[2] . ":" . $titlePieces[3];
 				$humanReadableTitle = self::translateTopicTitleForDocLinks($titleNoVersion, $fromNamespace, $ver, $topic); // this will add the version
+				// Add this title to the array of titles to be deleted from the database
+				$fromLinksToDelete[] = $humanReadableTitle;
 
 				if ($updateOrDelete == "update") {
-					// Clear out existing identical links
-					$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
-
 					// Add links in article to database
 					foreach ($matches as $match) {
 						// Get pretty to_link
 						$toUrl = self::translateTopicTitleForDocLinks($match[1], $fromNamespace, $ver, $topic);
 
-						// Insert from_link and to_link into database
+						// Add this from_link and to_link to array to be inserted into the database
 						if($toUrl) {
-							$dbh->insert("ponydocs_doclinks", array(
+							$toAndFromLinksToInsert[] = array(
 								'from_link' => $humanReadableTitle,
 								'to_link' => $toUrl
-								)
 							);
 						}
 					}
-				} else if ($updateOrDelete == "delete") {
-					// Delete all instances of this title in the database.
-					// Keep the to_links, so we can still see what linked to a page for cleanup purposes.
-					$dbh->delete('ponydocs_doclinks', array('from_link' => $humanReadableTitle));
 				}
 			}
 		} else {
 			// Do generic mediawiki stuff for non-PonyDocs namespaces
 
+			// Add this title to the array of titles to be deleted from the database
+			// We don't need to translate title here since we're not in the PonyDocs namespace
+			$fromLinksToDelete[] = $title;
+
 			if ($updateOrDelete == "update") {
-
-				// Clear out existing identical links
-				// We don't need to translate title here since we're not in the PonyDocs namespace
-				$dbh->delete('ponydocs_doclinks', array('from_link' => $title));
-
 				// Add links in article to database
 				foreach ($matches as $match) {
 					// Get pretty to_link
 					$toUrl = self::translateTopicTitleForDocLinks($match[1]);
 
-					// Insert from_link and to_link into database
+					// Add this from_link and to_link to array to be inserted into the database
 					if($toUrl) {
-						$dbh->insert("ponydocs_doclinks", array(
+						$toAndFromLinksToInsert[] = array(
 							'from_link' => $title,
 							'to_link' => $toUrl
-							)
 						);
 					}
 				}
-			} else if ($updateOrDelete == "delete") {
-				// Delete all instances of this title in the database.
-				// Keep the to_links, so we can still see what linked to a page for cleanup purposes.
-				// We don't need to translate title here since we're not in the PonyDocs namespace.
-				$dbh->delete('ponydocs_doclinks', array('from_link' => $title));
 			}
-
 		}
+
+		// Perform database queries using arrays populated above
+
+		// First, delete to clear old data out of the database
+		if (!empty($fromLinksToDelete)) {
+			foreach ($fromLinksToDelete as &$fromLinkToDelete) {
+				$fromLinkToDelete = $dbh->strencode($fromLinkToDelete);
+			}
+			$deleteWhereConds = implode("' OR from_link = '", $fromLinksToDelete);
+			$deleteQuery = "DELETE FROM ponydocs_doclinks WHERE from_link = '" . $deleteWhereConds . "'";
+			$dbh->query($deleteQuery);
+		}
+
+		// Now insert new data, if we have any
+		if (!empty($toAndFromLinksToInsert)) {
+			$insertValuesAry = array();
+			foreach ($toAndFromLinksToInsert as $toAndFromLink) {
+				$insertValuesAry[] = "'" . $dbh->strencode($toAndFromLink['from_link']) . "', '" . $dbh->strencode($toAndFromLink['to_link']) . "'";
+			}
+			$insertValuesString = implode("), (", $insertValuesAry);
+			$insertQuery = "INSERT INTO ponydocs_doclinks (from_link, to_link) VALUES (" . $insertValuesString . ")";
+			$dbh->query($insertQuery);
+		}
+
+
 		return true;
 	}
 

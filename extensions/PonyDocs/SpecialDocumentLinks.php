@@ -33,12 +33,10 @@ class SpecialDocumentLinks extends SpecialPage {
 	 * This is called upon loading the special page.  It should write output to 
 	 * the page with $wgOut
 	 */
-	public function execute($params) {
+	public function execute() {
 		global $wgOut, $wgArticlePath, $wgScriptPath, $wgUser;
 		global $wgRequest;
 		global $wgDBprefix;
-
-		ob_start();
 
 		$dbr = wfGetDB(DB_SLAVE);
 
@@ -71,7 +69,7 @@ class SpecialDocumentLinks extends SpecialPage {
 			if (is_object($latestVersionObj)) {
 				$latestVersion = $latestVersionObj->getVersionName();
 			} else {
-				error_log("WARNING [PonyDocs] [SpecialDocumentLinks] Unable to find latest released version of " . $titlePieces[1]);
+				error_log('WARNING [PonyDocs] [' . __CLASS__ . '] Unable to find latest released version of ' . $titlePieces[1]);
 			}
 
 			// Generate a title without the version so we can dynamically generate a list of titles with all inherited versions
@@ -92,7 +90,7 @@ class SpecialDocumentLinks extends SpecialPage {
 					}
 				}
 			} else {
-				error_log("WARNING [PonyDocs] [SpecialDocumentLinks] Unable to find versions for " . $title);
+				error_log('WARNING [PonyDocs] [' . __CLASS__ . '] Unable to find versions for ' . $title);
 			}
 
 		} else { // Do generic mediawiki stuff for non-PonyDocs namespaces
@@ -101,6 +99,9 @@ class SpecialDocumentLinks extends SpecialPage {
 
 		// Query the database for the list of toUrls we've collated
 		if (!empty($toUrls)) {
+			foreach ($toUrls as &$toUrl) {
+				$toUrl = $dbr->strencode($toUrl);
+			}
 			$whereConds = implode("' OR to_link = '", $toUrls);
 			$query = "SELECT * FROM " . $wgDBprefix . "ponydocs_doclinks WHERE to_link = '" . $whereConds . "'";
 			$results = $dbr->query($query);
@@ -147,6 +148,7 @@ class SpecialDocumentLinks extends SpecialPage {
 		}
 
 		// Make HTML go!
+		ob_start();
 		?>
 
 		<h2>Inbound links to <?php echo $title; ?> from other topics.</h2>
