@@ -628,7 +628,7 @@ if($this->data['copyrightico']) { ?>
 			if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTVERSION_SUFFIX, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Versions Management - '.$this->data['selectedProduct'];
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name|status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, underscore, and dash.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#version:name|status}} to define a new version, where status is released, unreleased, or preview.  Valid chars in version name are A-Z, 0-9, period, comma, and dash.</i></span>');
 			}
 			else if( !strcmp( PONYDOCS_DOCUMENTATION_PREFIX . $this->data['selectedProduct'] . PONYDOCS_PRODUCTMANUAL_SUFFIX, $wgTitle->__toString( )))
 			{
@@ -639,12 +639,13 @@ if($this->data['copyrightico']) { ?>
 			{
 				$this->data['titletext'] = 'Products Management';
 				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:productShortName|displayName|parent}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in /extensions/PonyDocs/PonyDocs.config.php $ponyDocsProductsList.</i></span>');
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in LocalSettings.php $ponyDocsProductsList.</i></span>');
 			}
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))
 			{
 				$this->data['titletext'] = $matches[1] . ' Table of Contents Page';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} to assign within a bullet.  Place topic tags below proper section name.</i></span>' );
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#topic:Display Name}} within a bullet to create topics.</i></span>' );
+				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Topic bullets must be preceded by at least one section name in plain text.</i></span>' );
 			}
 			else if( sizeof( $pieces ) >= 2 && PonyDocsProductManual::IsManual( $pieces[1], $pieces[2] ))
 			{
@@ -841,16 +842,17 @@ if($this->data['copyrightico']) { ?>
 	 * @param string $parent  Short name of parent whose children we want to output
 	 */
 	private function hierarchicalProductSelect($parent = NULL) {
-		foreach ($this->data['products'] as $idx => $data) {
+		foreach ($this->data['products'] as $data) {
 			// We're at the top-level, output all top-level Products
 			if ($parent == NULL && !isset($data['parent'])) {
-				$selected = !strcmp( $data['name'], $this->data['selectedProduct']) ? 'selected' : '';
-				echo '<option value="' . $data['name'] .'" ' . $selected . '>';
+				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected' : '';
+				echo '<option value="' . $data['name'] .'" selected="' . $selected . '">';
 				echo $data['label'];
 				echo "</option>\n";
 				echo $this->hierarchicalProductSelect($data['name']);
 			} else if ($parent != NULL && isset($data['parent']) && $data['parent'] == $parent) {
-				echo '<option class="child" value="' . $data['name'] .'" ' . $selected . '>';
+				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected' : '';
+				echo '<option class="child" value="' . $data['name'] .'" selected="' . $selected . '">';
 				echo '-- ' . $data['label'];
 				echo "</option>\n";
 			}

@@ -48,7 +48,9 @@ class PonyDocsProduct
 	static protected $sDefinedProductList = array( );
 	
 	/**
-	 * @var $sParentChildMap array  An array mapping parents to child products
+	 * @access protected
+	 * 
+	 * @var array $sParentChildMap An array mapping parents to child products
 	 */
 	static protected $sParentChildMap = array();
 	
@@ -91,6 +93,7 @@ class PonyDocsProduct
 	 * currently selected version or not.
 	 *
 	 * @param boolean $reload
+	 * 
 	 * @return array
 	 */
 
@@ -127,13 +130,13 @@ class PonyDocsProduct
 		 * NOTE product is the top entity, we need to verify better it has at least one version defined
 		 */
 
-		$products = explode('}}', $content); // explode on the closing tag to get an array of products
-		foreach ($products as $product) {
-			// The last element of the array is empty
-			if ($product) { 
+		$tags = explode('}}', $content); // explode on the closing tag to get an array of products
+		foreach ($tags as $tag) {
+			$tag = trim($tag);
+			if (strpos($tag, '{{#product:') === 0) { 
 				
 				// Remove the opening tag and prefix
-				$product = str_replace('{{#product:', '', $product);   
+				$product = str_replace('{{#product:', '', $tag);   
 				$parameters = explode('|', $product);
 				$parameters = array_map('trim', $parameters);
 
@@ -283,15 +286,18 @@ class PonyDocsProduct
 	/**
 	 * Return an array of child products for a given product
 	 * 
+	 * @access public
+	 * @static
+	 * 
 	 * @param string $product  short name of a parent product
 	 * 
 	 * @return array  An array of child product short names
 	 */
-	static public function getChildProducts($product) {
+	static public function getChildProducts($productName) {
 		self::GetProducts();
 		$parentChildMap = self::$sParentChildMap;
-		if (isset($parentChildMap[$product])) {
-			return $parentChildMap[$product];
+		if (isset($parentChildMap[$productName])) {
+			return $parentChildMap[$productName];
 		} else {
 			return array();
 		}

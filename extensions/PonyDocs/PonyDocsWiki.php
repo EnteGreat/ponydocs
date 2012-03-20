@@ -59,8 +59,8 @@ class PonyDocsWiki
 		$productAry = array();
 
 		/**
-		 * This should give us one row per version which has 1 or more TOCs tagged to it.  So basically, if its not in this list
-		 * it should not be displayed.
+		 * This should give us one row per version which has 1 or more TOCs tagged to it.  
+		 * So basically, if its not in this list it should not be displayed.
 		 */
 		$res = PonyDocsCategoryLinks::getTOCCountsByProduct();
 
@@ -76,8 +76,22 @@ class PonyDocsWiki
 			//if( in_array( 'V:' . $p->getShortName( ), $validProducts ))
 
 			// Only add product to list if it has versions visible to this user
+			$valid = FALSE;
 			$versions = PonyDocsProductVersion::LoadVersionsForProduct($p->getShortName());
 			if (!empty($versions)) {
+				$valid = TRUE;
+			} elseif (empty($versions)) {
+				// Check for children with visibile versions
+				foreach (PonyDocsProduct::getChildProducts($p->getShortName()) as $childProductName) {
+					$childVersions = PonyDocsProductVersion::LoadVersionsForProduct($childProductName);
+					if (!empty($childVersions)) {
+						$valid = TRUE;
+						break;
+					}
+				}
+			}
+
+			if ($valid) {
 				$productAry[$p->getShortname()] = array(
 					'name' => $p->getShortName(),
 					'label' => $p->getLongName(),

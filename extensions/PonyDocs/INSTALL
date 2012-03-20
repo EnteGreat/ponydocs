@@ -283,10 +283,10 @@ a version:
 
 	{{#version:versionName|status}}
 
-versionName can be any alphanumeric string (no spaces allowed). It should match
-your software's version. status is either "released", "unreleased" or "preview".
-For example, to initialize version 1.0 of your product, have the following line
-in your Documentation:productShortName:Versions page:
+versionName can be any alphanumeric string (no spaces or underscores allowed). It 
+should match your software's version. status is either "released", "unreleased" or 
+"preview". For example, to initialize version 1.0 of your product, have the following
+line in your Documentation:productShortName:Versions page:
 
 	{{#version:1.0|unreleased}}
 
@@ -298,7 +298,7 @@ page.
 -------  9) Create your first manual. -------
 
 Now head to /Documentation:productShortName:Manuals .  Click on the "Create" tab
-at the top of the page to edit the page and add new versions.
+at the top of the page to edit the page and add new manuals.
 
 The Documentation:productShortName:Manuals page defines the Manuals available
 for a product version. A version can have all the manuals, or a sub-set of the
@@ -352,6 +352,8 @@ Note the use of the Category tag inside the TOC, which should have been
 auto-populated when the page was created. This will ensure the TOC is linked to
 version 1.0.  You must have this category tag present in order for the TOC to
 properly render for that version.
+
+At least one Section Header is mandatory, and all topic tags must be in an unordered list.
 
 When you save the edit to your first TOC page, links to your new topics will
 automatically be created. Clicking on the topic in the TOC page will take you 
