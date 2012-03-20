@@ -163,6 +163,10 @@ class PonyDocsPdfBook {
 					$ttext   = $wgOut->getHTMLTitle();
 					$text	 = $out->getText();
 
+					
+					$articleMeta = PonyDocsArticleFactory::getArticleMetadataFromTitle($title);
+					$text = '<a name="' . $articleMeta['topic'] . '"></a>' . $text;
+
 					// prepare for replacing pre tags with code tags WEB-5926
 					// derived from http://stackoverflow.com/questions/1517102/replace-newlines-with-br-tags-but-only-inside-pre-tags
 					// only inside pre tag:
@@ -193,8 +197,8 @@ class PonyDocsPdfBook {
 					// Link removal
 					$regex_search = array
 					(
-						'|<a[^\<]*>|', // Link Removal
-						'|</a>|', // Link Removal
+						'|<a([^\>])*href="(' . str_replace('/', '\/', $wgServer) . ')+\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/' . $productName . '\/' . $versionText . '\/' . $pManual->getShortName() . '\/([^"]*)"([^\<]*)>|', // Link replacement
+						'|<a[^\>]*href="(?!#)[^"]*"[^>]*>(.*?)</a>|', // Link removal negative lookahead on # which we're replacing above
 						'|(<img[^>]+?src=")(/.*>)|', // Image absolute urls,
 						'|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', // Non printable areas
 						'|@{4}([^@]+?)@{4}|s', // HTML Comments hack
@@ -210,8 +214,8 @@ class PonyDocsPdfBook {
 					
 					$regex_replace = array
 					(
-						'', // Link Removal
-						'', // Link Removal
+						'<a${1}href="#${3}"${4}>', // Link replacement
+						'${1}', // Link removal
 						"$1$wgServer$2", // Image absolute urls,
 						'', // Non printable areas
 						'<!--$1-->', // HTML Comments hack
