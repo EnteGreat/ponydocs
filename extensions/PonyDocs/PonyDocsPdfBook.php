@@ -63,8 +63,8 @@ class PonyDocsPdfBook {
 
 		# Initialise PDF variables
 		$layout      = '--firstpage p1';
-		$x_margin = '1in';
-		$y_margin = '1.5in';
+		$x_margin = '1.25in';
+		$y_margin = '1in';
 		$font	= 'Arial';
 		$size	= '12';
 		$linkcol = '4d9bb3';
