@@ -1901,7 +1901,7 @@ HEREDOC;
 		global $wgScriptPath;
 		// Check for static URI
 		if (!preg_match( '/^' . str_replace("/", "\/", PONYDOCS_STATIC_URI) . '(.*)$/i', $title->__toString( ), $matches )) {
-			return false;
+			return true;
 		}
 		// Check if request is for a "static" product
 		$articleMeta = PonyDocsArticleFactory::getArticleMetaDataFromURL($_SERVER['PATH_INFO'], $wgScriptPath);
