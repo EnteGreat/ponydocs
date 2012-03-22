@@ -2069,6 +2069,7 @@ HEREDOC;
 
 			// Get the versions associated with this topic
 			$topic = new PonyDocsTopic($article);
+			PonyDocsProductVersion::LoadVersionsForProduct($titlePieces[1], true, true);
 			$ponydocsVersions = $topic->getProductVersions();
 
 			// Add a link to the database for each version
