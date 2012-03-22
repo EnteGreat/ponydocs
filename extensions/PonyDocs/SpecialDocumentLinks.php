@@ -52,19 +52,23 @@ class SpecialDocumentLinks extends SpecialPage {
 
 		// Parse "t" (the title we're looking for inbound links to)
 		// Find titles for all inherited versions, etc.
+		$titlePieces = explode(':', $title);
+		$plainTitle = $title;
 		$title = Title::newFromText($title); // Create a new Title from text, such as what one would find in a link. Decodes any HTML entities in the text.
 
 		$toUrls = array();
-		$titlePieces = explode(':', $title);
 		if ($titlePieces[0] == PONYDOCS_DOCUMENTATION_NAMESPACE_NAME) { // Do PonyDocs-specific stuff (loop through all inherited versions)
 
 			// Get the versions associated with this topic
+			PonyDocsProductVersion::LoadVersionsForProduct($titlePieces[1], true);
 			$article = new Article($title);
 			$topic = new PonyDocsTopic($article);
 			$versions = $topic->getProductVersions(true);
+			if (empty($versions)) {
+				error_log('WARNING [PonyDocs] [' . __CLASS__ . '] Unable to find product versions for this topic: ' . $title);
+			}
 
 			// Get the latest released version of this product
-			PonyDocsProductVersion::LoadVersionsForProduct($titlePieces[1], true);
 			$latestVersionObj = PonyDocsProductVersion::GetLatestReleasedVersion($titlePieces[1]);
 			if (is_object($latestVersionObj)) {
 				$latestVersion = $latestVersionObj->getVersionName();
@@ -151,13 +155,13 @@ class SpecialDocumentLinks extends SpecialPage {
 		ob_start();
 		?>
 
-		<h2>Inbound links to <?php echo $title; ?> from other topics.</h2>
+		<h2>Inbound links to <?php echo $plainTitle; ?> from other topics.</h2>
 
 		<?php
 		// If there are no links, display a message saying as much
 		if (empty($links)) {
 		?>
-			<p>No links to <?php echo $title; ?> (and its inherited versions) from other topics.</p>
+			<p>No links to <?php echo $plainTitle; ?> (and its inherited versions) from other topics.</p>
 		<?php
 		} else {
 			// Display all links, ordered by product then version
@@ -165,19 +169,44 @@ class SpecialDocumentLinks extends SpecialPage {
 				?>
 				<h2><?php echo $fromProduct; ?> </h2>
 				<?php
-				foreach ($fromVersions as $fromVersion => $links) {
-					?>
-					<h3><?php if ($fromVersion != 'None') { echo $fromProduct . ' ' . $fromVersion; } ?> </h3>
-					<ul>
-					<?php
-					foreach ($links as $linkAry) {
-						?>
-						<li><a href="<?php echo str_replace('$1', $linkAry['from_link'], $wgArticlePath); ?>"><?php echo $linkAry['display_url']; ?></a></li>
-					<?php
+				// If this is a PonyDocs Product
+				if (PonyDocsProduct::IsProduct($fromProduct)) {
+					// Get versions for this product, so we can display the versions in the correct order
+					PonyDocsProductVersion::LoadVersionsForProduct($fromProduct, true);
+					$fromProductVersions = PonyDocsProductVersion::GetVersions($fromProduct);
+					foreach ($fromProductVersions as $fromProductVersionObj) {
+						$fromProductVersionName = $fromProductVersionObj->getVersionName(); // to make it easier to read
+						// If there are doclinks from this version, print them
+						if (array_key_exists($fromProductVersionName, $fromVersions)) {
+							?>
+							<h3><?php echo $fromProduct . ' ' . $fromProductVersionName; ?></h3>
+							<ul>
+							<?php
+							foreach ($fromVersions[$fromProductVersionName] as $linkAry) {
+								?>
+								<li><a href="<?php echo str_replace('$1', $linkAry['from_link'], $wgArticlePath); ?>"><?php echo $linkAry['display_url']; ?></a></li>
+							<?php
+							}
+							?>
+							</ul>
+							<?php
+						}
 					}
-					?>
-					</ul>
-					<?php
+				} else {
+					// This is not a PonyDocs product, don't worry about sorting
+					foreach ($fromVersions as $fromVersion => $fromVersionData) {
+						?>
+						<ul>
+						<?php
+						foreach ($fromVersionData as $linkAry) {
+							?>
+							<li><a href="<?php echo str_replace('$1', $linkAry['from_link'], $wgArticlePath); ?>"><?php echo $linkAry['display_url']; ?></a></li>
+						<?php
+						}
+						?>
+						</ul>
+						<?php
+					}
 				}
 			}
 		}
