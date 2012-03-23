@@ -488,11 +488,7 @@ if($this->data['copyrightico']) { ?>
 		<div class="pBody">
 			<ul>
 <?php
-		if($this->data['notspecialpage']) { ?>
-				<li id="t-whatlinkshere"><a href="<?php
-				echo htmlspecialchars($this->data['nav_urls']['whatlinkshere']['href'])
-				?>"<?php echo $this->skin->tooltipAndAccesskey('t-whatlinkshere') ?>><?php $this->msg('whatlinkshere') ?></a></li>
-<?php
+		if($this->data['notspecialpage']) { 
 			if( $this->data['nav_urls']['recentchangeslinked'] ) { ?>
 				<li id="t-recentchangeslinked"><a href="<?php
 				echo htmlspecialchars($this->data['nav_urls']['recentchangeslinked']['href'])
@@ -828,7 +824,7 @@ if($this->data['copyrightico']) { ?>
 				'text' => 'Manuals' );
 
 			$this->data['nav_urls']['document_links'] = array(
-				'href' => str_replace( '$1', 'Special:PonyDocsDocumentLinks?t=' . $wgTitle->__toString()  , $wgArticlePath),
+				'href' => str_replace( '$1', 'Special:SpecialDocumentLinks?t=' . $wgTitle->getNsText() . ':' . htmlspecialchars($wgTitle->getPartialURL()), $wgArticlePath),
 				'text' => 'Document Links');
 
 		}
