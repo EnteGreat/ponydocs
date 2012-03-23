@@ -163,7 +163,7 @@ class PonyDocsPdfBook {
 					$ttext   = $wgOut->getHTMLTitle();
 					$text	 = $out->getText();
 
-					
+					// parse article title string and add topic name anchor tag for intramanual linking
 					$articleMeta = PonyDocsArticleFactory::getArticleMetadataFromTitle($title);
 					$text = '<a name="' . $articleMeta['topic'] . '"></a>' . $text;
 
@@ -194,17 +194,32 @@ class PonyDocsPdfBook {
 					$str_replace = array('<h6>', '</h6>', '<h5>', '</h5>', '<h4><font size="3"><b><i>', '</i></b></font></h4>', '<h3>', '</h3>', '<h2>', '</h2>', '<code><font size="2">', '</font></code>', '<code><font size="2">', '</font></code>');
 					$text    	 = str_replace($str_search, $str_replace, $text);
 
-					// Link removal
+					/*
+					 * HTML regex tweaking prior to sending to PDF library
+					 *
+					 * 1 - replace intramanual links with just the anchor hash of topic name (e.g. href="#topicname")
+					 * 2 - remove all non-intramanual links - strip anchor tags with href attribute whose href value doesn't start with #
+					 * 3 - wrap all span tags having id attribute with <a name="[topicname]_[span_id_attr_value]"> ... </a>
+					 * 4 - all anchor links' href values that contain two # characters, replace the second with _
+					 * 5 - make images have absolute URLs
+					 * 6 - non-printable areas
+					 * 7 - comment
+					 * 8 - cell padding
+					 * 9 - th bgcolor
+					 * 10 - td valign, align and font size
+					 */
 					$regex_search = array
 					(
-						'|<a([^\>])*href="(' . str_replace('/', '\/', $wgServer) . ')+\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/' . $productName . '\/' . $versionText . '\/' . $pManual->getShortName() . '\/([^"]*)"([^\<]*)>|', // Link replacement
-						'|<a[^\>]*href="(?!#)[^"]*"[^>]*>(.*?)</a>|', // Link removal negative lookahead on # which we're replacing above
-						'|(<img[^>]+?src=")(/.*>)|', // Image absolute urls,
-						'|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s', // Non printable areas
-						'|@{4}([^@]+?)@{4}|s', // HTML Comments hack
-						'/(<table[^>]*)/', // Cell padding
-						'/(<th[^>]*)/', // TH bgcolor
-						'/(<td[^>]*)>([^<]*)/' // TD valign and align and font size
+						'|<a([^\>])+href="(' . str_replace('/', '\/', $wgServer) . ')+\/' . PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '\/' . $productName . '\/' . $versionText . '\/' . $pManual->getShortName() . '\/([^"]*)"([^\<]*)>|',
+						'|<a[^\>]+href="(?!#)[^"]*"[^>]*>(.*?)</a>|',
+						'|<span[^\>]+id="([^"]*)"[^>]*>(.*?)</span>|',
+						'|<a([^\>])+href="#([^"]*)#([^"]*)"([^>])*>(.*?)</a>|',
+						'|(<img[^>]+?src=")(/.*>)|',
+						'|<div\s*class=[\'"]?noprint["\']?>.+?</div>|s',
+						'|@{4}([^@]+?)@{4}|s',
+						'/(<table[^>]*)/',
+						'/(<th[^>]*)/',
+						'/(<td[^>]*)>([^<]*)/'
 					);
 					
 					// Table vars
@@ -214,14 +229,16 @@ class PonyDocsPdfBook {
 					
 					$regex_replace = array
 					(
-						'<a${1}href="#${3}"${4}>', // Link replacement
-						'${1}', // Link removal
-						"$1$wgServer$2", // Image absolute urls,
-						'', // Non printable areas
-						'<!--$1-->', // HTML Comments hack
-						"$1$table_extra", // Cell padding
-						"$1$th_extra", // TH bgcolor
-						"$1$td_extra><font size=\"2.75\">$2</font>" // TD valign and align and font size
+						'<a${1}href="#${3}"${4}>',
+						'${1}',
+						'<a name="' . $articleMeta['topic'] . '_${1}">${0}</a>',
+						'<a${1}href="#${2}_${3}"${4}>${5}</a>',
+						"$1$wgServer$2",
+						'',
+						'<!--$1-->',
+						"$1$table_extra",
+						"$1$th_extra",
+						"$1$td_extra><font size=\"2.75\">$2</font>"
 					);
 					
 					$text  = preg_replace($regex_search, $regex_replace, $text);
