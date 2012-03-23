@@ -309,6 +309,13 @@ class PonyDocsExtension
 
 		$defaultRedirect = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME, $wgArticlePath );
 
+		// If this article doesn't have a valid manual, don't display the article
+		$articleMetadata = PonyDocsArticleFactory::getArticleMetadataFromTitle($title->__toString());
+		if (!PonyDocsProductManual::IsManual($articleMetadata['product'], $articleMetadata['manual'])) {
+			$wgHooks['BeforePageDisplay'][] = "PonyDocsExtension::handle404";
+			return false;
+		}
+
 		$dbr = wfGetDB( DB_SLAVE );
 
 		$res = $dbr->select( 'categorylinks', array( 'cl_sortkey', 'cl_to' ), 
@@ -422,6 +429,12 @@ class PonyDocsExtension
 		$versionName = $matches[2];
 		$manualName = $matches[3];
 		$topicName = $matches[4];
+
+		// If this article doesn't have a valid manual, don't display the article
+		if (!PonyDocsProductManual::IsManual($productName, $manualName)) {
+			$wgHooks['BeforePageDisplay'][] = "PonyDocsExtension::handle404";
+			return false;
+		}
 
 		// If this is a static product return because that should be handled by another function
 		$product = PonyDocsProduct::GetProductByShortName($productName);
