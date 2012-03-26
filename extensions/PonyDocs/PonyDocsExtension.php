@@ -308,14 +308,8 @@ function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 }
 
 /**
- * Our topic parser functions used in TOC management to define a topic to be listed within a section.  This is simply the form:
- *   {#topic:Name of Topic}
+ * This section handles the parser function {{#product:<name>|<long_name>|<parent>}} which defines a product.
  */
-
-/**
- * This section handles the parser function {{#product:<name>|<status>}} which defines a product.
- */
-
 function efProductParserFunction_Setup()
 {
 	global $wgParser;
@@ -330,31 +324,33 @@ function efProductParserFunction_Magic( &$magicWords, $langCode )
 
 /**
  * The product parser function is of the form:
- * 	{{#product:name|long_name}}
+ * 	{{#product:name|long_name|description|parent}}
  * Which defines a product and its state.  When output it currently does nothing but should perhaps be a list to Category:<product>.
  *
  * @param Parser $parser
- * @param string $param1 The product name itself.
- * @param string $param2 The long product name.
+ * @param string $shortName The product name itself.
+ * @param string $longName The long product name.
+ * @param string $description The product description
+ * @param string $parent The short name of the parent product
+ *
  * @return array
  */
-function efProductParserFunction_Render( &$parser, $param1 = '', $param2 = '', $param3 = null) {
+function efProductParserFunction_Render(&$parser, $shortName = '', $longName = '', $description = '', $parent = '') {
 	global $wgUser, $wgScriptPath;
 	
-	$valid = true;
-	
-	if (!preg_match(PONYDOCS_PRODUCT_REGEX, $param1)) {
-		$valid = false;
-	}
-	
-	$output = "$param1 ($param2)";
-	
-	if (isset($param3)) {
-		$output .= " - Parent: $param3";
-	}
-	
-	if (!$valid) {
+	$output = "$shortName ($longName)";
+
+	// Invalid $shortName
+	if (!preg_match(PONYDOCS_PRODUCT_REGEX, $shortName)) {
 		$output .= ' - Invalid Product Name, Please Fix';
+	}
+	
+	if (!empty($description)) {
+		$output .= "<br>$description";
+	}
+	
+	if (!empty($parent)) {
+		$output .= "<br>Parent: $parent";
 	}
 	
 	$output .= "\n";

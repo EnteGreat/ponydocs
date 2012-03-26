@@ -26,6 +26,24 @@ class PonyDocsProduct
 	protected $mLongName;
 
 	/**
+	 * Long name for the product which functions as the 'display' name in the list of products and so
+	 * forth.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $mParent;
+
+	/**
+	 * Long name for the product which functions as the 'display' name in the list of products and so
+	 * forth.
+	 * 
+	 * @access protected
+	 * @var string
+	 */
+	protected $mDescription;
+
+	/**
 	 * Stores whether product instance is defined as static
 	 *
 	 * @var boolean
@@ -62,9 +80,10 @@ class PonyDocsProduct
 	 * @param string $longName   Display name for product.
 	 * @param string $status     Status for product. One of: hidden
 	 */
-	public function __construct($shortName, $longName = '', $parent = '') {
+	public function __construct($shortName, $longName = '', $description = '', $parent = '') {
 		$this->mShortName = preg_replace( '/([^' . PONYDOCS_PRODUCT_LEGALCHARS . '])/', '', $shortName );
 		$this->mLongName = strlen( $longName ) ? $longName : $shortName;
+		$this->mDescription = $description;
 		$this->mParent = $parent;
 	}
 
@@ -80,6 +99,10 @@ class PonyDocsProduct
 		return $this->mParent;
 	}
 
+	public function getDescription() {
+		return $this->mDescription;
+	}
+	
 	public function setStatic($static) {
 		$this->static = $static;
 	}
@@ -120,7 +143,7 @@ class PonyDocsProduct
 
 		/**
 		 * The content of this topic should be of this form:
-		 * {{#product:shortName|Long Product Name|parent}}{{#product:anotherProduct|...
+		 * {{#product:shortName|Long Product Name|description|parent}}{{#product:anotherProduct|...
 		 * 
 		 * There is a user defined parser hook which converts this into useful output when viewing as well.
 		 * 
@@ -140,9 +163,6 @@ class PonyDocsProduct
 				$parameters = explode('|', $product);
 				$parameters = array_map('trim', $parameters);
 
-				// Third parameter is optional
-				$parent = isset($parameters[2]) ? $parameters[2] : null;
-
 				// Set static flag if defined as static
 				$static = false;
 				if (strpos($parameters[0], PONYDOCS_PRODUCT_STATIC_PREFIX) === 0) {
@@ -150,13 +170,13 @@ class PonyDocsProduct
 					$static = true;
 				}
 
-				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parent);
+				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parameters[2], $parameters[3]);
 				$pProduct->setStatic($static);
 				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
 				self::$sProductList[$parameters[0]] = $pProduct;
-				if (isset($parent)) {
+				if (!empty($parameters[3])) {
 					// key is parent, value is array of children
-					self::$sParentChildMap[$parent][] = $parameters[0];
+					self::$sParentChildMap[$parameters[3]][] = $parameters[0];
 				}
 			}
 		}

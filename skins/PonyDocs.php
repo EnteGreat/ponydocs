@@ -634,8 +634,10 @@ if($this->data['copyrightico']) { ?>
 			else if ( !strcmp( PONYDOCS_DOCUMENTATION_PRODUCTS_TITLE, $wgTitle->__toString( )))
 			{
 				$this->data['titletext'] = 'Products Management';
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* Use {{#product:productShortName|displayName|parent}} to define a new product.  If you omit display name, the short name will be used in links.</i></span>');
-				$wgOut->addHTML( '<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in LocalSettings.php $ponyDocsProductsList.</i></span>');
+				$wgOut->addHTML('<br><span class="' . $helpClass . '"><i>* Use {{#product:productShortName|displayName|description|parent}} to define a new product.</i></span>');
+				$wgOut->addHTML('<br><span class="' . $helpClass . '"><i>* displayName, description and parent can be left empty.</i></span>');
+				$wgOut->addHTML('<br><span class="' . $helpClass . '"><i>* If you leave displayName empty, productShortName will be used in links.</i></span>');
+				$wgOut->addHTML('<br><span class="' . $helpClass . '"><i>* This product list <b>MUST</b> match the products listed in LocalSettings.php $ponyDocsProductsList.</i></span>');
 			}
 			else if( preg_match( '/(.*)TOC(.*)/', $pieces[2], $matches ))
 			{
@@ -840,15 +842,15 @@ if($this->data['copyrightico']) { ?>
 	private function hierarchicalProductSelect($parent = NULL) {
 		foreach ($this->data['products'] as $data) {
 			// We're at the top-level, output all top-level Products
-			if ($parent == NULL && !isset($data['parent'])) {
-				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected' : '';
-				echo '<option value="' . $data['name'] .'" selected="' . $selected . '">';
+			if ($parent == NULL && empty($data['parent'])) {
+				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected="selected"' : '';
+				echo '<option value="' . $data['name'] . '" ' . $selected . '>';
 				echo $data['label'];
 				echo "</option>\n";
 				echo $this->hierarchicalProductSelect($data['name']);
 			} else if ($parent != NULL && isset($data['parent']) && $data['parent'] == $parent) {
 				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected' : '';
-				echo '<option class="child" value="' . $data['name'] .'" selected="' . $selected . '">';
+				echo '<option class="child" value="' . $data['name'] . '" ' . $selected . '>';
 				echo '-- ' . $data['label'];
 				echo "</option>\n";
 			}
