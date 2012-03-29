@@ -174,7 +174,7 @@ class PonyDocsProduct
 				$pProduct->setStatic($static);
 				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
 				self::$sProductList[$parameters[0]] = $pProduct;
-				if (!empty($parameters[3])) {
+				if (isset($parameters[3]) || $parameters[3] != '') {
 					// key is parent, value is array of children
 					self::$sParentChildMap[$parameters[3]][] = $parameters[0];
 				}

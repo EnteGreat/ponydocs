@@ -345,11 +345,11 @@ function efProductParserFunction_Render(&$parser, $shortName = '', $longName = '
 		$output .= ' - Invalid Product Name, Please Fix';
 	}
 	
-	if (!empty($description)) {
+	if ($description != '') {
 		$output .= "<br>$description";
 	}
 	
-	if (!empty($parent)) {
+	if ($parent != '') {
 		$output .= "<br>Parent: $parent";
 	}
 	

@@ -842,14 +842,14 @@ if($this->data['copyrightico']) { ?>
 	private function hierarchicalProductSelect($parent = NULL) {
 		foreach ($this->data['products'] as $data) {
 			// We're at the top-level, output all top-level Products
-			if ($parent == NULL && empty($data['parent'])) {
+			if ($parent === NULL && $data['parent'] == '') {
 				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected="selected"' : '';
 				echo '<option value="' . $data['name'] . '" ' . $selected . '>';
 				echo $data['label'];
 				echo "</option>\n";
 				echo $this->hierarchicalProductSelect($data['name']);
-			} else if ($parent != NULL && isset($data['parent']) && $data['parent'] == $parent) {
-				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected' : '';
+			} else if ($parent != NULL && $data['parent'] == $parent) {
+				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected="selected"' : '';
 				echo '<option class="child" value="' . $data['name'] . '" ' . $selected . '>';
 				echo '-- ' . $data['label'];
 				echo "</option>\n";
