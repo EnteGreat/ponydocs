@@ -170,13 +170,24 @@ class PonyDocsProduct
 					$static = true;
 				}
 
-				$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parameters[2], $parameters[3]);
-				$pProduct->setStatic($static);
-				self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
-				self::$sProductList[$parameters[0]] = $pProduct;
-				if (isset($parameters[3]) || $parameters[3] != '') {
-					// key is parent, value is array of children
-					self::$sParentChildMap[$parameters[3]][] = $parameters[0];
+				// Allow admins to omit optional parameters
+				foreach (array(1, 2, 3) as $index) {
+					if (!array_key_exists($index, $parameters)) {
+						$parameters[$index] = '';
+					}
+				}
+				
+				// Avoid wedging the product page with a fatal error if shortName 
+				// is omitted by some crazy nihilist
+				if (isset($parameters[0]) && $parameters[0] != '') {
+					$pProduct = new PonyDocsProduct($parameters[0], $parameters[1], $parameters[2], $parameters[3]);
+					$pProduct->setStatic($static);
+					self::$sDefinedProductList[$pProduct->getShortName()] = $pProduct;
+					self::$sProductList[$parameters[0]] = $pProduct;
+					if (isset($parameters[3]) && $parameters[3] != '') {
+						// key is parent, value is array of children
+						self::$sParentChildMap[$parameters[3]][] = $parameters[0];
+					}
 				}
 			}
 		}
