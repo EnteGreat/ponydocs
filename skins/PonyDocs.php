@@ -848,7 +848,7 @@ if($this->data['copyrightico']) { ?>
 				echo $data['label'];
 				echo "</option>\n";
 				echo $this->hierarchicalProductSelect($data['name']);
-			} else if ($parent != NULL && $data['parent'] == $parent) {
+			} else if ($parent !== NULL && $data['parent'] == $parent) {
 				$selected = !strcmp($data['name'], $this->data['selectedProduct']) ? 'selected="selected"' : '';
 				echo '<option class="child" value="' . $data['name'] . '" ' . $selected . '>';
 				echo '-- ' . $data['label'];
