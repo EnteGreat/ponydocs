@@ -430,6 +430,14 @@ class PonyDocsExtension
 		$manualName = $matches[3];
 		$topicName = $matches[4];
 
+		$product = PonyDocsProduct::GetProductByShortName($productName);
+
+		// If we don't have a valid product, display 404
+		if (!($product instanceof PonyDocsProduct)) {
+			$wgHooks['BeforePageDisplay'][] = "PonyDocsExtension::handle404";
+			return false;
+		}
+
 		// If this article doesn't have a valid manual, don't display the article
 		if (!PonyDocsProductManual::IsManual($productName, $manualName)) {
 			$wgHooks['BeforePageDisplay'][] = "PonyDocsExtension::handle404";
@@ -437,7 +445,6 @@ class PonyDocsExtension
 		}
 
 		// If this is a static product return because that should be handled by another function
-		$product = PonyDocsProduct::GetProductByShortName($productName);
 		if ($product->isStatic()) {
 			return true;
 		}
