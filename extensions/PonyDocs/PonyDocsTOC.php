@@ -407,7 +407,8 @@ class PonyDocsTOC
 			}
 
 			$idx = $currentIndex;
-			while ($idx <= sizeof($toc)) {
+			// Array is sparse, so sizeof() truncates the end. Use max key instead.
+			while ($idx <= max(array_keys($toc))) {
 				++$idx;
 				if (isset($toc[$idx]) &&  $toc[$idx]['level'] == 1) {
 					$next = $idx;
