@@ -184,28 +184,33 @@ class PonyDocsTOC
 	}
 
 	/**
-	 * This function parses the content of the TOC management page.  It should be loaded and stored and this sort of breaks
-	 * the design in the way that it returns the template ready array of data which PonyDocsWiki is really supposed to be
-	 * returning, but I do not see the point or use of an intermediate format other than to bloat the code.  It returns an
-	 * array of arrays, which can be stored as a single array or separated using the list() = loadContnet() syntax.
+	 * Parse the content of the TOC management page.  
+	 * 
+	 * It should be loaded and stored and this sort of breaks the design in the way 
+	 * that it returns the template ready array of data which PonyDocsWiki is really 
+	 * supposed to be returning, but I do not see the point or use of an intermediate 
+	 * format other than to bloat the code.  
+	 * 
+	 * It returns an array of arrays, which can be stored as a single array or 
+	 * separated using the list() = loadContnet() syntax.
 	 *
-	 * toc:  This is the actual TOC as a list of arrays, each array having a set of keys available to specify the TOC level,
-	 *		text, href, etc.
-	 * prev:  Assoc array containing the 'previous' link data (text, href), or empty if there isn't one.
-	 * next:  Assoc array containing the 'next' link data or empty if there isn't one.
-	 * start:  Assoc array containing the data for the FIRST topic in the TOC.
+	 * toc: This is the actual TOC as a list of arrays, each array having a set 
+	 *      of keys available to specify the TOC level, text, href, etc.
+	 * prev: Assoc array containing the 'previous' link data (text, href), or empty 
+	 *       if there isn't one.
+	 * next: Assoc array containing the 'next' link data or empty if there isn't one.
+	 * start: Assoc array containing the data for the FIRST topic in the TOC.
 	 *
-	 * These can be captured in a variable when calling and individually accessed or captured using the list() construct when
-	 * calling; i.e.:
-	 *	list( $toc, $prev, $next, $start ) = $toc->loadContent().
+	 * These can be captured in a variable when calling and individually accessed 
+	 * or captured using the list() construct when calling; i.e.:
+	 * list( $toc, $prev, $next, $start ) = $toc->loadContent().
 	 *
 	 * @FIXME:  Store results internally and then have a $reload flag as param.
 	 * $content = $toc-
 	 * 
 	 * @return array
 	 */
-	public function loadContent( )
-	{
+	public function loadContent() {
 		global $wgArticlePath;
 		global $wgTitle;
 		global $wgScriptPath;
@@ -214,22 +219,29 @@ class PonyDocsTOC
 		global $title;
 
 		/**
-		 * From this we have the page ID of the TOC page to use -- fetch it then parse it so we can produce an output TOC array.
+		 * From this we have the page ID of the TOC page to use -- fetch it then 
+		 * parse it so we can produce an output TOC array.
+		 * 
 		 * This array will contain one array per item with the following keys:
-		 * 	'level': 0= Arbitary Section Name, 1= Actual topic link.
-		 *  'link': Link (wiki path) to item;  may be unset for section headers (or set to first section H1)?
-		 *  'text': Text to show in sidebar TOC.
-		 *  'current': 1 if this is the currently selected topic, 0 otherwise.
-		 * We also have to store the index of the current section in our loop.  The reason for this is so that we can remove
-		 * any sections which have no defined/valid topics listed.  This will also assist in our prev/next links which are stored
-		 * in special indices.
+		 * - 'level': 0= Arbitary Section Name, 1= Actual topic link.
+		 * - 'link': Link (wiki path) to item;  may be unset for section headers 
+		 *   (or set to first section H1)?
+		 * - 'text': Text to show in sidebar TOC.
+		 * - 'current': 1 if this is the currently selected topic, 0 otherwise.
+		 * 
+		 * We also have to store the index of the current section in our loop. 
+		 * 
+		 * The reason for this is so that we can remove any sections which have no 
+		 * defined/valid topics listed. 
+		 * 
+		 * This will also assist in our prev/next links which are stored in special 
+		 * indices.
 		 */
 
-		// Our title is our url.  We should check to see if 
-		// latest is our version.  If so, we want to FORCE 
-		// the URL to include /latest/ as the version 
-		// instead of the version that the user is 
-		// currently in.
+		// Our title is our url.
+		// We should check to see if latest is our version.
+		// If so, we want to FORCE the URL to include /latest/ as the version instead 
+		// of the version that the user is currently in.
 		$tempParts = explode("/", $title);
 		$latest = false;
 
@@ -243,8 +255,8 @@ class PonyDocsTOC
 
 		// Okay, let's determine if the VERSION that the user is in is latest, 
 		// if so, we should set latest to true.
-		if(PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct) != null) {
-		  	if($selectedVersion == PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct)->getVersionName()) {
+		if (PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct) != null) {
+		  	if ($selectedVersion == PonyDocsProductVersion::GetLatestReleasedVersion($selectedProduct)->getVersionName()) {
 				$latest = true;
 			}
 		}
@@ -252,91 +264,100 @@ class PonyDocsTOC
 		$cache = PonyDocsCache::getInstance();
 		$key = "TOCCACHE-" . $selectedProduct . "-" . $selectedManual . "-" . $selectedVersion;
 		$toc = $cache->get($key);
-		if($toc === null) {
+		if ($toc === null) {
 			// Cache did not exist, let's load our content is build up our cache 
 			// entry.
 			$toc = array( );
 			$idx = 0; 				// The current index of the element in $toc we will work on
 			$section = -1;
 			$lines = explode( "\n", $this->pTOCArticle->mContent );
-			foreach( $lines as $line )
-			{
+			foreach ($lines as $line) {
 				/**
 				* Indicates an arbitrary section header if it does not begin with a bullet point.  This is level 0 in our TOC and is
 				* not a link of any type (?).
 				*/
-				if((!isset($line[0])) ||  $line[0] != '*' )
-				{
+				if ((!isset($line[0])) ||  $line[0] != '*') {
 					/**
 					* See if we are CLOSING a section (i.e. $section != -1).  If so, check 'subs' and ensure its >0, otherwise we
 					* need to remove the section from the list.
 					*/
-					if(( $section != -1 ) && !$toc[$section]['subs'] )
+					if (($section != -1 ) && !$toc[$section]['subs']) {
 							unset( $toc[$section] );
-
-					if(isset($line[0]) && ctype_alnum( $line[0] ))
-					{
-						$toc[$idx] = array( 	'level' => 0,
-												'subs' => 0,
-												'link' => '',
-												'text' => $line,
-												'current' => false );
+					}
+					if (isset($line[0]) && ctype_alnum( $line[0] )) {
+						$toc[$idx] = array(
+							'level' => 0,
+							'subs' => 0,
+							'link' => '',
+							'text' => $line,
+							'current' => false
+						);
 						$section = $idx;
 					}
 				}
 				/**
-				* This is a bullet point and thus an actual topic which can be linked to in MediaWiki. 
-				* 	{{#topic:H1 Of Topic Page}}
-				*/
-				else
-				{
-					if( -1 == $section ) {
+				 * This is a bullet point and thus an actual topic which can be linked to in MediaWiki. 
+				 * {{#topic:H1 Of Topic Page}}
+				 */
+				else {
+					if (-1 == $section) {
 						continue;
 					}
-					if( !preg_match( '/{{#topic:(.*)}}/i', $line, $matches )) {
+					if (!preg_match('/{{#topic:(.*)}}/i', $line, $matches)) {
 						continue ;
 					}
 
 					$baseTopic = $matches[1];
-					$title = PONYDOCS_DOCUMENTATION_PREFIX . $selectedProduct . ':' . $selectedManual . ':' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic );
-					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion( $title, $selectedProduct );
+
+					$title_suffix = preg_replace('/([^' . str_replace(' ', '', Title::legalChars()) . '])/', '', $baseTopic);
+					$title = PONYDOCS_DOCUMENTATION_PREFIX . "$selectedProduct:$selectedManual:$title_suffix";
+					$newTitle = PonyDocsTopic::GetTopicNameFromBaseAndVersion($title, $selectedProduct);
 
 					/**
-					* Hide topics which have no content (i.e. have not been created yet) from the user viewing.  Authors must go to the
-					* TOC page in order to view and edit these.  The only way to do this (the cleanest/quickest) is to create a Title
-					* object then see if its article ID is 0.  
-					* 
-					* @tbd:  Fix so that the section name is hidden if no topics are visible?
-					*/
-					$t = Title::newFromText( $newTitle ) ;
-					if( !$t || !$t->getArticleID( )) {
+					 * Hide topics which have no content (i.e. have not been created 
+					 * yet) from the user viewing.  
+					 * 
+					 * Authors must go to the TOC page in order to view and edit these.
+					 * 
+					 * The only way to do this (the cleanest/quickest) is to create
+					 * a Title object then see if its article ID is 0.  
+					 * 
+					 * @tbd:  Fix so that the section name is hidden if no topics are visible?
+					 */
+					$t = Title::newFromText($newTitle);
+					if (!$t || !$t->getArticleID()) {
 						continue;
 					}
 
 					/**
-					* Obtain H1 content from the article -- WE NEED TO CACHE THIS!
-					*/
-					$h1 = PonyDocsTopic::FindH1ForTitle( $newTitle );
-					if( $h1 === false )
+					 * Obtain H1 content from the article -- WE NEED TO CACHE THIS!
+					 */
+					$h1 = PonyDocsTopic::FindH1ForTitle($newTitle);
+					if ($h1 === false) {
 						$h1 = $newTitle;
+					}
 
-					$href = str_replace( '$1', PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . '/' . $selectedProduct . '/' . $selectedVersion . '/' . $selectedManual . '/' . preg_replace( '/([^' . str_replace( ' ', '', Title::legalChars( )) . '])/', '', $baseTopic ), $wgArticlePath );
+					$href = str_replace('$1', 
+						PONYDOCS_DOCUMENTATION_NAMESPACE_NAME . "/$selectedProduct/$selectedVersion/$selectedManual/$title_suffix", 
+						$wgArticlePath);
 
-					$toc[$idx] = array( 	'level' => 1,
-											'page_id' => $t->getArticleID(),
-											'link' => $href,
-											'toctitle' => $baseTopic,
-											'text' => $h1,
-											'section' => $toc[$section]['text'],
-											'title' => $newTitle,
-											'class' => 'toclevel-1',
-									  );
+					$toc[$idx] = array(
+						'level' => 1,
+						'page_id' => $t->getArticleID(),
+						'link' => $href,
+						'toctitle' => $baseTopic,
+						'text' => $h1,
+						'section' => $toc[$section]['text'],
+						'title' => $newTitle,
+						'class' => 'toclevel-1',
+					);
 					$toc[$section]['subs']++;
 				}
 				$idx++;
 			}
-			if( !$toc[$section]['subs'] ) 
+			if (!$toc[$section]['subs']) {
 				unset( $toc[$section] );
+			}
 			// Okay, let's store in our cache.
 			$cache->put($key, $toc, time() + 3600);
 		}
@@ -366,41 +387,46 @@ class PonyDocsTOC
 		}
 
 		/**
-		 * Figure out previous and next links.  Previous should point to previous topic regardless of section, so our best bet
-		 * is to skip any 'level=0'.  Next works the same way.
+		 * Figure out previous and next links.
+		 * 
+		 * Previous should point to previous topic regardless of section, so our 
+		 * best bet is to skip any 'level=0'.  
+		 * 
+		 * Next works the same way.
 		 */
 		$prev = $next = $idx = -1;
 
-		if( $currentIndex >= 0 )
-		{
+		if ($currentIndex >= 0) {
 			$idx = $currentIndex;
-			while( $idx >= 0 )
-			{
+			while ($idx >= 0) {
 				--$idx;
-				if(isset($toc[$idx]) &&  $toc[$idx]['level'] == 1 )
-				{
+				if (isset($toc[$idx]) &&  $toc[$idx]['level'] == 1) {
 					$prev = $idx;
 					break;
 				} 
 			}
 
 			$idx = $currentIndex;
-			while( $idx <= sizeof( $toc ))
-			{
+			while ($idx <= sizeof($toc)) {
 				++$idx;
-				if(isset($toc[$idx]) &&  $toc[$idx]['level'] == 1 )
-				{
+				if (isset($toc[$idx]) &&  $toc[$idx]['level'] == 1) {
 					$next = $idx;
 					break;
 				}
 			}
 
-			if( $prev != -1 )
-				$prev = array(	'link' => $toc[$prev]['link'],
-								'text' => $toc[$prev]['text'] );
-			if( $next != -1 )
-				$next = array( 'link' => $toc[$next]['link'],
-							   'text' => $toc[$next]['text'] );
+			if ($prev != -1) {
+				$prev = array(
+					'link' => $toc[$prev]['link'],
+					'text' => $toc[$prev]['text']
+				);
+			}
+			if ($next != -1) {
+				$next = array(
+					'link' => $toc[$next]['link'],
+					'text' => $toc[$next]['text']
+				);
+			}
 		}
 
 		/**
@@ -408,17 +434,17 @@ class PonyDocsTOC
 		 * list( $toc, $prev, $next, $start ) = $ponydocstoc->loadContent( );
 		 *
 		 * @FIXME:  Previous and next links change based on the page you are on, so we cannot CACHE those!
+		 *
+		 * $obj = new stdClass();
+		 * $obj->toc = $toc;
+		 * $obj->prev = $prev;
+		 * $obj->next = $next;
+		 * $obj->start = $start;
+		 * $cache->addKey($tocKey, $obj);
 		 */
-		/**$obj = new stdClass( );
-		$obj->toc = $toc;
-		$obj->prev = $prev;
-		$obj->next = $next;
-		$obj->start = $start;
-		$cache->addKey( $tocKey, $obj );*/
 		
 		// Last but not least, get the manual description if there is one.
-		if (preg_match('/{{#manualDescription:([^}]*)}}/', $this->pTOCArticle->mContent, $matches))
-		{
+		if (preg_match('/{{#manualDescription:([^}]*)}}/', $this->pTOCArticle->mContent, $matches)) {
 			$this->mManualDescription = $matches[1];
 		}
 
