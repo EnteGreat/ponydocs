@@ -43,7 +43,7 @@ define('PONYDOCS_TEMP_DIR', '/tmp/');
 define('PONYDOCS_STATIC_DIR', '/var/www/useruploads/docs/staticDocs');
 define('PONYDOCS_STATIC_PATH', 'DocumentationStatic');
 define('PONYDOCS_STATIC_URI', '/' . PONYDOCS_STATIC_PATH . '/');
-define('PONYDOCS_STATIC_CSS', '/skins/splunk/staticdocs.css');
+define('PONYDOCS_STATIC_CSS', '');
 
 // capitalization settings
 define('PONYDOCS_CASE_SENSITIVE_TITLES', false);
