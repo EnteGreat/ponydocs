@@ -43,6 +43,7 @@ define('PONYDOCS_TEMP_DIR', '/tmp/');
 define('PONYDOCS_STATIC_DIR', '/var/www/useruploads/docs/staticDocs');
 define('PONYDOCS_STATIC_PATH', 'DocumentationStatic');
 define('PONYDOCS_STATIC_URI', '/' . PONYDOCS_STATIC_PATH . '/');
+// specify URI to CSS file to dynamically override static documentation iframe CSS
 define('PONYDOCS_STATIC_CSS', '');
 
 // capitalization settings
