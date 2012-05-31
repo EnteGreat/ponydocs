@@ -276,9 +276,18 @@ class PonyDocsBranchInheritEngine {
 		if($newArticle->exists()) {
 			throw new Exception("TOC Already exists.");
 		}
+
+		// Remove old versions from and add new version to new TOC
 		preg_match_all("/\[\[Category:V:[^\]]*\]\]/", $content, $matches);
-		$lastTag = $matches[0][count($matches[0]) - 1];
-		$content = str_replace($lastTag, $lastTag . "[[Category:V:" . $product->getShortName() . ':' . $targetVersion->getVersionName() . "]]", $content);
+		$lastTag = $matches[0][count($matches[0]) - 1]; // identify the last of the old tags
+		$newVersionTag = "[[Category:V:" . $product->getShortName() . ':' . $targetVersion->getVersionName() . "]]"; // make the new tag
+		foreach ($matches[0] as $match) {
+			if ($match != $lastTag) { // delete tags that aren't the last tag
+				$content = str_replace($match, "", $content);
+			} else { // replace the last tag with the new tag
+				$content = str_replace($match, $newVersionTag, $content);
+			}
+		}
 		$newArticle->doEdit($content, "Branched TOC For Version: " . $product->getShortName() . ':' . $sourceVersion->getVersionName() . " from Version: " . $product->getShortName() . ':' . $sourceVersion->getVersionName(), EDIT_NEW);
 		PonyDocsExtension::ClearNavCache();
 		return $title;

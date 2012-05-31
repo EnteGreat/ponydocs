@@ -166,9 +166,24 @@ SplunkBranchInherit = function() {
 					if(topicData[manual].meta.toc_exists != false && topicData[manual].meta.toc_exists != '') {
 						html += '<p>A Table Of Contents already exists for this manual.  Topics processed below will be added only if they do not exist in the TOC.</p><input class="manualtocaction" type="hidden" value="default"/>';
 
-					}
-					else {
-						html += '<p>A Table Of Contents does not exist for this manual.  Choose creation behavior: <select class="manualtocaction"><option value="forceinherit">Force Inherit</option><option value="forcebranch">Force Branch</option></select></p>';
+					} else {
+						html += '<p>A Table Of Contents does not exist for this manual.  Choose creation behavior: <select class="manualtocaction">';
+
+						if(defaultAction == 'ignore') {
+							html += '<option value="forceinherit">Force Inherit</option><option value="forcebranch">Force Branch</option>';
+						}
+						if(defaultAction == 'inherit') {
+							html += '<option value="forceinherit" selected="selected">Force Inherit</option>';
+						} else {
+							html += '<option value="forceinherit">Force Inherit</option>';
+						}
+						if(defaultAction == 'branch') {
+							html += '<option value="forcebranch" selected="selected">Force Branch</option>';
+						} else {
+							html += '<option value="forcebranch">Force Branch</option>';
+						}
+
+						html += '</select></p>';
 					}
 					for(section in topicData[manual].sections) {
 						html += '<div class="section"><h3>' + section + '</h3>Set Action For All Topics In This Section: <select class="sectiondefault">';
