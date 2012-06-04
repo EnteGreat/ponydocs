@@ -169,9 +169,6 @@ SplunkBranchInherit = function() {
 					} else {
 						html += '<p>A Table Of Contents does not exist for this manual.  Choose creation behavior: <select class="manualtocaction">';
 
-						if(defaultAction == 'ignore') {
-							html += '<option value="forceinherit">Force Inherit</option><option value="forcebranch">Force Branch</option>';
-						}
 						if(defaultAction == 'inherit') {
 							html += '<option value="forceinherit" selected="selected">Force Inherit</option>';
 						} else {
