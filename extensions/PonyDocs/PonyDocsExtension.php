@@ -269,11 +269,13 @@ function efVersionParserFunction_Setup()
 {
 	global $wgParser;
 	$wgParser->setFunctionHook( 'version', 'efVersionParserFunction_Render' );
+	$wgParser->setFunctionHook( 'versiongroup', 'efVersionGroupParserFunction_Render' );
 }
 
 function efVersionParserFunction_Magic( &$magicWords, $langCode )
 {
 	$magicWords['version'] = array( 0, 'version' );
+	$magicWords['versiongroup'] = array( 0, 'versiongroup' );
 	return true;
 }
 
@@ -302,6 +304,32 @@ function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 	
 	if( !$valid )
 		$output .= ' - Invalid Version Name or Status, Please Fix';
+	$output .= "\n";
+
+	return $parser->insertStripItem($output, $parser->mStripState);
+}
+
+/**
+ * The version parser function is of the form:
+ * 	{{#versiongroup:name|status}}
+ * Which defines a version and its state.  When output it currently does nothing but should perhaps be a list to Category:<version>.
+ *
+ * @param Parser $parser
+ * @param string $param1 The version group name itself.
+ * @param string $param2 The message of the version (released, unreleased, or preview).
+ * @return array
+ */
+function efVersionGroupParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
+{
+	global $wgUser, $wgScriptPath;
+
+	if ($param1 != '') {
+		$output = 'Version Group: ' . $param1 . ' (' . $param2 . ') ' ;
+		$output .= '<hr/>';
+	} else {
+		$output = '<hr/>';
+	}
+
 	$output .= "\n";
 
 	return $parser->insertStripItem($output, $parser->mStripState);

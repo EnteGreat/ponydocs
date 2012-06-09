@@ -49,6 +49,20 @@ class PonyDocsProductVersion
 	protected $pName = '';
 
 	/**
+	 * Version group
+	 *
+	 * @var string
+	 */
+	protected $versionGroup;
+
+	/**
+	 * Version group message
+	 *
+	 * @var string
+	 */
+	protected $versionGroupMessage;
+
+	/**
 	 * STATIC MEMBERS
 	 * 
 	 * Class has dual use;  these hold info on ALL versions defined.  Each contains a list and a map.  The
@@ -161,6 +175,25 @@ class PonyDocsProductVersion
 	public function isValid( )
 	{
 		return (( $this->vStatusCode == self::STATUS_UNKNOWN ) || ( $this->vStatusCode == self::STATUS_INVALID )) ? false : true;
+	}
+
+	/**
+	 * Get version group message
+	 *
+	 * @return string Version group message
+	 */
+	public function getVersionGroupMessage() {
+		return $this->versionGroupMessage;
+	}
+
+	/**
+	 * Set version group and optionally group message
+	 *
+	 * @param string Version group
+	 */
+	public function setVersionGroup($group, $message = null) {
+		$this->versionGroup = $group;
+		$this->versionGroupMessage = $message;
 	}
 
 	/**
@@ -311,36 +344,59 @@ class PonyDocsProductVersion
 		$authProductGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_PRODUCT, $productName);
 		$authPreviewGroup = PonyDocsExtension::getDerivedGroup(PonyDocsExtension::ACCESS_GROUP_VERSION, $productName);
 		$versions = explode( "\n", $content );
+		$currentGroup = null;
+		$currentGroupMessage = null;
 		foreach( $versions as $v )
 		{
-			$matches = preg_replace( '/{{#version:\s*(.*)\s*}}/i', '\\1', $v );
-			$pcs = explode( '|', trim( $matches ), 2 );
-		
-			$pVersion = new PonyDocsProductVersion( $productName, $pcs[0], $pcs[1] );
-			if( !$pVersion->isValid( ))
-				continue;
+			// if this is a version group definition line
+			if (preg_match('/{{#versiongroup:\s*([^}]*)\s*}}/i', $v)) {
+				$matches = preg_replace( '/{{#versiongroup:\s*([^}]*)\s*}}/i', '\\1', $v );
+				$pcs = explode( '|', trim( $matches ), 2 );
+				if (count($pcs) === 1 && trim($pcs[0]) === '') {
+					// reset group and message
+					$currentGroup = null;
+					$currentGroupMessage = null;
+				} else {
+					// set group name and message, if present
+					$currentGroup = $pcs[0];
+					if (isset($pcs[1])) {
+						$currentGroupMessage = $pcs[1];
+					}
+				}
+			} else { // else this should be a version definition
+				$matches = preg_replace( '/{{#version:\s*(.*)\s*}}/i', '\\1', $v );
+				$pcs = explode( '|', trim( $matches ), 2 );
 			
-			if( !strcasecmp( $pcs[1], 'UNRELEASED' ))
-			{
-				if(in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) ||
-					in_array( $authProductGroup, $groups ) ||
-					(isset($_SERVER['HTTP_USER_AGENT']) && preg_match(PONYDOCS_CRAWLER_AGENT_REGEX, $_SERVER['HTTP_USER_AGENT'])) ||
-					(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] == $ponydocsMediaWiki['CrawlerAddress']) ||
-					$ignorePermissions)
-						self::$sVersionList[$productName][] = self::$sVersionListUnreleased[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapUnreleased[$productName][$pcs[0]] = $pVersion;
-			}
-			else if( !strcasecmp( $pcs[1], 'RELEASED' ))
-			{
-				self::$sVersionList[$productName][] = self::$sVersionListReleased[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapReleased[$productName][$pcs[0]] = $pVersion;
-			}
-			else if( !strcasecmp( $pcs[1], 'PREVIEW' ))
-			{
-				if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || 
-					in_array( $authProductGroup, $groups ) ||
-					in_array( $authPreviewGroup, $groups ) ||
-					(isset($_SERVER['HTTP_USER_AGENT']) && preg_match(PONYDOCS_CRAWLER_AGENT_REGEX, $_SERVER['HTTP_USER_AGENT'])) ||
-					(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] == $ponydocsMediaWiki['CrawlerAddress']) || $ignorePermissions)
-						self::$sVersionList[$productName][] = self::$sVersionListPreview[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapPreview[$productName][$pcs[0]] = $pVersion;
+				$pVersion = new PonyDocsProductVersion( $productName, $pcs[0], $pcs[1] );
+				if( !$pVersion->isValid( ))
+					continue;
+
+				if (isset($currentGroup)) {
+					$pVersion->setVersionGroup($currentGroup, $currentGroupMessage);
+				}
+
+				if( !strcasecmp( $pcs[1], 'UNRELEASED' ))
+				{
+					if(in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) ||
+						in_array( $authProductGroup, $groups ) ||
+						(isset($_SERVER['HTTP_USER_AGENT']) && preg_match(PONYDOCS_CRAWLER_AGENT_REGEX, $_SERVER['HTTP_USER_AGENT'])) ||
+						(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] == $ponydocsMediaWiki['CrawlerAddress']) ||
+						$ignorePermissions)
+							self::$sVersionList[$productName][] = self::$sVersionListUnreleased[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapUnreleased[$productName][$pcs[0]] = $pVersion;
+				}
+				else if( !strcasecmp( $pcs[1], 'RELEASED' ))
+				{
+					self::$sVersionList[$productName][] = self::$sVersionListReleased[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapReleased[$productName][$pcs[0]] = $pVersion;
+				}
+				else if( !strcasecmp( $pcs[1], 'PREVIEW' ))
+				{
+					if( in_array( PONYDOCS_EMPLOYEE_GROUP, $groups ) || 
+						in_array( $authProductGroup, $groups ) ||
+						in_array( $authPreviewGroup, $groups ) ||
+						(isset($_SERVER['HTTP_USER_AGENT']) && preg_match(PONYDOCS_CRAWLER_AGENT_REGEX, $_SERVER['HTTP_USER_AGENT'])) ||
+						(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] == $ponydocsMediaWiki['CrawlerAddress']) || $ignorePermissions)
+							self::$sVersionList[$productName][] = self::$sVersionListPreview[$productName][] = self::$sVersionMap[$productName][$pcs[0]] = self::$sVersionMapPreview[$productName][$pcs[0]] = $pVersion;
+				}
 			}
 		}
 
