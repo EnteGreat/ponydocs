@@ -90,6 +90,7 @@ class PonyDocsTemplate extends QuickTemplate {
 		$this->data['versions'] = $ponydocs->getVersionsForProduct( $this->data['selectedProduct'] );
 		$this->data['namespaces'] = $wgExtraNamespaces;
 		$this->data['selectedVersion'] = PonyDocsProductVersion::GetSelectedVersion( $this->data['selectedProduct'] );
+		$this->data['pVersion'] = PonyDocsProductVersion::GetVersionByName($this->data['selectedProduct'], $this->data['selectedVersion']);
 		if (PONYDOCS_SESSION_DEBUG) {error_log("DEBUG [" . __METHOD__ . "] selected product/version is set to " . $this->data['selectedProduct'] . "/" . $this->data['selectedVersion']);}
 		$this->data['versionurl'] = $this->data['wgScript'] . '?title=' . $this->data['thispage'] . '&action=changeversion';
 
@@ -184,6 +185,18 @@ class PonyDocsTemplate extends QuickTemplate {
 <?php } ?><?php if($this->data['showjumplinks']) { ?>
 		<div id="jump-to-nav"><?php $this->msg('jumpto') ?> <a href="#column-one"><?php $this->msg('jumptonavigation') ?></a>, <a href="#searchInput"><?php $this->msg('jumptosearch') ?></a></div>
 <?php } ?>
+<?php
+	// Version group message, if any
+	if( $this->data['versionGroupMessage'] !== null ) {
+		?>
+		<div class="affectedVersions smallRoundedCorners <?php echo $this->data['versionclass']; ?>">
+			<p class="bannerVersion">
+				<?php echo $this->data['versionGroupMessage'];?>
+			</p>
+		</div>
+		<?php
+	}
+?>
 		<!-- start content -->
 <?php $this->html('bodytext') ?>
 		<?php if($this->data['catlinks']) { $this->html('catlinks'); } ?>
@@ -709,6 +722,7 @@ if($this->data['copyrightico']) { ?>
 			$this->data['topicversions'] = PonyDocsWiki::getVersionsForTopic( $topic );
 			$this->data['inlinetoc'] = $topic->getSubContents( );
 			$this->data['versionclass'] = $topic->getVersionClass( );
+			$this->data['versionGroupMessage'] = $this->data['pVersion']->getVersionGroupMessage();
 
 			/**
 			 * Sort of a hack -- we only use this right now when loading a TOC page which is new/does not exist.  When this
