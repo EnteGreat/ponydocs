@@ -1311,7 +1311,7 @@ div.mw-lag-warn-high {
 
 /* Ponydocs version banner message */
 .bannerVersion {
-	background-color: yellow;
+	background-color: #ffffbf;
 	color: black;
 	padding: 10px;
 }
