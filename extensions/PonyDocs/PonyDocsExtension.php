@@ -310,13 +310,13 @@ function efVersionParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
 }
 
 /**
- * The version parser function is of the form:
- * 	{{#versiongroup:name|status}}
- * Which defines a version and its state.  When output it currently does nothing but should perhaps be a list to Category:<version>.
+ * The version group parser function is of the form:
+ * 	{{#versiongroup:name|message}}
+ * Which defines a version group and its message.
  *
  * @param Parser $parser
  * @param string $param1 The version group name itself.
- * @param string $param2 The message of the version (released, unreleased, or preview).
+ * @param string $param2 The message of the version group.
  * @return array
  */
 function efVersionGroupParserFunction_Render( &$parser, $param1 = '', $param2 = '' )
