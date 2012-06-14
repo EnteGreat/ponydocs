@@ -1,6 +1,6 @@
 
 ---------------------------------------------
-PonyDocs 1.0 Beta 1 - September 6, 2011
+PonyDocs 1.0 Beta 2 - June 14th, 2012
 ---------------------------------------------
 
 Open Source documentation based on MediaWiki
@@ -14,11 +14,12 @@ Splunk > Open Source FTW!
 
 
 ---------------------------------------------
-Requirements & Assumptions
+Prerequisites & Assumptions
 ---------------------------------------------
 1. You're a sysadmin
-2. You have a MediaWiki system at the ready. Beta 1 only tested with MW 1.16.4
-  (http://download.wikimedia.org/mediawiki/1.16/mediawiki-1.16.4.tar.gz)
+2. You have a MediaWiki system at the ready. Beta 2 only tested with MW 1.16.4
+  (http://bit.ly/KqnCbw?mediawiki-installer), PHP 5.2.16 and 5.3.3 and 
+  MySQL 5.1.52.
 3. You can update apache's conf files for the MediaWiki vhost
 4. You can run SQL commands on the MediaWiki DB
 5. You know this is Beta ;)
@@ -393,9 +394,18 @@ Q. When I click "View PDF" I get an error, "Failed to create PDF. Our team is
    looking into it."
 A. Follow step 11 to install HTMLDOC.  Check that the web user can write to the
    images directory in your MediaWiki install.
+   
+Q. How come the vanilla ponydocs skin shipping with the extension doesn't look
+   anything like docs.splunk.com?
+A. The web development team has greatly extended the skin shipping with ponydocs.
+   Long term, the plan is to port all delta of features between to two so that
+   the entire docs.splunk.com feature set is available in the ponydocs skin.
 
 ---------------------------------------------
 HISTORY
 ---------------------------------------------
- - PonyDocs 1.0 Beta 1 - September 6, 2011
  - PonyDocs 1.0 Alpha 3 - May 24, 2011
+ - PonyDocs 1.0 Beta 1 - September 6, 2011
+<<<<<<< .mine
+ - PonyDocs 1.0 Beta 2 - June 14, 2012=======
+ - PonyDocs 1.0 Alpha 3 - May 24, 2011>>>>>>> .r264
