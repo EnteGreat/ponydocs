@@ -76,65 +76,71 @@ Restart Apache at this time so Rewrite Rules will take affect.
 
 ------- 2) Modify LocalSettings.php -------
 
-There are additional user permission flags that are defined.
-These are branchtopic, branchmanual, inherit, viewall.
-Modify your $wgGroupPermissions to add these permissions to your existing groups.
+Set $wgLogo to the PonyDocs logo if you like!
+
+Modify your $wgGroupPermissions to add PonyDoc's additional permissions to your existing groups.
+These permissions are named are branchtopic, branchmanual, inherit, viewall.
 You can also create new groups for your permissions.
 Review http://www.mediawiki.org/wiki/Manual:User_rights for more information.  
 
-Some MediaWiki instances do not have $wgArticlePath property defined.
-Please make sure this is defined in your LocalSettings.php.
+Make sure to define $wgArticlePath (some MediaWiki instances do not have this property defined.)
 Refer to: http://www.mediawiki.org/wiki/Manual:$wgArticlePath for more information.
 
-Example, if MediaWiki was installed at the root of your html directory:
+For example: if MediaWiki was installed at the root of your html directory:
 
 	$wgArticlePath = '/$1';
 
-You'll also need to include the extension itself:
+Update all the PONYDOCS_ contents to fit to your installation.
+
+	PONYDOCS_PRODUCT_LOGO_URL
+	PONYDOCS_PDF_COPYRIGHT_MESSAGE
+	PONYDOCS_DEFAULT_PRODUCT
+	PONYDOCS_ENABLE_BRANCHINHERIT_EMAIL
+
+Add a $ponyDocsProductsList array. More on this in section 5.
+
+Finally, you'll need to include the extension itself:
 
 	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
 
-You should update all the constants here (PONYDOCS_*) to be specific to your install.
-
-An example in your LocalSettings.php file, with the two samples above, would be:
+An example in your LocalSettings.php file with all the settings listed above, would be:
 
 	################# PONYDOCS START #################
 	// first things first, set logo
 	$wgLogo = "/extensions/PonyDocs/images/pony.png";
 
-	// Implicit group for all visitors, removing
-	// access beyond reading
-	$wgGroupPermissions['*']['createaccount']   = false;
-	$wgGroupPermissions['*']['edit']			= false;
-	$wgGroupPermissions['*']['createpage']		= false;
-	$wgGroupPermissions['*']['upload']			= false;
-	$wgGroupPermissions['*']['reupload']		= false;
-	$wgGroupPermissions['*']['reupload-shared']	= false;
-	$wgGroupPermissions['*']['writeapi']		= false;
-	$wgGroupPermissions['*']['createtalk']		= false;
-	$wgGroupPermissions['*']['read']			= true;
+	// Implicit group for all visitors, remove access beyond reading
+	$wgGroupPermissions['*']['createaccount'] = false;
+	$wgGroupPermissions['*']['edit'] = false;
+	$wgGroupPermissions['*']['createpage'] = false;
+	$wgGroupPermissions['*']['upload'] = false;
+	$wgGroupPermissions['*']['reupload'] = false;
+	$wgGroupPermissions['*']['reupload-shared'] = false;
+	$wgGroupPermissions['*']['writeapi'] = false;
+	$wgGroupPermissions['*']['createtalk'] = false;
+	$wgGroupPermissions['*']['read'] = true;
 
-	// User is a logged.  ensuring they still can't edit.
-	$wgGroupPermissions['user']['read']			= true;
-	$wgGroupPermissions['user']['createtalk']	= false;
-	$wgGroupPermissions['user']['upload']		= false;
-	$wgGroupPermissions['user']['reupload']		= false;
+	// User is logged-in. Ensure that they still can't edit.
+	$wgGroupPermissions['user']['read'] = true;
+	$wgGroupPermissions['user']['createtalk'] = false;
+	$wgGroupPermissions['user']['upload'] = false;
+	$wgGroupPermissions['user']['reupload'] = false;
 	$wgGroupPermissions['user']['reupload-shared'] = false;
-	$wgGroupPermissions['user']['edit']			= false;
-	$wgGroupPermissions['user']['move']			= false;
-	$wgGroupPermissions['user']['minoredit']	= false;
-	$wgGroupPermissions['user']['createpage']	= false;
-	$wgGroupPermissions['user']['writeapi']		= false;
-	$wgGroupPermissions['user']['move-subpages']= false;
-	$wgGroupPermissions['user']['move-rootuserpages']= false;
-	$wgGroupPermissions['user']['purge']		= false;
-	$wgGroupPermissions['user']['sendemail']	= false;
-	$wgGroupPermissions['user']['writeapi']		= false;
+	$wgGroupPermissions['user']['edit'] = false;
+	$wgGroupPermissions['user']['move'] = false;
+	$wgGroupPermissions['user']['minoredit'] = false;
+	$wgGroupPermissions['user']['createpage'] = false;
+	$wgGroupPermissions['user']['writeapi'] = false;
+	$wgGroupPermissions['user']['move-subpages'] = false;
+	$wgGroupPermissions['user']['move-rootuserpages'] = false;
+	$wgGroupPermissions['user']['purge'] = false;
+	$wgGroupPermissions['user']['sendemail'] = false;
+	$wgGroupPermissions['user']['writeapi'] = false;
 
-	// And our "in charge" group.
+	// Our "in charge" group.
 	$wgGroupPermissions['bureaucrat']['userrights'] = true;
 	 // Custom permission to branch ALL topics for a version.
-	$wgGroupPermissions['bureaucrat']['branchall']  = true;
+	$wgGroupPermissions['bureaucrat']['branchall'] = true;
 
 	// Implicit group for accounts that pass $wgAutoConfirmAge
 	$wgGroupPermissions['autoconfirmed']['autoconfirmed'] = true;
@@ -143,12 +149,11 @@ An example in your LocalSettings.php file, with the two samples above, would be:
 	// This has little use when email address confirmation is off
 	$wgGroupPermissions['emailconfirmed']['emailconfirmed'] = true;
 
-	// Users with bot privilege can have their edits hidden
-	// from various log pages by default
-	$wgGroupPermissions['bot'  ]['bot']				= true;
-	$wgGroupPermissions['bot'  ]['autoconfirmed']	= true;
-	$wgGroupPermissions['bot'  ]['nominornewtalk']	= true;
-	$wgGroupPermissions['bot'  ]['autopatrol']		= true;
+	// Users with bot privilege can have their edits hidden from various log pages by default
+	$wgGroupPermissions['bot']['bot'] = true;
+	$wgGroupPermissions['bot']['autoconfirmed']	= true;
+	$wgGroupPermissions['bot']['nominornewtalk'] = true;
+	$wgGroupPermissions['bot']['autopatrol'] = true;
 
 	$wgArticlePath = '/$1';
 
@@ -161,8 +166,7 @@ An example in your LocalSettings.php file, with the two samples above, would be:
 
 	// NOTE: this *must* match what is in Documentation:Products.
 	// This will be fixed in later versions
-	$ponyDocsProductsList = array(
-			);
+	$ponyDocsProductsList = array('Foo');
 
 	include_once($IP . "/extensions/PonyDocs/PonyDocsExtension.php");
 	#################  PONYDOCS END ################# 
@@ -199,29 +203,27 @@ Here is one product defined (Foo):
 
 	// NOTE: this *must* match what is in Documentation:Products.
 	// This will be fixed in later versions
-	$ponyDocsProductsList = array(
-			'Foo'
-		);
+	$ponyDocsProductsList = array('Foo');
 
 And here are three:
 
 	// NOTE: this *must* match what is in Documentation:Products.
 	// This will be fixed in later versions
 	$ponyDocsProductsList = array(
-			'Foo',
-			'Bar',
-			'Bash',
-		);
+		'Foo',
+		'Bar',
+		'Bash',
+	);
 
-As well, set your default product to be one of the above, also in LocalSettings.php:
+Set your default product to be one of the above, also in LocalSettings.php:
 
 	define('PONYDOCS_DEFAULT_PRODUCT', 'Foo');
 
 ------- 6) Add your administrator user to appropriate user groups. -------
 
-Logged in as your administrator user, visit your MediaWiki instance's Special:UserRights page and modify
-your administrator user to be added to the productShortName-docteam group based on which products you want to edit, e.g. Foo-docteam.
-Be sure the admin is in the productShortName-docteam for the PONYDOCS_DEFAULT_PRODUCT as defined in step 5.
+Logged in as your administrator user, visit your MediaWiki instance's Special:UserRights page and add your
+admin user to the productShortName-docteam group for each product you want to edit, e.g. Foo-docteam.
+Be sure the admin is in the productShortName-docteam for the PONYDOCS_DEFAULT_PRODUCT defined in step 5.
 
 ------- 7) Create your products on the front-end. -------
 
@@ -232,22 +234,29 @@ Click on the "Create" tab at the top of the page to edit the page and add new pr
 The Documentation:Products page contains a listing of all your products.
 Each line defines a single product. A product definition uses this format:
 
-	{{#product:productShortName|displayName|parent}}
+	{{#product:productShortName|displayName|description|parent}}
 
 productShortName can be any alphanumeric string (no spaces allowed).
-displayName is the human readable name of the product you are documenting. 
+displayName is the human readable name of the product you are documenting.
+description is a short description of the product
 parent is the short name of a parent product.
 Child products will be displayed under their parents in product listings.
 
 Here's an example of a page with the three products above:
 
-	{{#product:Foo|Foo for fooing}}
-	{{#product:Bar|Bar for the bar}}
-	{{#product:Bash|Bash is not Quux|Bar}}
+	{{#product:Foo|Foo for fooing|Foo is the synergy of three popular domain-specific languages|}}
+	{{#product:Bar|Bar for the bar|You've never seen a Bar like this before|}}
+	{{#product:Bash|Bash is not Quux|Bash is a Quux-like framework for rapid prototyping|Bar}}
+
+Only productShortName is required. displayName will default to shortName if left empty.
+Please do include all the pipes if you are leaving some variables empty:
+
+	{{#product:Quux|||}}
 
 Once the page is saved, you'll be able to move to the next step, defining your versions.
 As you add more products, add more lines to the Documentation:Products page.
-Don't forget to add corresponding elements to the array in LocalSettings.php, as mentioned in Step 5 above.
+Don't forget to add corresponding elements to the $ponyDocsProductsList array in LocalSettings.php, as
+documented in Step 5 above.
 
 ------- 8) Create your first product version. -------
 
@@ -328,7 +337,7 @@ Note the use of the Category tag inside the TOC, which should have been auto-pop
 This will ensure the TOC is linked to version 1.0.
 You must have this category tag present in order for the TOC to properly render for that version.
 
-At least one Section Header is mandatory, and all topic tags must be in an unordered list.
+You must have at least one Section Header before the first topic tag, and all topic tags must be unordered list items.
 
 When you save the edit to your first TOC page, links to your new topics will automatically be created.
 Clicking on the topic in the TOC page will take you to the new topic, which you'll be able to edit with your new content.
