@@ -7,7 +7,6 @@
  * @package MediaWiki
  * @subpackage Extensions
  * @author Taylor Dondich tdondich@splunk.com 
- * @licence GNU General Public Licence 2.0 or later
  */
 if (!defined('MEDIAWIKI')) die('Not an entry point.');
 
@@ -265,7 +264,7 @@ class PonyDocsPdfBook {
 					. '<h2>' . $book . '</h2>'
 					. 'Generated: ' . date('n/d/Y g:i a', time())
 					. '</td></tr><tr><td height="50%" width="100%" align="left" valign="bottom"><font size="2">'
-					. 'Copyright &copy; ' . date('Y') . ' Splunk Inc. All rights reserved.'
+					. PONYDOCS_PDF_COPYRIGHT_MESSAGE
 					. '</td></tr></table>';
 
 		fwrite($fh, $titleText);

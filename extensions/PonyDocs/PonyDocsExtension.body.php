@@ -1473,8 +1473,7 @@ HEREDOC;
 
 		// We want to do link substitution in all namespaces now.
 		$doWikiLinkSubstitution = true;
-		$matches = array( 	'/^' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/',
-							'/^Splexicon/' );
+		$matches = array( 	'/^' . PONYDOCS_DOCUMENTATION_PREFIX . '(.*):(.*):(.*):(.*)/');
 
 		$doStripH1 = false;
 		foreach( $matches as $m )
@@ -1638,7 +1637,7 @@ HEREDOC;
 	 * Handles special cases for permissions, which include:
 	 * 
 	 * 	- Only AUTHOR group can edit/submit the manuals and versions pages.
-	 * 	- Only AUTHORS and EMPLOYEES can edit/submit pages in FAQ, Splexicon, and Documentation namespace.
+	 * 	- Only AUTHORS and EMPLOYEES can edit/submit pages in Documentation namespace.
 	 *
 	 * @param Title $title The title to test permission against.
 	 * @param User $user The user requestion the action.
@@ -1669,7 +1668,7 @@ HEREDOC;
 			}
 
 			/**
-			 * Disallow edit/submit for documentation, FAQ, and Splexicon namespaces (and pages) unless
+			 * Disallow edit/submit for documentation namespaces (and pages) unless
 			 * the user is in the employee or authors/docteam group.
 			 */
 			if(	( $title->getNamespace( ) == PONYDOCS_DOCUMENTATION_NAMESPACE_ID ) || ( !strcmp( $title->__toString( ), PONYDOCS_DOCUMENTATION_NAMESPACE_NAME ))) 
