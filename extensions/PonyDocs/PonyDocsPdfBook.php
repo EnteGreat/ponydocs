@@ -257,7 +257,7 @@ class PonyDocsPdfBook {
 		$titlepagefile = "$wgUploadDirectory/" .uniqid('ponydocs-pdf-book-title');
 		$fh = fopen($titlepagefile, 'w+');
 		
-		$image_path	= $wgServer . $wgStylePath . '/splunk/images/CVR-datastream-101-header-image.jpg';
+		$image_path	= $wgServer . $wgStylePath . PONYDOCS_PDF_TITLE_IMAGE_PATH;
 		$titleText	= '<table height="100%" width="100%"><tr><td valign="top" height="50%">'
 					. '<center><img src="' . $image_path .  '" width="1024"></center>'
 					. '<h1>' . $productLongName . ' ' . $versionText . '</h1>'

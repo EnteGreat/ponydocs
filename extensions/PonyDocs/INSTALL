@@ -96,6 +96,7 @@ Failure to do so will result in frustration and keyboard tossing.
 4. Update all the PONYDOCS_ contents to fit to your installation.
 	* `PONYDOCS_PRODUCT_LOGO_URL`
 	* `PONYDOCS_PDF_COPYRIGHT_MESSAGE`
+	* `PONYDOCS_PDF_TITLE_IMAGE_PATH`
 	* `PONYDOCS_DEFAULT_PRODUCT`
 	* `PONYDOCS_ENABLE_BRANCHINHERIT_EMAIL`
 
@@ -162,7 +163,8 @@ Failure to do so will result in frustration and keyboard tossing.
 		// Ponydocs environment configuration.  update to your
 		// specific install
 		define('PONYDOCS_PRODUCT_LOGO_URL', 'http://' . $_SERVER['SERVER_NAME'] . '/extensions/PonyDocs/images/pony.png');
-		define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Copyright Splunk, Inc. All Rights Reserved');
+		define('PONYDOCS_PDF_COPYRIGHT_MESSAGE', 'Copyright Foo, Inc. All Rights Reserved');
+		define('PONYDOCS_PDF_TITLE_IMAGE_PATH', '/extensions/PonyDocs/images/pony.png');
 		define('PONYDOCS_DEFAULT_PRODUCT', 'Foo');
 		define('PONYDOCS_ENABLE_BRANCHINHERIT_EMAIL', true);
 
